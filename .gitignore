@@ -39,3 +39,9 @@ captures/
 
 # Keystore files
 *.jks
+
+.idea/gradle.xml
+
+build.gradle
+projectFilesBackup/.idea/workspace.xml
+
