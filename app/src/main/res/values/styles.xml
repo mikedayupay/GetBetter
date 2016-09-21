@@ -20,5 +20,9 @@
     <style name="TextAppearance.App.TextInputLayout" parent="@android:style/TextAppearance">
         <item name="android:textColor">@color/colorAccent</item>
     </style>
+    
+    <style name="error_appearance" parent="@android:style/TextAppearance">
+        <item name="android:textColor">@color/colorAlert</item>
+    </style>
 
 </resources>

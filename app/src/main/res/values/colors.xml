@@ -9,5 +9,6 @@
     <color name="neutralButton">#F4F3ED</color>
     <color name="greenButton">#7EA568</color>
     <color name="redButton">#A3554F</color>
+    <color name="colorAlert">#F44336</color>
 
 </resources>

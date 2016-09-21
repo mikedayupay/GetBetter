@@ -2,6 +2,7 @@ package com.dlsu.getbetter.getbetter.activities;
 
 import android.content.Intent;
 import android.support.design.widget.TextInputEditText;
+import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -20,6 +21,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     private TextInputEditText emailInput;
     private TextInputEditText passwordInput;
+    private TextInputLayout emailInputLayout;
+    private TextInputLayout passwordInputLayout;
     private Button registerUserBtn;
 
     private SystemSessionManager systemSessionManager;
@@ -35,6 +38,9 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
         emailInput = (TextInputEditText)findViewById(R.id.email_input);
         passwordInput = (TextInputEditText)findViewById(R.id.password_input);
+
+        emailInputLayout = (TextInputLayout) findViewById(R.id.email_input_layout);
+        passwordInputLayout = (TextInputLayout) findViewById(R.id.password_input_layout);
         Button signInBtn = (Button) findViewById(R.id.sign_in_btn);
 //        registerUserBtn = (Button)findViewById(R.id.register_user_btn);
 
@@ -77,8 +83,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         String password = passwordInput.getText().toString();
 
         View focusView = null;
-        emailInput.setError(null);
-        passwordInput.setError(null);
+        emailInputLayout.setError(null);
+        passwordInputLayout.setError(null);
 
         if (email.trim().length() > 0 && password.trim().length() > 0) {
 
@@ -102,7 +108,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
             } else {
                 if (!email.contains("@")) {
-                    emailInput.setError("Invalid email");
+                    emailInputLayout.setError("Invalid email");
                     emailInput.requestFocus();
                 }
 //
@@ -115,13 +121,13 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
             if (email.trim().length() == 0) {
 
-                emailInput.setError("Email Required");
+                emailInputLayout.setError("Email Required");
                 focusView = emailInput;
                 focusView.requestFocus();
 
             } else if (password.trim().length() == 0) {
 
-                passwordInput.setError("Password Required");
+                passwordInputLayout.setError("Password Required");
                 focusView = passwordInput;
                 focusView.requestFocus();
 
