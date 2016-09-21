@@ -1,5 +1,10 @@
 package com.dlsu.getbetter.getbetter.objects;
 
+import org.joda.time.LocalDate;
+import org.joda.time.Years;
+
+import java.util.StringTokenizer;
+
 /**
  * Created by mikedayupay on 27/01/2016.
  * GetBetter 2016
@@ -62,6 +67,23 @@ public class Patient {
     }
 
     public String getAge() {
+
+        int[] birthdateTemp = new int[3];
+        StringTokenizer tok = new StringTokenizer(getBirthdate(), "-");
+        int i = 0;
+        while(tok.hasMoreTokens()) {
+
+            birthdateTemp[i] = Integer.parseInt(tok.nextToken());
+            i++;
+        }
+
+        LocalDate birthdate = new LocalDate(birthdateTemp[0], birthdateTemp[1], birthdateTemp[2]);
+        LocalDate now = new LocalDate();
+
+        Years years = Years.yearsBetween(birthdate, now);
+
+        age = years.getYears() + "";
+
         return age;
     }
 
@@ -88,4 +110,6 @@ public class Patient {
     public void toggleChecked() {
         checked = !checked;
     }
+
+
 }

@@ -1,6 +1,6 @@
 package com.dlsu.getbetter.getbetter.activities;
 
-import android.app.Activity;
+
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -23,6 +23,8 @@ import com.dlsu.getbetter.getbetter.objects.Patient;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+
+
 
 public class ViewPatientActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -59,10 +61,10 @@ public class ViewPatientActivity extends AppCompatActivity implements View.OnCli
         Patient patient = getPatientInfo();
         getCaseRecords();
 
-
         setPic(profileImage, patient.getProfileImageBytes());
         patientName.setText(patientFullName(patient.getFirstName(), patient.getMiddleName(), patient.getLastName()));
-        ageGender.setText(patient.getAge() + ", " + patient.getGender());
+        String patientAgeGender = patient.getAge() + ", " + patient.getGender();
+        ageGender.setText(patientAgeGender);
         civilStatus.setText(patient.getCivilStatus());
 
         RecyclerView.LayoutManager caseRecordsLayoutManager = new LinearLayoutManager(this);
@@ -76,8 +78,8 @@ public class ViewPatientActivity extends AppCompatActivity implements View.OnCli
                 int selectedCaseRecordId = caseRecords.get(position).getCaseRecordId();
                 Intent intent = new Intent(ViewPatientActivity.this, ViewCaseRecordActivity.class);
                 intent.putExtra("caseRecordId", selectedCaseRecordId);
+                intent.putExtra("patientId", patientId);
                 startActivity(intent);
-                finish();
             }
         });
 
@@ -140,8 +142,8 @@ public class ViewPatientActivity extends AppCompatActivity implements View.OnCli
 
     private void setPic(ImageView mImageView, String mCurrentPhotoPath) {
         // Get the dimensions of the View
-        int targetW = mImageView.getWidth();
-        int targetH = mImageView.getHeight();
+        int targetW = 300;//mImageView.getWidth();
+        int targetH = 250;//mImageView.getHeight();
         Log.d("width and height", targetW + targetH + "");
 
         // Get the dimensions of the bitmap
