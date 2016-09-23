@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -26,11 +27,12 @@ public class ViewImageActivity extends AppCompatActivity implements View.OnClick
 
         TextView imageTitle = (TextView)findViewById(R.id.view_image_title);
         ImageView imageView = (ImageView)findViewById(R.id.view_image);
-        Button backBtn = (Button)findViewById(R.id.view_image_back_btn);
-        Button saveBtn = (Button)findViewById(R.id.view_image_remove_btn);
+        ImageButton backBtn = (ImageButton)findViewById(R.id.view_image_back);
+        ImageButton deleteBtn = (ImageButton)findViewById(R.id.view_image_delete);
+        ImageButton shareBtn = (ImageButton)findViewById(R.id.view_image_share);
 
         backBtn.setOnClickListener(this);
-        saveBtn.setOnClickListener(this);
+        deleteBtn.setOnClickListener(this);
 
         imageTitle.setText(title);
         setPic(imageView, imageUrl);

@@ -10,5 +10,7 @@
     <color name="greenButton">#7EA568</color>
     <color name="redButton">#A3554F</color>
     <color name="colorAlert">#F44336</color>
+    <color name="blackBackground">#000000</color>
+    <color name="grayText">#BBBBBB</color>
 
 </resources>
