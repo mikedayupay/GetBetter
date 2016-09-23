@@ -88,9 +88,16 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
         if (email.trim().length() > 0 && password.trim().length() > 0) {
 
-            if (checkLogin(email, password)) {
+            if (email.contains("@")) {
 
-                systemSessionManager.createUserSession(email);
+                emailInputLayout.setError("Invalid email");
+                emailInput.requestFocus();
+
+            } else {
+
+                if (checkLogin(email, password)) {
+
+                    systemSessionManager.createUserSession(email);
 //                Intent intent = new Intent(this, HomeActivity.class);
 //                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 //                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -98,23 +105,21 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 //
 //                finish();
 
-                Intent intent = new Intent(this, HealthCenterActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(intent);
+                    Intent intent = new Intent(this, HealthCenterActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
 
-                finish();
+                    finish();
 
 
-            } else {
-                if (!email.contains("@")) {
-                    emailInputLayout.setError("Invalid email");
+                } else {
+
+                    emailInputLayout.setError("Invalid email or password");
                     emailInput.requestFocus();
+
                 }
-//
-//                Toast.makeText(getApplicationContext(),
-//                        "Email/Password is incorrect",
-//                        Toast.LENGTH_LONG).show();
+
             }
 
         } else {
