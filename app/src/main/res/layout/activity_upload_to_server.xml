@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:paddingBottom="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
@@ -10,53 +11,20 @@
     android:background="@drawable/background"
     tools:context=".UploadPatientToServerActivity">
 
-    <TextView
-        android:id="@+id/home_title"
+    <ImageView
+        android:id="@+id/getbetter_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="48sp"
-        android:text="@string/app_name"
-        android:textColor="@color/cardBackground"
-        android:layout_centerHorizontal="true"/>
-
-    <android.support.v7.widget.CardView
-        android:id="@+id/user_label_container"
-        android:layout_width="1200dp"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/home_title"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="15dp">
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="10dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/current_user"
-                android:textSize="18sp"/>
-
-            <TextView
-                android:id="@+id/user_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text=""
-                android:textSize="18sp"
-                />
-
-        </LinearLayout>
-
-    </android.support.v7.widget.CardView>
+        android:src="@drawable/getbetter1"
+        android:layout_marginBottom="8dp"/>
 
     <android.support.v7.widget.CardView
         android:layout_width="1200dp"
         android:layout_height="wrap_content"
-        android:layout_below="@id/user_label_container"
-        android:layout_marginTop="15dp"
-        android:layout_centerHorizontal="true">
+        android:layout_below="@id/getbetter_title"
+        android:layout_centerHorizontal="true"
+        app:cardCornerRadius="2dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -118,8 +86,6 @@
                 </RelativeLayout>
 
             </LinearLayout>
-
-
 
     </android.support.v7.widget.CardView>
 
