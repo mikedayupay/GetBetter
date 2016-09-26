@@ -115,29 +115,8 @@ public class ViewCaseRecordActivity extends AppCompatActivity implements MediaCo
         String recordedHpiOutputFile = getHpiOutputFile();
         String fullName = patientInfo.getFirstName() + " " + patientInfo.getMiddleName() + " " + patientInfo.getLastName();
         String gender = patientInfo.getGender();
+        String patientAgeGender = patientInfo.getAge() + " yrs. old, " + gender;
         setPic(profilePic, patientInfo.getProfileImageBytes());
-
-        int[] birthdateTemp = new int[3];
-        String patientAgeGender = "";
-
-        if(patientInfo.getBirthdate() != null) {
-
-            StringTokenizer tok = new StringTokenizer(patientInfo.getBirthdate(), "-");
-            int i = 0;
-            while(tok.hasMoreTokens()) {
-
-                birthdateTemp[i] = Integer.parseInt(tok.nextToken());
-                i++;
-            }
-
-            LocalDate birthdate = new LocalDate(birthdateTemp[0], birthdateTemp[1], birthdateTemp[2]);
-            LocalDate now = new LocalDate();
-
-            Years age = Years.yearsBetween(birthdate, now);
-
-            String patientAge = age.getYears() + "";
-            patientAgeGender = patientAge + " yrs. old, " + gender;
-        }
 
         if (ageGender != null) {
             ageGender.setText(patientAgeGender);

@@ -38,12 +38,11 @@ import com.dlsu.getbetter.getbetter.activities.ViewImageActivity;
 import com.dlsu.getbetter.getbetter.adapters.SummaryPageDataAdapter;
 import com.dlsu.getbetter.getbetter.database.DataAdapter;
 import com.dlsu.getbetter.getbetter.objects.Attachment;
+import com.dlsu.getbetter.getbetter.objects.DividerItemDecoration;
+import com.dlsu.getbetter.getbetter.objects.Patient;
 import com.dlsu.getbetter.getbetter.sessionmanagers.NewPatientSessionManager;
 import com.dlsu.getbetter.getbetter.sessionmanagers.SystemSessionManager;
 
-
-import org.joda.time.LocalDate;
-import org.joda.time.Years;
 
 import java.io.File;
 import java.io.IOException;
@@ -53,7 +52,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
-import java.util.StringTokenizer;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -62,7 +60,7 @@ public class SummaryPageFragment extends Fragment implements View.OnClickListene
 
     private String patientName;
     private String patientAgeGender;
-    private String image;
+    private String patientProfileImage;
     private String patientFirstName;
     private String patientMiddleName;
     private String patientLastName;
@@ -125,32 +123,31 @@ public class SummaryPageFragment extends Fragment implements View.OnClickListene
 
         HashMap<String, String> user = systemSessionManager.getUserDetails();
         HashMap<String, String> hc = systemSessionManager.getHealthCenter();
+        HashMap<String, String> patientDetails = newPatientDetails.getNewPatientDetails();
         healthCenterId = Integer.parseInt(hc.get(SystemSessionManager.HEALTH_CENTER_ID));
-        String midwifeName = user.get(SystemSessionManager.LOGIN_USER_NAME);
 
         initializeDatabase();
         getUserId(user.get(SystemSessionManager.LOGIN_USER_NAME));
-
         newPatientDetails = new NewPatientSessionManager(getActivity());
 
-        HashMap<String, String> patient = newPatientDetails.getNewPatientDetails();
+        patientProfileImage = patientDetails.get(NewPatientSessionManager.NEW_PATIENT_PROFILE_IMAGE);
+        patientFirstName = patientDetails.get(NewPatientSessionManager.NEW_PATIENT_FIRST_NAME);
+        patientMiddleName = patientDetails.get(NewPatientSessionManager.NEW_PATIENT_MIDDLE_NAME);
+        patientLastName = patientDetails.get(NewPatientSessionManager.NEW_PATIENT_LAST_NAME);
+        patientBirthdate = patientDetails.get(NewPatientSessionManager.NEW_PATIENT_BIRTHDATE);
+        patientGender = patientDetails.get(NewPatientSessionManager.NEW_PATIENT_GENDER);
+        patientCivilStatus = patientDetails.get(NewPatientSessionManager.NEW_PATIENT_CIVIL_STATUS);
+        chiefComplaint = patientDetails.get(NewPatientSessionManager.NEW_PATIENT_CHIEF_COMPLAINT);
+        String recordedHpiOutputFile = patientDetails.get(NewPatientSessionManager.NEW_PATIENT_DOC_HPI_RECORD);
+        Patient patient = new Patient(patientFirstName, patientMiddleName, patientLastName, patientBirthdate,
+                patientGender, patientCivilStatus, patientProfileImage);
 
-        image = patient.get(NewPatientSessionManager.NEW_PATIENT_PROFILE_IMAGE);
-        patientFirstName = patient.get(NewPatientSessionManager.NEW_PATIENT_FIRST_NAME);
-        patientMiddleName = patient.get(NewPatientSessionManager.NEW_PATIENT_MIDDLE_NAME);
-        patientLastName = patient.get(NewPatientSessionManager.NEW_PATIENT_LAST_NAME);
-        patientBirthdate = patient.get(NewPatientSessionManager.NEW_PATIENT_BIRTHDATE);
-        patientGender = patient.get(NewPatientSessionManager.NEW_PATIENT_GENDER);
-        patientCivilStatus = patient.get(NewPatientSessionManager.NEW_PATIENT_CIVIL_STATUS);
-        chiefComplaint = patient.get(NewPatientSessionManager.NEW_PATIENT_CHIEF_COMPLAINT);
-        String recordedHpiOutputFile = patient.get(NewPatientSessionManager.NEW_PATIENT_DOC_HPI_RECORD);
-
-        String patientInfoFormImage = patient.get(NewPatientSessionManager.NEW_PATIENT_DOC_IMAGE1);
-        String familySocialHistoryFormImage = patient.get(NewPatientSessionManager.NEW_PATIENT_DOC_IMAGE2);
-        String chiefComplaintFormImage = patient.get(NewPatientSessionManager.NEW_PATIENT_DOC_IMAGE3);
-        String patientInfoFormImageTitle = patient.get(NewPatientSessionManager.NEW_PATIENT_DOC_IMAGE1_TITLE);
-        String familySocialHistoryFormImageTitle = patient.get(NewPatientSessionManager.NEW_PATIENT_DOC_IMAGE2_TITLE);
-        String chiefComplaintFormImageTitle = patient.get(NewPatientSessionManager.NEW_PATIENT_DOC_IMAGE3_TITLE);
+        String patientInfoFormImage = patientDetails.get(NewPatientSessionManager.NEW_PATIENT_DOC_IMAGE1);
+        String familySocialHistoryFormImage = patientDetails.get(NewPatientSessionManager.NEW_PATIENT_DOC_IMAGE2);
+        String chiefComplaintFormImage = patientDetails.get(NewPatientSessionManager.NEW_PATIENT_DOC_IMAGE3);
+        String patientInfoFormImageTitle = patientDetails.get(NewPatientSessionManager.NEW_PATIENT_DOC_IMAGE1_TITLE);
+        String familySocialHistoryFormImageTitle = patientDetails.get(NewPatientSessionManager.NEW_PATIENT_DOC_IMAGE2_TITLE);
+        String chiefComplaintFormImageTitle = patientDetails.get(NewPatientSessionManager.NEW_PATIENT_DOC_IMAGE3_TITLE);
 
         if(!newPatientDetails.isActivityNewPatient()) {
             HashMap<String, String> pId = newPatientDetails.getPatientInfo();
@@ -161,10 +158,7 @@ public class SummaryPageFragment extends Fragment implements View.OnClickListene
             controlNumber = generateControlNumber(patientId);
         }
 
-        Log.e("patient id summary", patientId + "");
-
         attachments = new ArrayList<>();
-
         uploadedDate = getTimeStamp();
 
         fileAdapter = new SummaryPageDataAdapter(attachments);
@@ -175,27 +169,8 @@ public class SummaryPageFragment extends Fragment implements View.OnClickListene
 
         fileListLayoutManager = new LinearLayoutManager(this.getContext());
 
-        int[] birthdateTemp = new int[3];
-
-        if(patientBirthdate != null) {
-
-            StringTokenizer tok = new StringTokenizer(patientBirthdate, "-");
-            int i = 0;
-            while(tok.hasMoreTokens()) {
-
-                birthdateTemp[i] = Integer.parseInt(tok.nextToken());
-                i++;
-            }
-
-            LocalDate birthdate = new LocalDate(birthdateTemp[0], birthdateTemp[1], birthdateTemp[2]);
-            LocalDate now = new LocalDate();
-
-            Years age = Years.yearsBetween(birthdate, now);
-
-            String patientAge = age.getYears() + "";
-            patientName = patientFirstName + " " + patientMiddleName + " " + patientLastName;
-            patientAgeGender = patientAge + " yrs. old, " + patientGender;
-        }
+        patientName = patientFirstName + " " + patientMiddleName + " " + patientLastName;
+        patientAgeGender = patient.getAge() + " yrs. old, " + patientGender;
 
         nMediaPlayer = new MediaPlayer();
         nMediaController = new MediaController(this.getContext()) {
@@ -286,6 +261,7 @@ public class SummaryPageFragment extends Fragment implements View.OnClickListene
         Button summaryEstethoscopeBtn = (Button)rootView.findViewById(R.id.summary_page_estethoscope_btn);
         Button summarySelectFileBtn = (Button)rootView.findViewById(R.id.summary_page_select_file_btn);
         RecyclerView attachmentFileList = (RecyclerView) rootView.findViewById(R.id.summary_page_files_list);
+        RecyclerView.ItemDecoration dividerItemDecoration = new DividerItemDecoration(getContext());
 
         recordSoundContainer = (CardView)rootView.findViewById(R.id.summary_page_record_sound_container);
         recordSoundbBtn = (Button)rootView.findViewById(R.id.summary_page_audio_record_btn);
@@ -325,6 +301,7 @@ public class SummaryPageFragment extends Fragment implements View.OnClickListene
         attachmentFileList.setHasFixedSize(true);
         attachmentFileList.setLayoutManager(fileListLayoutManager);
         attachmentFileList.setAdapter(fileAdapter);
+        attachmentFileList.addItemDecoration(dividerItemDecoration);
         fileAdapter.SetOnItemClickListener(new SummaryPageDataAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
@@ -353,7 +330,7 @@ public class SummaryPageFragment extends Fragment implements View.OnClickListene
     @Override
     public void onResume() {
         super.onResume();
-        setPic(summaryProfileImage, image);
+        setPic(summaryProfileImage, patientProfileImage);
     }
 
     @Override
@@ -367,7 +344,7 @@ public class SummaryPageFragment extends Fragment implements View.OnClickListene
             if(newPatientDetails.isActivityNewPatient()) {
 
                 new InsertPatientTask().execute(patientFirstName, patientMiddleName, patientLastName,
-                        patientBirthdate, patientGender, patientCivilStatus, image);
+                        patientBirthdate, patientGender, patientCivilStatus, patientProfileImage);
             } else {
 
                 new InsertCaseRecordTask().execute();
@@ -911,10 +888,10 @@ public class SummaryPageFragment extends Fragment implements View.OnClickListene
         int photoW = bmOptions.outWidth;
         int photoH = bmOptions.outHeight;
 
-        // Determine how much to scale down the image
+        // Determine how much to scale down the patientProfileImage
         int scaleFactor = Math.min(photoW/targetW, photoH/targetH);
 
-        // Decode the image file into a Bitmap sized to fill the View
+        // Decode the patientProfileImage file into a Bitmap sized to fill the View
         bmOptions.inJustDecodeBounds = false;
         bmOptions.inSampleSize = scaleFactor;
 

@@ -16,7 +16,6 @@ public class Patient {
     private String middleName;
     private String lastName;
     private String birthdate;
-    private String age;
     private String gender;
     private String civilStatus;
     private String profileImageBytes;
@@ -82,9 +81,7 @@ public class Patient {
 
         Years years = Years.yearsBetween(birthdate, now);
 
-        age = years.getYears() + "";
-
-        return age;
+        return years.getYears() + "";
     }
 
     public String getGender() {
