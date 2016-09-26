@@ -68,16 +68,7 @@ public class UpdatePatientRecordActivity extends AppCompatActivity implements Vi
         Log.e("patient id", patientId + "");
 
         initializeDatabase();
-
-        try {
-            getBetterDb.openDatabase();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        Patient patient = getBetterDb.getPatient(patientId);
-
-        getBetterDb.closeDatabase();
+        Patient patient = getPatientInfo(patientId);
 
         Button submitBtn = (Button)findViewById(R.id.new_patient_next_btn);
         Button setBirthday = (Button)findViewById(R.id.new_patient_set_birthday_btn);
@@ -188,6 +179,21 @@ public class UpdatePatientRecordActivity extends AppCompatActivity implements Vi
 
     }
 
+    private Patient getPatientInfo(long patientId) {
+
+        try {
+            getBetterDb.openDatabase();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        Patient patient = getBetterDb.getPatient(patientId);
+
+        getBetterDb.closeDatabase();
+
+        return patient;
+
+    }
     private void showDate (int year, int month, int day) {
         String sMonth = month + "";
         String sDay = day + "";
