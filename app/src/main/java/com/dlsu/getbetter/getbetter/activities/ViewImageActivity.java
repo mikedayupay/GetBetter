@@ -66,9 +66,9 @@ public class ViewImageActivity extends AppCompatActivity implements View.OnClick
     public void onClick(View v) {
         int id = v.getId();
 
-        if(id == R.id.view_image_back_btn) {
+        if(id == R.id.view_image_back) {
             finish();
-        } else if (id == R.id.view_image_remove_btn) {
+        } else if (id == R.id.view_image_delete) {
 
         }
 
