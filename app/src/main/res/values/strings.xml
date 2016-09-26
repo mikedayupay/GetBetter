@@ -110,4 +110,7 @@
     <string name="address_placeholder">Address Placeholder</string>
     <string name="number_of_case_records_placeholder">Number of Case Records Placeholder</string>
     <string name="new_case_record_button_text">New Case Record</string>
+    <string name="welcome_text">Welcome</string>
+    <string name="de_la_salle_university_science_amp_technology_campus"><![CDATA[De La Salle University Science & Technology Campus]]></string>
+    <string name="caption_this_image">Caption this image</string>
 </resources>

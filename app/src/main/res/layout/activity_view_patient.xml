@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:paddingBottom="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
@@ -21,7 +22,9 @@
     <android.support.v7.widget.CardView
         android:layout_width="1200dp"
         android:layout_height="wrap_content"
-        android:layout_below="@id/getbetter_title">
+        app:cardCornerRadius="2dp"
+        android:layout_below="@+id/getbetter_title"
+        android:layout_alignParentStart="true">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -33,141 +36,161 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-
                 android:baselineAligned="false">
 
-                <RelativeLayout
+                <android.support.v7.widget.CardView
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1">
+                    android:layout_height="match_parent"
+                    app:cardCornerRadius="2dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="4dp"
+                    android:layout_marginRight="4dp">
 
-                    <ImageView
-                        android:id="@+id/view_patient_profile_image"
-                        android:layout_width="300dp"
-                        android:layout_height="250dp"
-                        android:src="@drawable/profile_picture_placeholder"
-                        android:layout_centerHorizontal="true"
-                        android:padding="8dp"
-                        android:contentDescription="@string/patient_profile_image"
-                        android:layout_marginBottom="8dp"/>
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="8dp">
+
+                        <ImageView
+                            android:id="@+id/view_patient_profile_image"
+                            android:layout_width="300dp"
+                            android:layout_height="250dp"
+                            android:src="@drawable/profile_picture_placeholder"
+                            android:layout_centerHorizontal="true"
+                            android:padding="8dp"
+                            android:contentDescription="@string/patient_profile_image"
+                            android:layout_marginBottom="8dp"/>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_below="@id/view_patient_profile_image"
+                            android:orientation="vertical"
+                            android:padding="4dp" >
+
+                            <TextView
+                                android:id="@+id/view_patient_name"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/patient_name_placeholder"
+                                android:textAllCaps="true"
+                                android:textStyle="bold"
+                                android:textSize="24sp"
+                                android:layout_marginBottom="4dp"
+                                />
+
+                            <TextView
+                                android:id="@+id/view_patient_age_gender"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/age_gender_placeholder"
+                                android:layout_marginBottom="3dp"
+                                />
+
+                            <TextView
+                                android:id="@+id/view_patient_civil_status"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/civil_status_placeholder"
+                                android:layout_marginBottom="3dp"
+                                />
+
+                            <TextView
+                                android:id="@+id/view_patient_blood"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/blood_type_placeholder"
+                                android:layout_marginBottom="3dp"
+                                />
+
+                            <!--<TextView-->
+                            <!--android:id="@+id/view_patient_contact"-->
+                            <!--android:layout_width="wrap_content"-->
+                            <!--android:layout_height="wrap_content"-->
+                            <!--android:text="@string/contact_info_placeholder"-->
+                            <!--android:layout_marginBottom="3dp"-->
+                            <!--android:drawableLeft="@drawable/ic_contact_phone"-->
+                            <!--android:drawableStart="@drawable/ic_contact_phone"-->
+                            <!--android:drawablePadding="4dp"/>-->
+
+                            <!--<TextView-->
+                            <!--android:id="@+id/view_patient_address"-->
+                            <!--android:layout_width="wrap_content"-->
+                            <!--android:layout_height="wrap_content"-->
+                            <!--android:text="@string/address_placeholder"-->
+                            <!--android:layout_marginBottom="3dp"-->
+                            <!--android:drawableLeft="@drawable/ic_location_on"-->
+                            <!--android:drawableStart="@drawable/ic_location_on"-->
+                            <!--android:drawablePadding="4dp"/>-->
+
+                            <!--<TextView-->
+                            <!--android:id="@+id/view_patient_case_record_count"-->
+                            <!--android:layout_width="wrap_content"-->
+                            <!--android:layout_height="wrap_content"-->
+                            <!--android:text="@string/number_of_case_records_placeholder"-->
+                            <!--android:layout_marginBottom="3dp"-->
+                            <!--android:drawableLeft="@drawable/ic_folder"-->
+                            <!--android:drawableStart="@drawable/ic_folder"-->
+                            <!--android:drawablePadding="4dp"/>-->
+
+
+                        </LinearLayout>
+
+                    </RelativeLayout>
+
+
+                </android.support.v7.widget.CardView>
+
+
+                <android.support.v7.widget.CardView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    app:cardCornerRadius="2dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_below="@id/view_patient_profile_image"
                         android:orientation="vertical"
-                        android:padding="4dp">
+                        android:padding="8dp">
 
                         <TextView
-                            android:id="@+id/view_patient_name"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/patient_name_placeholder"
+                            android:text="@string/case_record"
                             android:textAllCaps="true"
-                            android:textStyle="bold"
-                            android:textSize="16sp"
-                            android:layout_marginBottom="4dp"
+                            android:textSize="22sp"
+                            android:textStyle="bold"/>
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:background="#c0c0c0"
+                            android:layout_marginTop="5dp"
+                            android:layout_marginBottom="10dp"
                             />
 
-                        <TextView
-                            android:id="@+id/view_patient_age_gender"
-                            android:layout_width="wrap_content"
+                        <android.support.v7.widget.RecyclerView
+                            android:id="@+id/view_patient_case_recycler"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="@string/age_gender_placeholder"
-                            android:layout_marginBottom="3dp"
-                            />
+                            android:padding="4dp">
 
-                        <TextView
-                            android:id="@+id/view_patient_civil_status"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/civil_status_placeholder"
-                            android:layout_marginBottom="3dp"
-                            />
 
-                        <TextView
-                            android:id="@+id/view_patient_blood"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/blood_type_placeholder"
-                            android:layout_marginBottom="3dp"
-                            />
-
-                        <TextView
-                            android:id="@+id/view_patient_contact"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/contact_info_placeholder"
-                            android:layout_marginBottom="3dp"
-                            android:drawableLeft="@drawable/ic_contact_phone"
-                            android:drawableStart="@drawable/ic_contact_phone"
-                            android:drawablePadding="4dp"/>
-
-                        <TextView
-                            android:id="@+id/view_patient_address"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/address_placeholder"
-                            android:layout_marginBottom="3dp"
-                            android:drawableLeft="@drawable/ic_location_on"
-                            android:drawableStart="@drawable/ic_location_on"
-                            android:drawablePadding="4dp"/>
-
-                        <TextView
-                            android:id="@+id/view_patient_case_record_count"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/number_of_case_records_placeholder"
-                            android:layout_marginBottom="3dp"
-                            android:drawableLeft="@drawable/ic_folder"
-                            android:drawableStart="@drawable/ic_folder"
-                            android:drawablePadding="4dp"/>
+                        </android.support.v7.widget.RecyclerView>
 
 
                     </LinearLayout>
 
-                </RelativeLayout>
+                </android.support.v7.widget.CardView>
 
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/case_record"
-                        android:textAllCaps="true"
-                        android:textSize="22sp"
-                        android:textStyle="bold"/>
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="#c0c0c0"
-                        android:layout_marginTop="5dp"
-                        android:layout_marginBottom="10dp"
-                        />
-
-                    <android.support.v7.widget.RecyclerView
-                        android:id="@+id/view_patient_case_recycler"
-                        android:layout_width="match_parent"
-                        android:layout_height="350dp"
-                        android:padding="4dp">
-
-
-                    </android.support.v7.widget.RecyclerView>
-
-
-                </LinearLayout>
 
             </LinearLayout>
 
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="32dp">
+                android:paddingTop="8dp" >
 
                 <Button
                     android:id="@+id/view_patient_back_btn"
@@ -210,11 +233,7 @@
         </LinearLayout>
 
 
-
-
-
     </android.support.v7.widget.CardView>
-
 
 
 </RelativeLayout>
