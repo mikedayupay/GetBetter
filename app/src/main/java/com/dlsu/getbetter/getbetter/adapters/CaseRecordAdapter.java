@@ -24,7 +24,7 @@ public class CaseRecordAdapter extends RecyclerView.Adapter<CaseRecordAdapter.Ca
     private int selectedItem = 0;
 
 
-    public class CaseRecordViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    class CaseRecordViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         CardView cardView;
         TextView controlNumber;
@@ -32,10 +32,9 @@ public class CaseRecordAdapter extends RecyclerView.Adapter<CaseRecordAdapter.Ca
         TextView caseRecordStatus;
         TextView date;
 
-        public CaseRecordViewHolder (View itemView) {
+        CaseRecordViewHolder (View itemView) {
             super(itemView);
 
-            cardView = (CardView)itemView.findViewById(R.id.case_record_card_view);
             controlNumber = (TextView)itemView.findViewById(R.id.case_record_control_number);
             chiefComplaint = (TextView)itemView.findViewById(R.id.case_record_chief_complaint);
             caseRecordStatus = (TextView)itemView.findViewById(R.id.case_record_status);

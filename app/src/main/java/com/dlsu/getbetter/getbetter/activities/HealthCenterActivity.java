@@ -1,6 +1,9 @@
 package com.dlsu.getbetter.getbetter.activities;
 
 import android.content.Intent;
+import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -12,6 +15,7 @@ import com.dlsu.getbetter.getbetter.R;
 import com.dlsu.getbetter.getbetter.activities.HomeActivity;
 import com.dlsu.getbetter.getbetter.adapters.HealthCenterListAdapter;
 import com.dlsu.getbetter.getbetter.database.DataAdapter;
+import com.dlsu.getbetter.getbetter.objects.DividerItemDecoration;
 import com.dlsu.getbetter.getbetter.objects.HealthCenter;
 import com.dlsu.getbetter.getbetter.sessionmanagers.SystemSessionManager;
 
@@ -35,27 +39,25 @@ public class HealthCenterActivity extends AppCompatActivity {
             finish();
 
         HashMap<String, String> user = systemSessionManager.getUserDetails();
-        String userName = user.get(SystemSessionManager.LOGIN_USER_NAME);
-        TextView userLabel = (TextView)findViewById(R.id.hc_user_label);
+        TextView userLabel = (TextView)findViewById(R.id.hc_welcome_text);
         RecyclerView healthCenterRecycler = (RecyclerView)findViewById(R.id.hc_recycler_view);
+        RecyclerView.ItemDecoration dividerItemDecoration = new DividerItemDecoration(this);
 
-        userLabel.setText(userName);
+
+        String userName = user.get(SystemSessionManager.LOGIN_USER_NAME);
+        String welcomeText = "Welcome " + userName + "!";
+        userLabel.setText(welcomeText);
         healthCenters = new ArrayList<>();
         initializeDatabase();
         getHealthCenterList();
 
-        if (healthCenterRecycler != null) {
-            healthCenterRecycler.setHasFixedSize(true);
-        }
-
-        if (healthCenterRecycler != null) {
-            healthCenterRecycler.setLayoutManager(new LinearLayoutManager(this));
-        }
-
         HealthCenterListAdapter healthCenterListAdapter = new HealthCenterListAdapter(healthCenters);
 
         if (healthCenterRecycler != null) {
+            healthCenterRecycler.setHasFixedSize(true);
+            healthCenterRecycler.setLayoutManager(new LinearLayoutManager(this));
             healthCenterRecycler.setAdapter(healthCenterListAdapter);
+            healthCenterRecycler.addItemDecoration(dividerItemDecoration);
         }
 
         healthCenterListAdapter.SetOnItemClickListener(new HealthCenterListAdapter.OnItemClickListener() {

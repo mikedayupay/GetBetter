@@ -16,9 +16,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.dlsu.getbetter.getbetter.R;
+import com.dlsu.getbetter.getbetter.UpdatePatientRecordActivity;
 import com.dlsu.getbetter.getbetter.adapters.CaseRecordAdapter;
 import com.dlsu.getbetter.getbetter.database.DataAdapter;
 import com.dlsu.getbetter.getbetter.objects.CaseRecord;
+import com.dlsu.getbetter.getbetter.objects.DividerItemDecoration;
 import com.dlsu.getbetter.getbetter.objects.Patient;
 
 import java.sql.SQLException;
@@ -31,8 +33,6 @@ public class ViewPatientActivity extends AppCompatActivity implements View.OnCli
     private DataAdapter getBetterDb;
     private long patientId;
     private ArrayList<CaseRecord> caseRecords;
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,10 +68,12 @@ public class ViewPatientActivity extends AppCompatActivity implements View.OnCli
         civilStatus.setText(patient.getCivilStatus());
 
         RecyclerView.LayoutManager caseRecordsLayoutManager = new LinearLayoutManager(this);
+        RecyclerView.ItemDecoration dividerItemDecoration = new DividerItemDecoration(this);
         CaseRecordAdapter caseRecordAdapter = new CaseRecordAdapter(caseRecords);
         caseRecordList.setHasFixedSize(true);
         caseRecordList.setLayoutManager(caseRecordsLayoutManager);
         caseRecordList.setAdapter(caseRecordAdapter);
+        caseRecordList.addItemDecoration(dividerItemDecoration);
         caseRecordAdapter.SetOnItemClickListener(new CaseRecordAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
@@ -112,56 +114,6 @@ public class ViewPatientActivity extends AppCompatActivity implements View.OnCli
 
         return patient;
 
-    }
-
-    @Override
-    public void onClick(View view) {
-
-        int id = view.getId();
-
-        if(id == R.id.view_patient_back_btn) {
-
-            Intent intent = new Intent(this, ExistingPatientActivity.class);
-            startActivity(intent);
-            finish();
-        }
-
-    }
-
-    private String patientFullName (String firstName, String middleName, String lastName) {
-
-        StringBuilder patientFullName = new StringBuilder();
-        patientFullName.append(firstName);
-        patientFullName.append(" ");
-        patientFullName.append(middleName);
-        patientFullName.append(" ");
-        patientFullName.append(lastName);
-
-        return patientFullName.toString();
-    }
-
-    private void setPic(ImageView mImageView, String mCurrentPhotoPath) {
-        // Get the dimensions of the View
-        int targetW = 300;//mImageView.getWidth();
-        int targetH = 250;//mImageView.getHeight();
-        Log.d("width and height", targetW + targetH + "");
-
-        // Get the dimensions of the bitmap
-        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-        bmOptions.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
-        int photoW = bmOptions.outWidth;
-        int photoH = bmOptions.outHeight;
-
-        // Determine how much to scale down the image
-        int scaleFactor = Math.min(photoW/targetW, photoH/targetH);
-
-        // Decode the image file into a Bitmap sized to fill the View
-        bmOptions.inJustDecodeBounds = false;
-        bmOptions.inSampleSize = scaleFactor;
-
-        Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
-        mImageView.setImageBitmap(bitmap);
     }
 
     private void getCaseRecords() {
@@ -208,6 +160,61 @@ public class ViewPatientActivity extends AppCompatActivity implements View.OnCli
         getCaseRecordsTask.execute();
 
     }
+
+    @Override
+    public void onClick(View view) {
+
+        int id = view.getId();
+
+        if(id == R.id.view_patient_back_btn) {
+
+            Intent intent = new Intent(this, ExistingPatientActivity.class);
+            startActivity(intent);
+            finish();
+        } else if(id == R.id.view_patient_update_btn) {
+
+            Intent intent = new Intent(this, UpdatePatientRecordActivity.class);
+            intent.putExtra("selectedPatient", patientId);
+            startActivity(intent);
+            finish();
+        }
+
+    }
+
+    private String patientFullName (String firstName, String middleName, String lastName) {
+
+        return firstName +
+                " " +
+                middleName +
+                " " +
+                lastName;
+    }
+
+    private void setPic(ImageView mImageView, String mCurrentPhotoPath) {
+        // Get the dimensions of the View
+        int targetW = 300;//mImageView.getWidth();
+        int targetH = 250;//mImageView.getHeight();
+        Log.d("width and height", targetW + targetH + "");
+
+        // Get the dimensions of the bitmap
+        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+        bmOptions.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
+        int photoW = bmOptions.outWidth;
+        int photoH = bmOptions.outHeight;
+
+        // Determine how much to scale down the image
+        int scaleFactor = Math.min(photoW/targetW, photoH/targetH);
+
+        // Decode the image file into a Bitmap sized to fill the View
+        bmOptions.inJustDecodeBounds = false;
+        bmOptions.inSampleSize = scaleFactor;
+
+        Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
+        mImageView.setImageBitmap(bitmap);
+    }
+
+
 
 
 

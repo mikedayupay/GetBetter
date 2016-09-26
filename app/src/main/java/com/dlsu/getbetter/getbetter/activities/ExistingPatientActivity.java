@@ -18,6 +18,7 @@ import com.dlsu.getbetter.getbetter.UpdatePatientRecordActivity;
 import com.dlsu.getbetter.getbetter.UploadPatientToServerActivity;
 import com.dlsu.getbetter.getbetter.adapters.ExistingPatientAdapter;
 import com.dlsu.getbetter.getbetter.database.DataAdapter;
+import com.dlsu.getbetter.getbetter.objects.DividerItemDecoration;
 import com.dlsu.getbetter.getbetter.objects.Patient;
 import com.dlsu.getbetter.getbetter.sessionmanagers.SystemSessionManager;
 
@@ -47,18 +48,15 @@ public class ExistingPatientActivity extends AppCompatActivity implements View.O
 
         HashMap<String, String> user = systemSessionManager.getUserDetails();
         HashMap<String, String> hc = systemSessionManager.getHealthCenter();
-        String userNameLabel = user.get(SystemSessionManager.LOGIN_USER_NAME);
         int healthCenterId = Integer.parseInt(hc.get(SystemSessionManager.HEALTH_CENTER_ID));
 
         Button newPatientRecBtn = (Button) findViewById(R.id.create_new_patient_btn);
         Button uploadPatientRecBtn = (Button) findViewById(R.id.upload_patient_record);
         Button backBtn = (Button)findViewById(R.id.existing_patient_back_btn);
 
-        TextView userLabel = (TextView)findViewById(R.id.user_label);
-        userLabel.setText(userNameLabel);
-
         RecyclerView existingPatientListView = (RecyclerView) findViewById(R.id.existing_patient_list);
         RecyclerView.LayoutManager existingPatientLayoutManager = new LinearLayoutManager(this);
+        RecyclerView.ItemDecoration dividerItemDecoration = new DividerItemDecoration(this);
 
         existingPatients = new ArrayList<>();
         initializeDatabase();
@@ -69,18 +67,18 @@ public class ExistingPatientActivity extends AppCompatActivity implements View.O
         existingPatientListView.setHasFixedSize(true);
         existingPatientListView.setLayoutManager(existingPatientLayoutManager);
         existingPatientListView.setAdapter(existingPatientsAdapter);
+        existingPatientListView.addItemDecoration(dividerItemDecoration);
         existingPatientsAdapter.SetOnItemClickListener(new ExistingPatientAdapter.OnItemClickListener() {
 
             @Override
             public void onItemClick(View view, int position) {
-//                Log.e("Patient Click", existingPatients.get(position).getId() + "");
+
                 selectedPatientId = existingPatients.get(position).getId();
-//                patientFirstName = existingPatients.get(position).getFirstName();
-//                patientLastName = existingPatients.get(position).getLastName();
                 Intent intent = new Intent(ExistingPatientActivity.this, ViewPatientActivity.class);
                 intent.putExtra("patientId", selectedPatientId);
                 startActivity(intent);
                 finish();
+
             }
         });
 

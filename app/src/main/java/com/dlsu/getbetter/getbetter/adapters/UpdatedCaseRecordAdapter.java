@@ -25,19 +25,17 @@ public class UpdatedCaseRecordAdapter extends RecyclerView.Adapter<UpdatedCaseRe
     private OnItemClickListener mItemClickListener;
     private int selectedItem = 0;
 
-    public class UpdatedCaseRecordViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    class UpdatedCaseRecordViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-        CardView cardView;
         TextView patientName;
         TextView complaint;
         TextView updatedOn;
         ImageView profilePic;
 
 
-        public UpdatedCaseRecordViewHolder(View itemView) {
+        UpdatedCaseRecordViewHolder(View itemView) {
             super(itemView);
 
-            cardView = (CardView)itemView.findViewById(R.id.home_case_record_card_view);
             patientName = (TextView)itemView.findViewById(R.id.home_case_record_patient_name);
             complaint = (TextView)itemView.findViewById(R.id.home_case_record_chief_complaint);
             updatedOn = (TextView)itemView.findViewById(R.id.home_case_record_updated_on);

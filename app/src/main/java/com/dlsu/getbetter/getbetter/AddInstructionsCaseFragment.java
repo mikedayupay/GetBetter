@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import com.dlsu.getbetter.getbetter.adapters.UpdatedCaseRecordAdapter;
 import com.dlsu.getbetter.getbetter.database.DataAdapter;
 import com.dlsu.getbetter.getbetter.objects.CaseRecord;
+import com.dlsu.getbetter.getbetter.objects.DividerItemDecoration;
 import com.dlsu.getbetter.getbetter.objects.Patient;
 import com.dlsu.getbetter.getbetter.sessionmanagers.SystemSessionManager;
 
@@ -60,10 +61,11 @@ public class AddInstructionsCaseFragment extends Fragment {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_updated_case, container, false);
         RecyclerView addInstructionsRecycler = (RecyclerView)rootView.findViewById(R.id.updated_case_recycler);
-
+        RecyclerView.ItemDecoration dividerItemDecoration = new DividerItemDecoration(getContext());
         addInstructionsRecycler.setHasFixedSize(true);
         addInstructionsRecycler.setLayoutManager(new LinearLayoutManager(getActivity()));
         addInstructionsRecycler.setAdapter(updatedCaseRecordAdapter);
+        addInstructionsRecycler.addItemDecoration(dividerItemDecoration);
         updatedCaseRecordAdapter.SetOnItemClickListener(new UpdatedCaseRecordAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
