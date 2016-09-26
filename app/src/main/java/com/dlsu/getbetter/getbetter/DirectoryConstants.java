@@ -6,9 +6,9 @@ package com.dlsu.getbetter.getbetter;
  */
 class DirectoryConstants {
 
-    public static final String PROFILE_IMAGE_DIRECTORY_NAME = "Profile Images";
+    public static final String PROFILE_IMAGE_DIRECTORY_NAME = "profile_Images";
 
-    public static final String CASE_RECORD_ATTACHMENT_DIRECTORY_NAME = "Case Record Attachments";
+    public static final String CASE_RECORD_ATTACHMENT_DIRECTORY_NAME = "case_record_attachments";
 
     public static final String UPLOAD_PATIENT_SERVER_SCRIPT_URL = "http://128.199.205.226/get_better/upload_patient.php";
 
