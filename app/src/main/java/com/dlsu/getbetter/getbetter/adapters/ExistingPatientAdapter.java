@@ -26,19 +26,18 @@ public class ExistingPatientAdapter extends RecyclerView.Adapter<ExistingPatient
     private int selectedItem = 0;
 
 
-    public class ExistingPatientViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+    class ExistingPatientViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
-        CardView cardView;
         TextView patientName;
-        TextView patientBirthdate;
+        TextView patientDateLastConsult;
         TextView patientGender;
         ImageView patientImage;
 
-        public ExistingPatientViewHolder (View itemView) {
+        ExistingPatientViewHolder(View itemView) {
             super(itemView);
-            cardView = (CardView)itemView.findViewById(R.id.existing_patient_item_card);
+
             patientName = (TextView)itemView.findViewById(R.id.upload_patient_item_name);
-            patientBirthdate = (TextView)itemView.findViewById(R.id.existing_patient_item_birthdate);
+            patientDateLastConsult = (TextView)itemView.findViewById(R.id.existing_patient_date_last_consult);
             patientGender = (TextView)itemView.findViewById(R.id.existing_patient_item_gender);
             patientImage = (ImageView)itemView.findViewById(R.id.upload_patient_item_profile_image);
             itemView.setOnClickListener(this);
@@ -71,9 +70,8 @@ public class ExistingPatientAdapter extends RecyclerView.Adapter<ExistingPatient
     public ExistingPatientViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.existing_patient_list_item, parent, false);
-        ExistingPatientViewHolder existingPatientViewHolder = new ExistingPatientViewHolder(v);
 
-        return existingPatientViewHolder;
+        return new ExistingPatientViewHolder(v);
     }
 
     @Override
@@ -82,9 +80,8 @@ public class ExistingPatientAdapter extends RecyclerView.Adapter<ExistingPatient
         String patientName = existingPatients.get(position).getLastName() + ", " +
                 existingPatients.get(position).getFirstName();
         holder.patientName.setText(patientName);
-        holder.patientBirthdate.setText(existingPatients.get(position).getBirthdate());
+        holder.patientDateLastConsult.setText(existingPatients.get(position).getBirthdate());
         holder.patientGender.setText(existingPatients.get(position).getGender());
-        //holder.patientImage.setImageBitmap(decodeEncodedImage(existingPatients.get(position).getProfileImageBytes()));
 
         holder.itemView.post(new Runnable() {
             @Override
@@ -94,9 +91,6 @@ public class ExistingPatientAdapter extends RecyclerView.Adapter<ExistingPatient
         });
 
         holder.itemView.setSelected(selectedItem == position);
-
-//        Bitmap imageBm = BitmapFactory.decodeFile(existingPatients.get(position).getProfileImageBytes());
-//        holder.patientImage.setImageBitmap(imageBm);
 
     }
 
