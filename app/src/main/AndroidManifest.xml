@@ -65,7 +65,8 @@
         <activity android:name=".activities.ViewCaseRecordActivity" />
         <activity android:name=".activities.ViewImageActivity" />
         <activity android:name=".activities.HealthCenterActivity" />
-        <activity android:name=".activities.ViewPatientActivity"></activity>
+        <activity android:name=".activities.ViewPatientActivity" />
+        <activity android:name=".activities.NewPatientInfoActivity"></activity>
     </application>
 
 </manifest>

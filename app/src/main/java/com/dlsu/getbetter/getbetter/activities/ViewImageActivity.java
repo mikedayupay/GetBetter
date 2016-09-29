@@ -25,7 +25,6 @@ public class ViewImageActivity extends AppCompatActivity implements View.OnClick
         String imageUrl = extras.getString("imageUrl");
         String title = extras.getString("imageTitle");
 
-        TextView imageTitle = (TextView)findViewById(R.id.view_image_title);
         ImageView imageView = (ImageView)findViewById(R.id.view_image);
         ImageButton backBtn = (ImageButton)findViewById(R.id.view_image_back);
         ImageButton deleteBtn = (ImageButton)findViewById(R.id.view_image_delete);
@@ -34,7 +33,7 @@ public class ViewImageActivity extends AppCompatActivity implements View.OnClick
         backBtn.setOnClickListener(this);
         deleteBtn.setOnClickListener(this);
 
-        imageTitle.setText(title);
+
         setPic(imageView, imageUrl);
     }
 

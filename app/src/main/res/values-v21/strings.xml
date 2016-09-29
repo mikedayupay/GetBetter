@@ -72,4 +72,11 @@
     <string name="welcome_text">Welcome</string>
     <string name="de_la_salle_university_science_amp_technology_campus"><![CDATA[De La Salle University Science & Technology Campus]]></string>
     <string name="caption_this_image">Caption this image</string>
+    <string name="last_name">Last Name</string>
+    <string name="birthdate">Birthdate</string>
+    <string name="middle_name">Middle Name</string>
+    <string name="first_name">First Name</string>
+    <string name="gender">Gender</string>
+    <string name="civil_status">Civil Status</string>
+    <string name="patient_record">PATIENT RECORD</string>
 </resources>

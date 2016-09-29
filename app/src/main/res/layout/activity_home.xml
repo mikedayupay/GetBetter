@@ -45,7 +45,7 @@
         android:layout_height="wrap_content"
         app:cardCornerRadius="2dp"
         android:layout_below="@id/user_label_container"
-        android:layout_marginTop="15dp"
+        android:layout_marginTop="12dp"
         android:layout_centerHorizontal="true">
 
         <LinearLayout
@@ -53,7 +53,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="10dp">
+            android:padding="8dp">
 
             <RelativeLayout
                 android:layout_width="match_parent"

@@ -48,9 +48,9 @@ public class ViewPatientActivity extends AppCompatActivity implements View.OnCli
         TextView ageGender = (TextView)findViewById(R.id.view_patient_age_gender);
         TextView civilStatus = (TextView)findViewById(R.id.view_patient_civil_status);
         TextView bloodType = (TextView)findViewById(R.id.view_patient_blood);
-        TextView contactInfo = (TextView)findViewById(R.id.view_patient_contact);
-        TextView addressInfo = (TextView)findViewById(R.id.view_patient_address);
-        TextView caseRecordCount = (TextView)findViewById(R.id.view_patient_case_record_count);
+//        TextView contactInfo = (TextView)findViewById(R.id.view_patient_contact);
+//        TextView addressInfo = (TextView)findViewById(R.id.view_patient_address);
+//        TextView caseRecordCount = (TextView)findViewById(R.id.view_patient_case_record_count);
         RecyclerView caseRecordList = (RecyclerView)findViewById(R.id.view_patient_case_recycler);
         Button backBtn = (Button)findViewById(R.id.view_patient_back_btn);
         Button updatePatientBtn = (Button)findViewById(R.id.view_patient_update_btn);
