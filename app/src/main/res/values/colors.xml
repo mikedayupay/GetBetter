@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#607D8B</color>
+    <color name="colorPrimary">#2196f3</color>
+    <color name="colorPrimaryDark">#1976d2</color>
+    <color name="colorAccent">#009688</color>
     <color name="rippleColor">#FF9EAAEC</color>
     <color name="cardBackground">#FFF</color>
     <color name="blueButton">#2980B9</color>
@@ -12,5 +12,7 @@
     <color name="colorAlert">#F44336</color>
     <color name="blackBackground">#000000</color>
     <color name="grayText">#BBBBBB</color>
+    <color name="secondaryTextColor">#757575</color>
+    <color name="primaryTextColor">#212121</color>
 
 </resources>

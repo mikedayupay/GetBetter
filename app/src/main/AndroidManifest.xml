@@ -44,10 +44,10 @@
             android:screenOrientation="sensorLandscape"
             android:windowSoftInputMode="stateHidden" />
         <activity
-            android:name=".UploadPatientToServerActivity"
+            android:name=".activities.UploadPatientToServerActivity"
             android:screenOrientation="sensorLandscape" />
         <activity
-            android:name=".UpdatePatientRecordActivity"
+            android:name=".activities.UpdatePatientRecordActivity"
             android:screenOrientation="sensorLandscape" />
         <activity
             android:name=".activities.CreateUpdateCaseRecordActivity"
@@ -57,16 +57,17 @@
             android:name=".activities.NewCaseRecordActivity"
             android:screenOrientation="sensorLandscape" />
         <activity
-            android:name=".UploadCaseRecordToServerActivity"
+            android:name=".activities.UploadCaseRecordToServerActivity"
             android:screenOrientation="sensorLandscape" />
         <activity
-            android:name=".DownloadContentActivity"
+            android:name=".activities.DownloadContentActivity"
             android:screenOrientation="sensorLandscape" />
         <activity android:name=".activities.ViewCaseRecordActivity" />
         <activity android:name=".activities.ViewImageActivity" />
         <activity android:name=".activities.HealthCenterActivity" />
         <activity android:name=".activities.ViewPatientActivity" />
-        <activity android:name=".activities.NewPatientInfoActivity"></activity>
+        <activity android:name=".activities.NewPatientInfoActivity" />
+        <activity android:name=".activities.CaptureDocumentsActivity"></activity>
     </application>
 
 </manifest>

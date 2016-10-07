@@ -16,12 +16,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.dlsu.getbetter.getbetter.R;
-import com.dlsu.getbetter.getbetter.UpdatePatientRecordActivity;
 import com.dlsu.getbetter.getbetter.adapters.CaseRecordAdapter;
 import com.dlsu.getbetter.getbetter.database.DataAdapter;
 import com.dlsu.getbetter.getbetter.objects.CaseRecord;
 import com.dlsu.getbetter.getbetter.objects.DividerItemDecoration;
 import com.dlsu.getbetter.getbetter.objects.Patient;
+import com.dlsu.getbetter.getbetter.sessionmanagers.SystemSessionManager;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -38,6 +38,10 @@ public class ViewPatientActivity extends AppCompatActivity implements View.OnCli
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_patient);
+
+        SystemSessionManager systemSessionManager = new SystemSessionManager(this);
+        if(systemSessionManager.checkLogin())
+            finish();
 
         Bundle extras = getIntent().getExtras();
         if(extras != null)
@@ -171,6 +175,7 @@ public class ViewPatientActivity extends AppCompatActivity implements View.OnCli
             Intent intent = new Intent(this, ExistingPatientActivity.class);
             startActivity(intent);
             finish();
+
         } else if(id == R.id.view_patient_update_btn) {
 
             Intent intent = new Intent(this, UpdatePatientRecordActivity.class);

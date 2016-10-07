@@ -79,4 +79,5 @@
     <string name="gender">Gender</string>
     <string name="civil_status">Civil Status</string>
     <string name="patient_record">PATIENT RECORD</string>
+    <string name="required_forms">Required Forms</string>
 </resources>

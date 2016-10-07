@@ -10,12 +10,8 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import com.dlsu.getbetter.getbetter.R;
-import com.dlsu.getbetter.getbetter.UpdatePatientRecordActivity;
-import com.dlsu.getbetter.getbetter.UploadPatientToServerActivity;
 import com.dlsu.getbetter.getbetter.adapters.ExistingPatientAdapter;
 import com.dlsu.getbetter.getbetter.database.DataAdapter;
 import com.dlsu.getbetter.getbetter.objects.DividerItemDecoration;
@@ -121,9 +117,8 @@ public class ExistingPatientActivity extends AppCompatActivity implements View.O
 
         if (id == R.id.create_new_patient_btn) {
 
-            Intent intent = new Intent(this, NewPatientRecordActivity.class);
+            Intent intent = new Intent(this, NewPatientInfoActivity.class);
             startActivity(intent);
-            finish();
 
         } else if (id == R.id.upload_patient_record) {
 

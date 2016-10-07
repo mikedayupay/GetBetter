@@ -4,9 +4,9 @@ package com.dlsu.getbetter.getbetter;
  * Created by mikedayupay on 11/05/2016.
  * GetBetter 2016
  */
-class DirectoryConstants {
+public class DirectoryConstants {
 
-    public static final String PROFILE_IMAGE_DIRECTORY_NAME = "profile_Images";
+    public static final String PROFILE_IMAGE_DIRECTORY_NAME = "profile_images";
 
     public static final String CASE_RECORD_ATTACHMENT_DIRECTORY_NAME = "case_record_attachments";
 
