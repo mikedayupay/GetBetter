@@ -1,4 +1,4 @@
-package com.dlsu.getbetter.getbetter;
+package com.dlsu.getbetter.getbetter.activities;
 
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
@@ -13,6 +13,9 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.dlsu.getbetter.getbetter.DirectoryConstants;
+import com.dlsu.getbetter.getbetter.R;
+import com.dlsu.getbetter.getbetter.RequestHandler;
 import com.dlsu.getbetter.getbetter.adapters.CaseRecordUploadAdapter;
 import com.dlsu.getbetter.getbetter.database.DataAdapter;
 import com.dlsu.getbetter.getbetter.objects.Attachment;
@@ -21,7 +24,6 @@ import com.dlsu.getbetter.getbetter.sessionmanagers.SystemSessionManager;
 import com.kosalgeek.android.photoutil.ImageBase64;
 import com.kosalgeek.android.photoutil.ImageLoader;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 

@@ -1,4 +1,4 @@
-package com.dlsu.getbetter.getbetter;
+package com.dlsu.getbetter.getbetter.activities;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
@@ -22,6 +22,8 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.dlsu.getbetter.getbetter.DirectoryConstants;
+import com.dlsu.getbetter.getbetter.R;
 import com.dlsu.getbetter.getbetter.activities.ExistingPatientActivity;
 import com.dlsu.getbetter.getbetter.database.DataAdapter;
 import com.dlsu.getbetter.getbetter.objects.Patient;

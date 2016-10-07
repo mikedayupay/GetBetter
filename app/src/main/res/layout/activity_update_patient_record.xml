@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/background"
-    tools:context="com.dlsu.getbetter.getbetter.UpdatePatientRecordActivity">
+    tools:context="com.dlsu.getbetter.getbetter.activities.UpdatePatientRecordActivity">
 
     <FrameLayout
         android:id="@+id/update_patient_fragment_container"

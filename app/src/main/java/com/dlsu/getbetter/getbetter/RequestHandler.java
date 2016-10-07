@@ -27,7 +27,7 @@ import java.util.Map;
  * Created by mikedayupay on 26/02/2016.
  * GetBetter 2016
  */
-class RequestHandler {
+public class RequestHandler {
 
     private int bytesAvailable;
     private int totalProgress;

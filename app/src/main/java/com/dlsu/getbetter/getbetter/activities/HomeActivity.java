@@ -1,6 +1,5 @@
 package com.dlsu.getbetter.getbetter.activities;
 
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.ConnectivityManager;
@@ -14,12 +13,10 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.balysv.materialripple.MaterialRippleLayout;
 import com.dlsu.getbetter.getbetter.AddInstructionsCaseFragment;
 import com.dlsu.getbetter.getbetter.ClosedCaseFragment;
 import com.dlsu.getbetter.getbetter.DetailsFragment;
 import com.dlsu.getbetter.getbetter.DiagnosedCaseFragment;
-import com.dlsu.getbetter.getbetter.DownloadContentActivity;
 import com.dlsu.getbetter.getbetter.R;
 import com.dlsu.getbetter.getbetter.UrgentCaseFragment;
 import com.dlsu.getbetter.getbetter.sessionmanagers.SystemSessionManager;

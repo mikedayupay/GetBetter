@@ -1,4 +1,4 @@
-package com.dlsu.getbetter.getbetter;
+package com.dlsu.getbetter.getbetter.activities;
 
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
@@ -15,18 +15,18 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
 
+import com.dlsu.getbetter.getbetter.DirectoryConstants;
+import com.dlsu.getbetter.getbetter.R;
+import com.dlsu.getbetter.getbetter.RequestHandler;
 import com.dlsu.getbetter.getbetter.adapters.CaseRecordDownloadAdapter;
 import com.dlsu.getbetter.getbetter.database.DataAdapter;
 import com.dlsu.getbetter.getbetter.objects.Attachment;
 import com.dlsu.getbetter.getbetter.objects.CaseRecord;
-import com.loopj.android.http.AsyncHttpClient;
-import com.loopj.android.http.FileAsyncHttpResponseHandler;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -34,12 +34,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
-
-import cz.msebera.android.httpclient.Header;
 
 public class DownloadContentActivity extends AppCompatActivity implements View.OnClickListener {
 
