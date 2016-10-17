@@ -4,6 +4,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.dlsu.getbetter.getbetter.R;
@@ -29,12 +30,14 @@ public class SummaryPageDataAdapter extends RecyclerView.Adapter<SummaryPageData
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
         TextView fileTitle;
+        ImageView typeIcon;
 
 
         public ViewHolder(View v) {
             super(v);
             itemView.setOnClickListener(this);
             fileTitle = (TextView)v.findViewById(R.id.summary_page_file_list_item);
+            typeIcon = (ImageView)v.findViewById(R.id.file_type_icon);
 
         }
 
@@ -74,6 +77,10 @@ public class SummaryPageDataAdapter extends RecyclerView.Adapter<SummaryPageData
     public void onBindViewHolder(ViewHolder holder, int position) {
 
         holder.fileTitle.setText(filesDataset.get(position).getAttachmentDescription());
+
+        if(filesDataset.get(position).getAttachmentType() == 1) {
+            holder.typeIcon.setImageResource(R.drawable.ic_action_picture);
+        }
 
     }
 

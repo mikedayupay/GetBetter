@@ -117,8 +117,21 @@
     <string name="birthdate">Birthdate</string>
     <string name="middle_name">Middle Name</string>
     <string name="first_name">First Name</string>
-    <string name="gender">Gender</string>
-    <string name="civil_status">Civil Status</string>
+    <string name="gender">Gender:</string>
+    <string name="civil_status">Civil Status:</string>
     <string name="patient_record">PATIENT RECORD</string>
     <string name="required_forms">Required Forms</string>
+    <string name="height_cm">Height (CM)</string>
+    <string name="weight_kg">Weight (KG)</string>
+    <string name="zero_value_placeholder">0</string>
+    <string name="temperature_c">Temperature (C)</string>
+    <string name="pulse_rate">Pulse Rate</string>
+    <string name="respiratory_rate">Respiratory Rate</string>
+    <string name="blood_pressure">Blood Pressure</string>
+    <string name="file_type_icon">File type icon</string>
+    <string name="record_video">Record Video</string>
+    <string name="record_sound">Record Sound</string>
+    <string name="e_stethoscope">E-stethoscope</string>
+    <string name="select_a_file_from_tablet">Select a file from tablet</string>
+    <string name="date_of_last_consultation">Date of last consultation</string>
 </resources>

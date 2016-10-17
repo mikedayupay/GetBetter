@@ -80,7 +80,7 @@ public class SummaryPageFragment extends Fragment implements View.OnClickListene
     private static final int MEDIA_TYPE_VIDEO = 2;
     private static final int MEDIA_TYPE_AUDIO = 3;
 
-    private long patientId = 0;
+    private long patientId;
     private int caseRecordId;
     private int healthCenterId;
     private int userId;
@@ -339,7 +339,6 @@ public class SummaryPageFragment extends Fragment implements View.OnClickListene
         int id = v.getId();
 
         if(id == R.id.summary_page_submit_btn) {
-
 
             if(newPatientDetails.isActivityNewPatient()) {
 
