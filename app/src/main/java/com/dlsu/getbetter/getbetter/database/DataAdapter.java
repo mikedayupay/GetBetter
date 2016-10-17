@@ -366,6 +366,32 @@ public class DataAdapter {
         return result;
     }
 
+    public int getGenderId(String genderName) {
+
+        int result;
+        String sql = "SELECT _id FROM tbl_genders WHERE gender_name = '" + genderName + "'";
+        Cursor c = getBetterDb.rawQuery(sql, null);
+
+        c.moveToFirst();
+        result = c.getInt(c.getColumnIndexOrThrow("_id"));
+
+        c.close();
+        return result;
+    }
+
+    public int getCivilStatusId(String civilStatusName) {
+
+        int result;
+        String sql = "SELECT _id FROM tbl_civil_statuses WHERE civil_status_name = '" + civilStatusName + "'";
+        Cursor c = getBetterDb.rawQuery(sql, null);
+
+        c.moveToFirst();
+        result = c.getInt(c.getColumnIndexOrThrow("_id"));
+
+        c.close();
+        return result;
+    }
+
     public ArrayList<Integer> getCaseRecordIds () {
 
         ArrayList<Integer> ids = new ArrayList<>();

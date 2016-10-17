@@ -52,7 +52,7 @@ public class CreateUpdateCaseRecordActivity extends AppCompatActivity implements
         Log.e("patient id", patientId + "");
 
         NewPatientSessionManager newPatientSessionManager = new NewPatientSessionManager(this);
-        newPatientSessionManager.setPatientInfo(String.valueOf(patientId), patientFirstName, patientLastName);
+        //newPatientSessionManager.setPatientInfo(String.valueOf(patientId), patientFirstName, patientLastName);
 
         Button createNewCaseRecBtn = (Button)findViewById(R.id.create_new_case_record_btn);
         Button uploadCaseRecBtn = (Button)findViewById(R.id.upload_case_record);
