@@ -67,9 +67,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:padding="8dp"
-                        android:layout_gravity="center"
-                        android:layout_alignParentLeft="true"
-                        android:layout_alignParentStart="true">
+                        android:layout_gravity="center">
 
                         <TextView
                             android:id="@+id/patient_info_form"
@@ -86,24 +84,42 @@
                             android:id="@+id/capture_docu_patient_info_image"
                             android:layout_width="250dp"
                             android:layout_height="250dp"
-                            android:src="@drawable/ic_add_image"
+                            android:src="@drawable/ic_action_picture"
                             android:contentDescription="@string/patient_information_form"
                             android:layout_below="@id/patient_info_form" />
 
-                        <Button
-                            android:id="@+id/capture_docu_view_patient_info_image"
+                        <LinearLayout
+                            android:id="@+id/patient_info_image_action_buttons"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_below="@id/capture_docu_patient_info_image"
-                            android:layout_alignEnd="@id/capture_docu_patient_info_image"
-                            android:text="@string/view_button_text"
-                            android:textColor="@color/blueButton"
-                            android:textSize="16sp"
-                            android:textStyle="bold"
+                            android:orientation="horizontal"
                             android:layout_marginTop="8dp"
-                            android:layout_centerHorizontal="true"
-                            style="@style/Base.Widget.AppCompat.Button.Borderless"
-                            />
+                            android:layout_below="@id/capture_docu_patient_info_image"
+                            android:layout_centerHorizontal="true">
+
+                            <Button
+                                android:id="@+id/capture_docu_remove_patient_info_image"
+                                android:layout_width="88dp"
+                                android:layout_height="36dp"
+                                android:text="@string/remove_button_text"
+                                android:textColor="@color/colorAlert"
+                                android:padding="8dp"
+                                android:layout_marginRight="8dp"
+                                style="@style/Base.Widget.AppCompat.Button.Borderless" />
+
+                            <Button
+                                android:id="@+id/capture_docu_view_patient_info_image"
+                                android:layout_width="88dp"
+                                android:layout_height="36dp"
+                                android:text="@string/view_button_text"
+                                android:textColor="@color/colorPrimary"
+                                android:padding="8dp"
+                                android:layout_marginLeft="8dp"
+                                style="@style/Base.Widget.AppCompat.Button.Borderless" />
+
+                        </LinearLayout>
+
+
 
                     </RelativeLayout>
 
@@ -113,14 +129,14 @@
                 <android.support.v7.widget.CardView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1">
+                    android:layout_weight="1"
+                    android:layout_margin="16dp">
 
                     <RelativeLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:padding="8dp"
-                        android:layout_gravity="center"
-                        android:layout_weight="1">
+                        android:layout_gravity="center">
 
                         <TextView
                             android:id="@+id/family_social_form"
@@ -137,27 +153,44 @@
                             android:id="@+id/capture_docu_family_social_history_image"
                             android:layout_width="250dp"
                             android:layout_height="250dp"
-                            android:src="@drawable/ic_add_image"
+                            android:src="@drawable/ic_action_picture"
                             android:contentDescription="@string/family_social_history_form"
                             android:layout_below="@id/family_social_form"
                             />
 
-
-
-                        <Button
-                            android:id="@+id/capture_docu_view_family_social_image"
+                        <LinearLayout
+                            android:id="@+id/family_social_image_action_buttons"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:orientation="horizontal"
                             android:layout_below="@id/capture_docu_family_social_history_image"
-                            android:layout_alignEnd="@id/capture_docu_family_social_history_image"
-                            android:text="@string/view_button_text"
-                            android:textColor="@color/blueButton"
-                            android:textSize="16sp"
-                            android:textStyle="bold"
                             android:layout_marginTop="8dp"
-                            android:layout_centerHorizontal="true"
-                            style="@style/Base.Widget.AppCompat.Button.Borderless"
-                            />
+                            android:layout_centerHorizontal="true">
+
+                            <Button
+                                android:id="@+id/capture_docu_remove_family_social_image"
+                                android:layout_width="88dp"
+                                android:layout_height="36dp"
+                                android:text="@string/remove_button_text"
+                                android:textColor="@color/colorAlert"
+                                android:padding="8dp"
+                                android:layout_marginRight="8dp"
+                                style="@style/Base.Widget.AppCompat.Button.Borderless" />
+
+                            <Button
+                                android:id="@+id/capture_docu_view_family_social_image"
+                                android:layout_width="88dp"
+                                android:layout_height="36dp"
+                                android:text="@string/view_button_text"
+                                android:textColor="@color/colorPrimary"
+                                android:padding="8dp"
+                                android:layout_marginLeft="8dp"
+                                style="@style/Base.Widget.AppCompat.Button.Borderless"
+                                />
+
+                        </LinearLayout>
+
+
 
 
                     </RelativeLayout>
@@ -165,47 +198,72 @@
                 </android.support.v7.widget.CardView>
 
 
-
-                <RelativeLayout
-                    android:layout_width="wrap_content"
+                <android.support.v7.widget.CardView
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:padding="8dp"
-                    android:layout_alignParentRight="true">
+                    android:layout_weight="1"
+                    android:layout_margin="16dp">
 
-                    <ImageView
-                        android:id="@+id/capture_docu_chief_complaint_image"
-                        android:layout_width="250dp"
-                        android:layout_height="250dp"
-                        android:src="@drawable/ic_add_image"
-                        android:contentDescription="@string/chief_complaint_form"
-                        />
-
-                    <TextView
-                        android:id="@+id/chief_complaint_form"
+                    <RelativeLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/chief_complaint_form"
-                        android:textSize="24sp"
-                        android:textStyle="bold"
-                        android:layout_below="@id/capture_docu_chief_complaint_image"
-                        android:layout_alignLeft="@id/capture_docu_chief_complaint_image"
-                        android:layout_alignStart="@id/capture_docu_chief_complaint_image"
-                        />
+                        android:padding="8dp"
+                        android:layout_gravity="center">
 
-                    <Button
-                        android:id="@+id/capture_docu_view_chief_complaint_image"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_below="@id/chief_complaint_form"
-                        android:text="@string/view_button_text"
-                        android:textColor="@color/cardBackground"
-                        android:background="@color/blueButton"
-                        android:layout_marginTop="8dp"
-                        android:layout_centerHorizontal="true"
-                        />
+                        <TextView
+                            android:id="@+id/chief_complaint_form"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/chief_complaint_form"
+                            android:textSize="18sp"
+                            android:textStyle="italic"
+                            android:textAllCaps="true"
+                            />
 
-                </RelativeLayout>
+                        <ImageView
+                            android:id="@+id/capture_docu_chief_complaint_image"
+                            android:layout_width="250dp"
+                            android:layout_height="250dp"
+                            android:src="@drawable/ic_action_picture"
+                            android:contentDescription="@string/chief_complaint_form"
+                            android:layout_below="@id/chief_complaint_form"
+                            />
 
+                        <LinearLayout
+                            android:id="@+id/chief_complaint_image_action_buttons"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:layout_below="@id/capture_docu_chief_complaint_image"
+                            android:layout_centerHorizontal="true"
+                            android:layout_marginTop="8dp">
+
+                            <Button
+                                android:id="@+id/capture_docu_remove_chief_complaint_image"
+                                android:layout_width="88dp"
+                                android:layout_height="36dp"
+                                android:text="@string/remove_button_text"
+                                android:textColor="@color/colorAlert"
+                                android:padding="8dp"
+                                android:layout_marginRight="8dp"
+                                style="@style/Base.Widget.AppCompat.Button.Borderless" />
+
+                            <Button
+                                android:id="@+id/capture_docu_view_chief_complaint_image"
+                                android:layout_width="88dp"
+                                android:layout_height="36dp"
+                                android:text="@string/view_button_text"
+                                android:textColor="@color/colorPrimary"
+                                android:padding="8dp"
+                                android:layout_marginLeft="8dp"
+                                style="@style/Base.Widget.AppCompat.Button.Borderless"
+                                />
+
+                        </LinearLayout>
+
+                    </RelativeLayout>
+
+                </android.support.v7.widget.CardView>
 
             </LinearLayout>
 
@@ -216,7 +274,7 @@
                 android:layout_marginTop="16dp">
 
                 <Button
-                    android:id="@+id/capture_document_fragment_back_btn"
+                    android:id="@+id/capture_document_back_btn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentLeft="true"
@@ -227,7 +285,7 @@
                     android:paddingRight="100dp"/>
 
                 <Button
-                    android:id="@+id/capture_docu_fragment_next_btn"
+                    android:id="@+id/capture_document_next_btn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"

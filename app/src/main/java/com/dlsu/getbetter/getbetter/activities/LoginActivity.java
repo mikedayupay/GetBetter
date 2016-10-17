@@ -35,7 +35,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
         systemSessionManager = new SystemSessionManager(getApplicationContext());
 
-
         emailInput = (TextInputEditText)findViewById(R.id.email_input);
         passwordInput = (TextInputEditText)findViewById(R.id.password_input);
 

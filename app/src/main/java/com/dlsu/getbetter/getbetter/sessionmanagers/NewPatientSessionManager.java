@@ -26,6 +26,7 @@ public class NewPatientSessionManager {
     public static final String NEW_PATIENT_MIDDLE_NAME = "newPatientMiddleName";
     public static final String NEW_PATIENT_LAST_NAME = "newPatientLastName";
     public static final String NEW_PATIENT_BIRTHDATE = "newPatientBirthdate";
+    public static final String NEW_PATIENT_AGE = "newPatientAge;";
     public static final String NEW_PATIENT_GENDER = "newPatientGender";
     public static final String NEW_PATIENT_CIVIL_STATUS = "newPatientCivilStatus";
     public static final String NEW_PATIENT_PROFILE_IMAGE = "newPatientProfileImage";
@@ -88,13 +89,24 @@ public class NewPatientSessionManager {
     }
 
     public HashMap<String, String> getPatientInfo () {
-        HashMap<String, String> patientId = new HashMap<>();
+        HashMap<String, String> patientInfo = new HashMap<>();
 
-        patientId.put(PATIENT_ID, pref.getString(PATIENT_ID, null));
-        patientId.put(NEW_PATIENT_FIRST_NAME, pref.getString(NEW_PATIENT_FIRST_NAME, null));
-        patientId.put(NEW_PATIENT_LAST_NAME, pref.getString(NEW_PATIENT_LAST_NAME, null));
+        patientInfo.put(PATIENT_ID, pref.getString(PATIENT_ID, null));
+        patientInfo.put(NEW_PATIENT_FIRST_NAME, pref.getString(NEW_PATIENT_FIRST_NAME, null));
+        patientInfo.put(NEW_PATIENT_LAST_NAME, pref.getString(NEW_PATIENT_LAST_NAME, null));
+        patientInfo.put(NEW_PATIENT_AGE, pref.getString(NEW_PATIENT_AGE, null));
+        patientInfo.put(NEW_PATIENT_GENDER, pref.getString(NEW_PATIENT_GENDER, null));
+        patientInfo.put(NEW_PATIENT_PROFILE_IMAGE, pref.getString(NEW_PATIENT_PROFILE_IMAGE, null));
+        patientInfo.put(NEW_PATIENT_DOC_IMAGE1, pref.getString(NEW_PATIENT_DOC_IMAGE1, null));
+        patientInfo.put(NEW_PATIENT_DOC_IMAGE2, pref.getString(NEW_PATIENT_DOC_IMAGE2, null));
+        patientInfo.put(NEW_PATIENT_DOC_IMAGE3, pref.getString(NEW_PATIENT_DOC_IMAGE3, null));
+        patientInfo.put(NEW_PATIENT_DOC_IMAGE1_TITLE, pref.getString(NEW_PATIENT_DOC_IMAGE1_TITLE, null));
+        patientInfo.put(NEW_PATIENT_DOC_IMAGE2_TITLE, pref.getString(NEW_PATIENT_DOC_IMAGE2_TITLE, null));
+        patientInfo.put(NEW_PATIENT_DOC_IMAGE3_TITLE, pref.getString(NEW_PATIENT_DOC_IMAGE3_TITLE, null));
+        patientInfo.put(NEW_PATIENT_DOC_HPI_RECORD, pref.getString(NEW_PATIENT_DOC_HPI_RECORD, null));
+        patientInfo.put(NEW_PATIENT_CHIEF_COMPLAINT, pref.getString(NEW_PATIENT_CHIEF_COMPLAINT, null));
 
-        return patientId;
+        return patientInfo;
     }
 
     public void setDocImages(String docImage1, String docImage2, String docImage3,
@@ -116,10 +128,14 @@ public class NewPatientSessionManager {
         editor.commit();
     }
 
-    public void setPatientInfo(String patientId, String firstName, String lastName) {
+    public void setPatientInfo(String patientId, String firstName, String lastName, String age,
+                               String gender, String profileImagePath) {
         editor.putString(PATIENT_ID, patientId);
         editor.putString(NEW_PATIENT_FIRST_NAME, firstName);
         editor.putString(NEW_PATIENT_LAST_NAME, lastName);
+        editor.putString(NEW_PATIENT_AGE, age);
+        editor.putString(NEW_PATIENT_GENDER, gender);
+        editor.putString(NEW_PATIENT_PROFILE_IMAGE, profileImagePath);
         editor.putBoolean(IS_ACTIVITY_NEW_PATIENT, false);
         editor.commit();
     }
