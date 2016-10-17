@@ -7,17 +7,20 @@
     app:mrl_rippleOverlay="true"
     app:mrl_rippleColor="@color/rippleColor">
 
-    <RelativeLayout
+    <TableRow
         android:id="@+id/existing_patient_item_card"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <ImageView
+        <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/upload_patient_item_profile_image"
             android:layout_width="150dp"
             android:layout_height="100dp"
-            android:src="@drawable/profile_picture_placeholder"
+            android:src="@drawable/ic_account_circle"
             android:contentDescription="@string/patient_profile_image"
+            app:civ_border_width="2dp"
+            app:civ_border_color="@color/colorPrimary"
+            android:padding="8dp"
             android:layout_marginRight="100dp"
             android:layout_marginEnd="100dp"/>
 
@@ -26,9 +29,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:layout_centerVertical="true"
-            android:layout_toRightOf="@+id/upload_patient_item_profile_image"
-            android:layout_toEndOf="@+id/upload_patient_item_profile_image" >
+            android:layout_gravity="center"
+            android:layout_weight="1">
 
             <TextView
                 android:id="@+id/upload_patient_item_name"
@@ -53,16 +55,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:layout_toRightOf="@+id/name_age_gender_container"
-            android:layout_toEndOf="@+id/name_age_gender_container"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="150dp"
-            android:layout_marginStart="150dp">
+            android:layout_gravity="center"
+            android:layout_weight="1">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Date of last consultation"
+                android:text="@string/date_of_last_consultation"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:paddingBottom="4dp"/>
@@ -79,7 +78,6 @@
 
 
 
-
-    </RelativeLayout>
+    </TableRow>
 
 </com.balysv.materialripple.MaterialRippleLayout>

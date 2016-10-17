@@ -23,6 +23,7 @@ import com.dlsu.getbetter.getbetter.adapters.SummaryPageDataAdapter;
 import com.dlsu.getbetter.getbetter.database.DataAdapter;
 import com.dlsu.getbetter.getbetter.objects.Attachment;
 import com.dlsu.getbetter.getbetter.objects.CaseRecord;
+import com.dlsu.getbetter.getbetter.objects.DividerItemDecoration;
 import com.dlsu.getbetter.getbetter.objects.Patient;
 import com.dlsu.getbetter.getbetter.sessionmanagers.SystemSessionManager;
 
@@ -92,10 +93,12 @@ public class ViewCaseRecordActivity extends AppCompatActivity implements MediaCo
 
         SummaryPageDataAdapter fileAdapter = new SummaryPageDataAdapter(caseAttachments);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
+        RecyclerView.ItemDecoration dividerItemDecoration = new DividerItemDecoration(this);
 
         attachmentList.setHasFixedSize(true);
         attachmentList.setLayoutManager(layoutManager);
         attachmentList.setAdapter(fileAdapter);
+        attachmentList.addItemDecoration(dividerItemDecoration);
         fileAdapter.SetOnItemClickListener(new SummaryPageDataAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {

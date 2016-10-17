@@ -21,11 +21,13 @@ import com.dlsu.getbetter.getbetter.database.DataAdapter;
 import com.dlsu.getbetter.getbetter.objects.CaseRecord;
 import com.dlsu.getbetter.getbetter.objects.DividerItemDecoration;
 import com.dlsu.getbetter.getbetter.objects.Patient;
+import com.dlsu.getbetter.getbetter.sessionmanagers.NewPatientSessionManager;
 import com.dlsu.getbetter.getbetter.sessionmanagers.SystemSessionManager;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
 
+import de.hdodenhof.circleimageview.CircleImageView;
 
 
 public class ViewPatientActivity extends AppCompatActivity implements View.OnClickListener {
@@ -33,6 +35,8 @@ public class ViewPatientActivity extends AppCompatActivity implements View.OnCli
     private DataAdapter getBetterDb;
     private long patientId;
     private ArrayList<CaseRecord> caseRecords;
+    private NewPatientSessionManager newPatientSessionManager;
+    private Patient patient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,7 +51,7 @@ public class ViewPatientActivity extends AppCompatActivity implements View.OnCli
         if(extras != null)
             patientId = extras.getLong("patientId");
 
-        ImageView profileImage = (ImageView)findViewById(R.id.view_patient_profile_image);
+        CircleImageView profileImage = (CircleImageView)findViewById(R.id.view_patient_profile_image);
         TextView patientName = (TextView)findViewById(R.id.view_patient_name);
         TextView ageGender = (TextView)findViewById(R.id.view_patient_age_gender);
         TextView civilStatus = (TextView)findViewById(R.id.view_patient_civil_status);
@@ -59,11 +63,13 @@ public class ViewPatientActivity extends AppCompatActivity implements View.OnCli
         Button backBtn = (Button)findViewById(R.id.view_patient_back_btn);
         Button updatePatientBtn = (Button)findViewById(R.id.view_patient_update_btn);
         Button newCaseRecordBtn = (Button)findViewById(R.id.view_patient_create_case_btn);
+        Button uploadCaseRecordBtn = (Button)findViewById(R.id.view_patient_upload_btn);
 
         initializeDatabase();
         caseRecords = new ArrayList<>();
-        Patient patient = getPatientInfo();
+        patient = getPatientInfo();
         getCaseRecords();
+        createPatientSession(this);
 
         setPic(profileImage, patient.getProfileImageBytes());
         patientName.setText(patientFullName(patient.getFirstName(), patient.getMiddleName(), patient.getLastName()));
@@ -165,6 +171,17 @@ public class ViewPatientActivity extends AppCompatActivity implements View.OnCli
 
     }
 
+    private void createPatientSession(ViewPatientActivity activity) {
+
+        newPatientSessionManager = new NewPatientSessionManager(activity);
+//        newPatientSessionManager.createNewPatientSession(patient.getFirstName(),
+//                patient.getMiddleName(), patient.getLastName(), patient.getBirthdate(),
+//                patient.getGender(), patient.getCivilStatus(), patient.getProfileImageBytes());
+        newPatientSessionManager.setPatientInfo(Long.toString(patient.getId()), patient.getFirstName(),
+                patient.getLastName(), patient.getAge(), patient.getGender(), patient.getProfileImageBytes());
+
+    }
+
     @Override
     public void onClick(View view) {
 
@@ -172,8 +189,7 @@ public class ViewPatientActivity extends AppCompatActivity implements View.OnCli
 
         if(id == R.id.view_patient_back_btn) {
 
-            Intent intent = new Intent(this, ExistingPatientActivity.class);
-            startActivity(intent);
+            newPatientSessionManager.endSession();
             finish();
 
         } else if(id == R.id.view_patient_update_btn) {
@@ -182,6 +198,17 @@ public class ViewPatientActivity extends AppCompatActivity implements View.OnCli
             intent.putExtra("selectedPatient", patientId);
             startActivity(intent);
             finish();
+
+        } else if(id == R.id.view_patient_create_case_btn) {
+
+            Intent intent = new Intent(this, CaptureDocumentsActivity.class);
+            startActivity(intent);
+            finish();
+
+        } else if(id == R.id.view_patient_upload_btn) {
+
+            Intent intent = new Intent(this, ViewCaseRecordActivity.class);
+
         }
 
     }
@@ -218,9 +245,4 @@ public class ViewPatientActivity extends AppCompatActivity implements View.OnCli
         Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
         mImageView.setImageBitmap(bitmap);
     }
-
-
-
-
-
 }

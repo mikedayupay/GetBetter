@@ -15,6 +15,8 @@ import com.dlsu.getbetter.getbetter.objects.Patient;
 
 import java.util.ArrayList;
 
+import de.hdodenhof.circleimageview.CircleImageView;
+
 /**
  * Created by mikedayupay on 16/02/2016.
  * GetBetter 2016
@@ -31,7 +33,7 @@ public class ExistingPatientAdapter extends RecyclerView.Adapter<ExistingPatient
         TextView patientName;
         TextView patientDateLastConsult;
         TextView patientGender;
-        ImageView patientImage;
+        CircleImageView patientImage;
 
         ExistingPatientViewHolder(View itemView) {
             super(itemView);
@@ -39,7 +41,7 @@ public class ExistingPatientAdapter extends RecyclerView.Adapter<ExistingPatient
             patientName = (TextView)itemView.findViewById(R.id.upload_patient_item_name);
             patientDateLastConsult = (TextView)itemView.findViewById(R.id.existing_patient_date_last_consult);
             patientGender = (TextView)itemView.findViewById(R.id.existing_patient_item_gender);
-            patientImage = (ImageView)itemView.findViewById(R.id.upload_patient_item_profile_image);
+            patientImage = (CircleImageView) itemView.findViewById(R.id.upload_patient_item_profile_image);
             itemView.setOnClickListener(this);
         }
 

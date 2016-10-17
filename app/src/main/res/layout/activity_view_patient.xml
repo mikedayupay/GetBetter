@@ -51,12 +51,14 @@
                         android:layout_height="wrap_content"
                         android:padding="8dp">
 
-                        <ImageView
+                        <de.hdodenhof.circleimageview.CircleImageView
                             android:id="@+id/view_patient_profile_image"
                             android:layout_width="300dp"
-                            android:layout_height="250dp"
-                            android:src="@drawable/profile_picture_placeholder"
+                            android:layout_height="200dp"
+                            android:src="@drawable/ic_account_circle"
                             android:layout_centerHorizontal="true"
+                            app:civ_border_width="2dp"
+                            app:civ_border_color="@color/colorPrimary"
                             android:padding="8dp"
                             android:contentDescription="@string/patient_profile_image"
                             android:layout_marginBottom="8dp"/>
@@ -190,7 +192,8 @@
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingTop="8dp" >
+                android:paddingTop="8dp"
+                android:layout_marginTop="32dp">
 
                 <Button
                     android:id="@+id/view_patient_back_btn"
@@ -223,6 +226,19 @@
                     android:background="@color/greenButton"
                     android:layout_toLeftOf="@id/view_patient_create_case_btn"
                     android:layout_toStartOf="@id/view_patient_create_case_btn"
+                    android:layout_marginRight="8dp"
+                    android:paddingLeft="20dp"
+                    android:paddingRight="20dp"/>
+
+                <Button
+                    android:id="@+id/view_patient_upload_btn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/upload_case_record_button_text"
+                    android:textColor="@color/cardBackground"
+                    android:background="@color/greenButton"
+                    android:layout_toLeftOf="@id/view_patient_update_btn"
+                    android:layout_toStartOf="@id/view_patient_update_btn"
                     android:layout_marginRight="8dp"
                     android:paddingLeft="20dp"
                     android:paddingRight="20dp"/>
