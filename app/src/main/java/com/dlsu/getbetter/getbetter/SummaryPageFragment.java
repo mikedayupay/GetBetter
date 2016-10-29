@@ -54,6 +54,8 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.StringTokenizer;
 
+import org.opencv.android.OpenCVLoader;
+
 //  TODO: 04/05/2016 audio capture attachment
 /**
  * A simple {@link Fragment} subclass.
@@ -112,6 +114,15 @@ public class SummaryPageFragment extends Fragment implements View.OnClickListene
 
     public SummaryPageFragment() {
         // Required empty public constructor
+    }
+
+    static {
+        if(!OpenCVLoader.initDebug()){
+            Log.i("opencv", "opencv failed");
+        }
+        else{
+            Log.i("opencv", "opencv success");
+        }
     }
 
     @Override
