@@ -18,12 +18,14 @@ public class Patient {
     private String birthdate;
     private String gender;
     private String civilStatus;
+    private String bloodType;
     private String profileImageBytes;
     private boolean checked = false;
 
 
     public Patient(long id, String firstName, String middleName, String lastName,
-                   String birthdate, String gender, String civilStatus, String profileImageBytes) {
+                   String birthdate, String gender, String civilStatus, String bloodType,
+                   String profileImageBytes) {
         this.id = id;
         this.firstName = firstName;
         this.middleName = middleName;
@@ -31,6 +33,7 @@ public class Patient {
         this.birthdate = birthdate;
         this.gender = gender;
         this.civilStatus = civilStatus;
+        this.bloodType = bloodType;
         this.profileImageBytes = profileImageBytes;
     }
 
@@ -90,6 +93,10 @@ public class Patient {
 
     public String getCivilStatus() {
         return civilStatus;
+    }
+
+    public String getBloodType() {
+        return bloodType;
     }
 
     public String getProfileImageBytes() {

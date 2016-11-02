@@ -2,7 +2,6 @@ package com.dlsu.getbetter.getbetter.activities;
 
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
-import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -11,56 +10,45 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import com.dlsu.getbetter.getbetter.DirectoryConstants;
 import com.dlsu.getbetter.getbetter.R;
-import com.dlsu.getbetter.getbetter.RequestHandler;
 import com.dlsu.getbetter.getbetter.adapters.PatientUploadAdapter;
 import com.dlsu.getbetter.getbetter.database.DataAdapter;
 import com.dlsu.getbetter.getbetter.objects.Patient;
 import com.dlsu.getbetter.getbetter.sessionmanagers.SystemSessionManager;
-import com.kosalgeek.android.photoutil.ImageBase64;
-import com.kosalgeek.android.photoutil.ImageLoader;
 import com.loopj.android.http.AsyncHttpClient;
-import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 import com.loopj.android.http.TextHttpResponseHandler;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import cz.msebera.android.httpclient.Header;
 import cz.msebera.android.httpclient.HttpResponse;
 
 public class UploadPatientToServerActivity extends AppCompatActivity implements View.OnClickListener {
+
     private static final String TAG = "UploadPatientActivity";
 
-    private static final String ID_KEY = "id";
-    private static final String FIRST_NAME_KEY = "firstName";
-    private static final String MIDDLE_NAME_KEY = "middleName";
-    private static final String LAST_NAME_KEY = "lastName";
+    private static final String ID_KEY = "user_id";
+    private static final String FIRST_NAME_KEY = "first_name";
+    private static final String MIDDLE_NAME_KEY = "middle_name";
+    private static final String LAST_NAME_KEY = "last_name";
     private static final String BIRTHDATE_KEY = "birthdate";
-    private static final String GENDER_ID_KEY = "genderId";
-    private static final String CIVIL_STATUS_KEY = "civilStatusId";
-    private static final String IMAGE_NAME_KEY = "imageName";
-    private static final String IMAGE = "image";
-    private static final String HEALTH_CENTER_KEY = "healthCenterId";
-    private static final String RESULT_MESSAGE = "SUCCESS";
-    private static final String TAG_JSON_RESULT = "result";
+    private static final String GENDER_ID_KEY = "gender_id";
+    private static final String CIVIL_STATUS_KEY = "civil_status_id";
+    private static final String IMAGE_NAME_KEY = "image_name";
+    private static final String HEALTH_CENTER_KEY = "default_health_center";
 
     private ArrayList<Patient> patientsUpload;
-    private ArrayList<Patient> selectedPatientsList;
     private DataAdapter getBetterDb;
     private int healthCenterId;
-    private String encodedImage;
     private ProgressDialog pDialog = null;
 
     @Override
@@ -148,7 +136,7 @@ public class UploadPatientToServerActivity extends AppCompatActivity implements 
         return result;
     }
 
-    private void removePatientUpload (int userId) {
+    private void removePatientUpload (long userId) {
 
         try {
             getBetterDb.openDatabase();
@@ -168,7 +156,7 @@ public class UploadPatientToServerActivity extends AppCompatActivity implements 
 
         if (id == R.id.upload_patient_upload_btn) {
 
-            selectedPatientsList = new ArrayList<>();
+            ArrayList<Patient> selectedPatientsList = new ArrayList<>();
 
             for(int i = 0; i < patientsUpload.size(); i++) {
                 Patient selectedPatients = patientsUpload.get(i);
@@ -178,11 +166,12 @@ public class UploadPatientToServerActivity extends AppCompatActivity implements 
 
                 }
             }
+            uploadPatient(selectedPatientsList);
 
-            for(int i = 0; i < selectedPatientsList.size(); i++) {
+//            for(int i = 0; i < selectedPatientsList.size(); i++) {
 //                getStringImage(selectedPatientsList.get(i).getProfileImageBytes());
-                uploadPatient(selectedPatientsList.get(i));
-            }
+//                uploadPatient(selectedPatientsList.get(i));
+//            }
 
 
 
@@ -228,58 +217,92 @@ public class UploadPatientToServerActivity extends AppCompatActivity implements 
         }
     }
 
-    private void uploadPatient(Patient patient) {
+    private void uploadPatient(ArrayList<Patient> patientsUpload) {
 
         AsyncHttpClient asyncHttpClient = new AsyncHttpClient();
         RequestParams params = new RequestParams();
-        final ProgressDialog uploadDialog = new ProgressDialog(this);
+        final String contentType = RequestParams.APPLICATION_OCTET_STREAM;
+        params.setForceMultipartEntityContentType(true);
+        List<Map<String, String>> patients = new ArrayList<Map<String, String>>();
 
-        String imageFileName = patient.getLastName() + "_" +
-                        patient.getFirstName() + ".jpg";
+        Log.d(TAG, "uploadPatient: size " + patientsUpload.size());
 
-        int genderId = getGenderId(patient.getGender());
-        int civilStatusId = getCivilStatusId(patient.getCivilStatus());
+        for(int i = 0; i < patientsUpload.size(); i++) {
 
-        Log.d(TAG, patient.getProfileImageBytes());
-        File imageFile = new File(patient.getProfileImageBytes());
+            Map<String, String> patient = new HashMap<>();
+            String imageFileName = patientsUpload.get(i).getFirstName().toLowerCase() + "_" +
+                    patientsUpload.get(i).getLastName().toLowerCase() + ".jpg";
+            String patientId = String.valueOf(patientsUpload.get(i).getId());
 
-        params.put(ID_KEY, patient.getId());
-        params.put(FIRST_NAME_KEY, patient.getFirstName());
-        params.put(MIDDLE_NAME_KEY, patient.getMiddleName());
-        params.put(LAST_NAME_KEY, patient.getLastName());
-        params.put(BIRTHDATE_KEY, patient.getBirthdate());
-        params.put(GENDER_ID_KEY, genderId);
-        params.put(CIVIL_STATUS_KEY, civilStatusId);
-        params.put(IMAGE_NAME_KEY, imageFileName);
-        params.put(HEALTH_CENTER_KEY, healthCenterId);
+            patient.put(ID_KEY, patientId);
+            patient.put(FIRST_NAME_KEY, patientsUpload.get(i).getFirstName());
+            patient.put(MIDDLE_NAME_KEY, patientsUpload.get(i).getMiddleName());
+            patient.put(LAST_NAME_KEY, patientsUpload.get(i).getLastName());
+            patient.put(BIRTHDATE_KEY, patientsUpload.get(i).getBirthdate());
+            patient.put(GENDER_ID_KEY, String.valueOf(getGenderId(patientsUpload.get(i).getGender())));
+            patient.put(CIVIL_STATUS_KEY, String.valueOf(getCivilStatusId(patientsUpload.get(i).getCivilStatus())));
+            patient.put(IMAGE_NAME_KEY, imageFileName);
+            patient.put(HEALTH_CENTER_KEY, String.valueOf(healthCenterId));
+            patients.add(patient);
 
-        try {
-            params.put(IMAGE, imageFile);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            Log.d(TAG, e.getMessage());
+            File profileImage = new File(patientsUpload.get(i).getProfileImageBytes());
+            try {
+                params.put(patientId, profileImage, contentType, imageFileName);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
         }
 
-        asyncHttpClient.post(this, DirectoryConstants.UPLOAD_PATIENT_SERVER_SCRIPT_URL, params, new TextHttpResponseHandler() {
+        params.put("patients", patients);
+        params.setHttpEntityIsRepeatable(true);
+        params.setUseJsonStreamer(false);
+
+
+//        try {
+//            params.put("profile_url", imageFiles);
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        }
+//        String imageFileName = patient.getLastName() + "_" +
+//                        patient.getFirstName() + ".jpg";
+//
+//        int genderId = getGenderId(patient.getGender());
+//        int civilStatusId = getCivilStatusId(patient.getCivilStatus());
+//
+//        Log.d(TAG, patient.getProfileImageBytes());
+//        File imageFile = new File(patient.getProfileImageBytes());
+//
+//        params.put(ID_KEY, patient.getId());
+//        params.put(FIRST_NAME_KEY, patient.getFirstName());
+//        params.put(MIDDLE_NAME_KEY, patient.getMiddleName());
+//        params.put(LAST_NAME_KEY, patient.getLastName());
+//        params.put(BIRTHDATE_KEY, patient.getBirthdate());
+//        params.put(GENDER_ID_KEY, genderId);
+//        params.put(CIVIL_STATUS_KEY, civilStatusId);
+//        params.put(IMAGE_NAME_KEY, imageFileName);
+//        params.put(HEALTH_CENTER_KEY, healthCenterId);
+//
+//        try {
+//            params.put(IMAGE, imageFile);
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//            Log.d(TAG, e.getMessage());
+//        }
+
+        asyncHttpClient.post(this, DirectoryConstants.TEST_URL, params, new TextHttpResponseHandler() {
 
             @Override
             public void onStart() {
                 super.onStart();
-
-                uploadDialog.setTitle("Upload Status");
-                uploadDialog.setMessage("Uploading...");
-                uploadDialog.setProgress(0);
-                uploadDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-                uploadDialog.show();
-
+                showProgressDialog();
             }
 
             @Override
             public void onSuccess(int statusCode, Header[] headers, String responseBody) {
 
                 featureAlertMessage("Upload Success");
-                Log.d(TAG, "onSuccess: " + responseBody);
-
+                Log.d(TAG, responseBody);
+//                removePatientUpload(patient.getId());
             }
 
             @Override
@@ -294,8 +317,7 @@ public class UploadPatientToServerActivity extends AppCompatActivity implements 
             @Override
             public void onProgress(long bytesWritten, long totalSize) {
                 super.onProgress(bytesWritten, totalSize);
-//                uploadDialog.setMax((int)totalSize);
-                uploadDialog.setProgress((int)bytesWritten);
+                pDialog.setProgress((int)bytesWritten);
 
 
             }
@@ -303,138 +325,16 @@ public class UploadPatientToServerActivity extends AppCompatActivity implements 
             @Override
             public void onFinish() {
                 super.onFinish();
-                uploadDialog.hide();
-                uploadDialog.dismiss();
+                dismissProgressDialog();
+
             }
         });
-
-
     }
-
-//    private class UploadPatientToServer extends AsyncTask<ArrayList<Patient>, Void, String> {
-//
-////        ProgressDialog progressDialog = null;
-////        Context context;
-//        RequestHandler rh = new RequestHandler();
-////
-////        public UploadPatientToServer(Context context) {
-////            this.context = context;
-////
-////        }
-//
-//        @Override
-//        protected void onPreExecute() {
-//            showProgressDialog();
-//        }
-//
-//        @Override
-//        protected String doInBackground(ArrayList<Patient>... params) {
-//
-//            ArrayList<Patient> uploadPatientList = params[0];
-//            String result = "";
-//            for(int i = 0; i < uploadPatientList.size(); i++) {
-//
-//                String imageFileName = uploadPatientList.get(i).getLastName() + "_" +
-//                        uploadPatientList.get(i).getFirstName() + ".jpg";
-//
-//                HashMap<String, String> data = new HashMap<>();
-//                data.put(ID_KEY, String.valueOf(uploadPatientList.get(i).getId()));
-//                data.put(FIRST_NAME_KEY, uploadPatientList.get(i).getFirstName());
-//                data.put(MIDDLE_NAME_KEY, uploadPatientList.get(i).getMiddleName());
-//                data.put(LAST_NAME_KEY, uploadPatientList.get(i).getLastName());
-//                data.put(BIRTHDATE_KEY, uploadPatientList.get(i).getBirthdate());
-//                data.put(GENDER_ID_KEY, uploadPatientList.get(i).getGender());
-//                data.put(CIVIL_STATUS_KEY, uploadPatientList.get(i).getCivilStatus());
-//                data.put(IMAGE_NAME_KEY, imageFileName);
-//                data.put(IMAGE, encodedImage);
-//                data.put(HEALTH_CENTER_KEY, String.valueOf(healthCenterId));
-//                result = rh.sendPostRequest(DirectoryConstants.UPLOAD_PATIENT_SERVER_SCRIPT_URL, data);
-//
-//            }
-//
-//            Log.e("message1", result);
-//            return result;
-//        }
-//
-//        @Override
-//        protected void onPostExecute(String s) {
-//
-//            dismissProgressDialog();
-//
-//            String message = getServerMessage(s);
-//
-//            if(RESULT_MESSAGE.contentEquals(message)) {
-//                for(int i = 0; i < selectedPatientsList.size(); i++) {
-//                    removePatientUpload((int) selectedPatientsList.get(i).getId());
-//                }
-//                featureAlertMessage("Successfully Uploaded Patient Record.");
-//            } else {
-//                featureAlertMessage("Failed to upload Patient Record.");
-//            }
-//        }
-//    }
-//
-//    private String getServerMessage(String s) {
-//
-//        String result = null;
-//
-//        try{
-//
-//            JSONObject jsonObject = new JSONObject(s);
-////            JSONArray jsonArray = jsonObject.getJSONArray(TAG_JSON_RESULT);
-////            JSONObject c = jsonArray.getJSONObject(0);
-////            result = c.getString(TAG_UPLOAD_STATUS);
-//            result = jsonObject.getString(TAG_JSON_RESULT);
-//
-//            Log.d("UploadCaseActivity", result);
-//
-//        } catch (JSONException e) {
-//            e.printStackTrace();
-//        }
-//
-//        return result;
-//    }
-//
-//    private void getStringImage(String currentPhotoPath) {
-//
-//        class EncodeImage extends AsyncTask<String, Void, String> {
-//
-//
-//            @Override
-//            protected String doInBackground(String... params) {
-//
-////                Bitmap bmp = BitmapFactory.decodeFile(params[0]);
-////                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-////                bmp.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-////                byte[] imageBytes = baos.toByteArray();
-////                return Base64.encodeToString(imageBytes, 0);
-//                String image = null;
-//                try {
-//                    Bitmap bmp = ImageLoader.init().from(params[0]).requestSize(512, 512).getBitmap();
-//                    image = ImageBase64.encode(bmp);
-//                } catch (FileNotFoundException e) {
-//                    e.printStackTrace();
-//                }
-//                return image;
-//            }
-//
-//            @Override
-//            protected void onPostExecute(String s) {
-//                encodedImage = s;
-//                UploadPatientToServer uploadPatientToServer = new UploadPatientToServer();
-//                uploadPatientToServer.execute(selectedPatientsList);
-//            }
-//        }
-//
-//        EncodeImage encodeImage = new EncodeImage();
-//        encodeImage.execute(currentPhotoPath);
-//
-//    }
 
     private void featureAlertMessage(String result) {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Upload Status");
+        builder.setTitle("UPLOAD STATUS");
         builder.setMessage(result);
 
         builder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
@@ -452,8 +352,9 @@ public class UploadPatientToServerActivity extends AppCompatActivity implements 
         if(pDialog == null) {
             pDialog = new ProgressDialog(UploadPatientToServerActivity.this);
             pDialog.setMessage("Uploading patient");
-            pDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-            pDialog.setIndeterminate(true);
+            pDialog.setProgress(0);
+            pDialog.setMax(100);
+            pDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         }
         pDialog.show();
     }
