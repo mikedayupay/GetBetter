@@ -29,6 +29,7 @@ public class NewPatientSessionManager {
     public static final String NEW_PATIENT_AGE = "newPatientAge;";
     public static final String NEW_PATIENT_GENDER = "newPatientGender";
     public static final String NEW_PATIENT_CIVIL_STATUS = "newPatientCivilStatus";
+    public static final String NEW_PATIENT_BLOOD_TYPE = "newPatientBloodType";
     public static final String NEW_PATIENT_PROFILE_IMAGE = "newPatientProfileImage";
     public static final String NEW_PATIENT_DOC_IMAGE1 = "newPatientDocImage1";
     public static final String NEW_PATIENT_DOC_IMAGE2 = "newPatientDocImage2";
@@ -52,7 +53,7 @@ public class NewPatientSessionManager {
 
     public void createNewPatientSession (String firstName, String middleName, String lastName,
                                          String birthdate, String gender, String civilStatus,
-                                         String profileImage) {
+                                         String bloodType, String profileImage) {
 
         editor.putString(NEW_PATIENT_FIRST_NAME, firstName);
         editor.putString(NEW_PATIENT_MIDDLE_NAME, middleName);
@@ -60,6 +61,7 @@ public class NewPatientSessionManager {
         editor.putString(NEW_PATIENT_BIRTHDATE, birthdate);
         editor.putString(NEW_PATIENT_GENDER, gender);
         editor.putString(NEW_PATIENT_CIVIL_STATUS, civilStatus);
+        editor.putString(NEW_PATIENT_BLOOD_TYPE, bloodType);
         editor.putString(NEW_PATIENT_PROFILE_IMAGE, profileImage);
         editor.putBoolean(IS_ACTIVITY_NEW_PATIENT, true);
         editor.commit();
@@ -75,6 +77,7 @@ public class NewPatientSessionManager {
         newPatient.put(NEW_PATIENT_BIRTHDATE, pref.getString(NEW_PATIENT_BIRTHDATE, null));
         newPatient.put(NEW_PATIENT_GENDER, pref.getString(NEW_PATIENT_GENDER, null));
         newPatient.put(NEW_PATIENT_CIVIL_STATUS, pref.getString(NEW_PATIENT_CIVIL_STATUS, null));
+        newPatient.put(NEW_PATIENT_BLOOD_TYPE, pref.getString(NEW_PATIENT_BLOOD_TYPE, null));
         newPatient.put(NEW_PATIENT_PROFILE_IMAGE, pref.getString(NEW_PATIENT_PROFILE_IMAGE, null));
         newPatient.put(NEW_PATIENT_DOC_IMAGE1, pref.getString(NEW_PATIENT_DOC_IMAGE1, null));
         newPatient.put(NEW_PATIENT_DOC_IMAGE2, pref.getString(NEW_PATIENT_DOC_IMAGE2, null));
@@ -96,6 +99,7 @@ public class NewPatientSessionManager {
         patientInfo.put(NEW_PATIENT_LAST_NAME, pref.getString(NEW_PATIENT_LAST_NAME, null));
         patientInfo.put(NEW_PATIENT_AGE, pref.getString(NEW_PATIENT_AGE, null));
         patientInfo.put(NEW_PATIENT_GENDER, pref.getString(NEW_PATIENT_GENDER, null));
+        patientInfo.put(NEW_PATIENT_BLOOD_TYPE, pref.getString(NEW_PATIENT_BLOOD_TYPE, null));
         patientInfo.put(NEW_PATIENT_PROFILE_IMAGE, pref.getString(NEW_PATIENT_PROFILE_IMAGE, null));
         patientInfo.put(NEW_PATIENT_DOC_IMAGE1, pref.getString(NEW_PATIENT_DOC_IMAGE1, null));
         patientInfo.put(NEW_PATIENT_DOC_IMAGE2, pref.getString(NEW_PATIENT_DOC_IMAGE2, null));
@@ -129,12 +133,14 @@ public class NewPatientSessionManager {
     }
 
     public void setPatientInfo(String patientId, String firstName, String lastName, String age,
-                               String gender, String profileImagePath) {
+                               String gender, String civilStatus, String bloodType, String profileImagePath) {
         editor.putString(PATIENT_ID, patientId);
         editor.putString(NEW_PATIENT_FIRST_NAME, firstName);
         editor.putString(NEW_PATIENT_LAST_NAME, lastName);
         editor.putString(NEW_PATIENT_AGE, age);
         editor.putString(NEW_PATIENT_GENDER, gender);
+        editor.putString(NEW_PATIENT_CIVIL_STATUS, civilStatus);
+        editor.putString(NEW_PATIENT_BLOOD_TYPE, bloodType);
         editor.putString(NEW_PATIENT_PROFILE_IMAGE, profileImagePath);
         editor.putBoolean(IS_ACTIVITY_NEW_PATIENT, false);
         editor.commit();
