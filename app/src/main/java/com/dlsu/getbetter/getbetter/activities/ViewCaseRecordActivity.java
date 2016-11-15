@@ -38,12 +38,22 @@ import java.util.StringTokenizer;
 
 public class ViewCaseRecordActivity extends AppCompatActivity implements MediaController.MediaPlayerControl, View.OnClickListener {
 
+    private TextView patientName;
+    private TextView healthCenterName;
+    private TextView ageGender;
+    private TextView chiefComplaint;
+    private TextView controlNumber;
+    private ImageView profilePic;
+    private Button backBtn;
+    private Button updateCaseBtn;
+    private RecyclerView attachmentList;
+
+    private int healthCenterId;
     private CaseRecord caseRecord;
     private Patient patientInfo;
     private ArrayList<Attachment> caseAttachments;
 
     private DataAdapter getBetterDb;
-
     private MediaPlayer nMediaPlayer;
     private MediaController nMediaController;
     private Handler nHandler = new Handler();
@@ -60,22 +70,7 @@ public class ViewCaseRecordActivity extends AppCompatActivity implements MediaCo
 
         HashMap<String, String> user = systemSessionManager.getUserDetails();
         HashMap<String, String> hc = systemSessionManager.getHealthCenter();
-        int healthCenterId = Integer.parseInt(hc.get(SystemSessionManager.HEALTH_CENTER_ID));
-        String midwifeName = user.get(SystemSessionManager.LOGIN_USER_NAME);
-
-        TextView userLabel = (TextView)findViewById(R.id.user_label);
-        TextView patientName = (TextView)findViewById(R.id.view_case_patient_name);
-        TextView healthCenterName = (TextView)findViewById(R.id.view_case_health_center);
-        TextView ageGender = (TextView)findViewById(R.id.view_case_age_gender);
-        TextView chiefComplaint = (TextView)findViewById(R.id.view_case_chief_complaint);
-        TextView controlNumber = (TextView)findViewById(R.id.view_case_control_number);
-        RecyclerView attachmentList = (RecyclerView)findViewById(R.id.view_case_files_list);
-        ImageView profilePic = (ImageView)findViewById(R.id.profile_picture_display);
-        Button backBtn = (Button)findViewById(R.id.view_case_back_btn);
-        Button updateCaseBtn = (Button)findViewById(R.id.update_case_record_btn);
-
-        backBtn.setOnClickListener(this);
-        updateCaseBtn.setOnClickListener(this);
+        healthCenterId = Integer.parseInt(hc.get(SystemSessionManager.HEALTH_CENTER_ID));
 
         killMediaPlayer();
         nMediaPlayer = new MediaPlayer();
@@ -90,61 +85,11 @@ public class ViewCaseRecordActivity extends AppCompatActivity implements MediaCo
         getCaseRecord(caseRecordId);
         getCaseAttachments(caseRecordId);
         getPatientInfo(patientId);
-
-        SummaryPageDataAdapter fileAdapter = new SummaryPageDataAdapter(caseAttachments);
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
-        RecyclerView.ItemDecoration dividerItemDecoration = new DividerItemDecoration(this);
-
-        attachmentList.setHasFixedSize(true);
-        attachmentList.setLayoutManager(layoutManager);
-        attachmentList.setAdapter(fileAdapter);
-        attachmentList.addItemDecoration(dividerItemDecoration);
-        fileAdapter.SetOnItemClickListener(new SummaryPageDataAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(View view, int position) {
-
-                if(caseAttachments.get(position).getAttachmentType() == 1) {
-                    Intent intent = new Intent(ViewCaseRecordActivity.this, ViewImageActivity.class);
-                    intent.putExtra("imageUrl", caseAttachments.get(position).getAttachmentPath());
-                    intent.putExtra("imageTitle", caseAttachments.get(position).getAttachmentDescription());
-                    startActivity(intent);
-                } else {
-                    Toast.makeText(getApplicationContext(), "Sorry, this feature is not yet available.", Toast.LENGTH_LONG).show();
-                }
-
-            }
-        });
+        bindViews(this);
+        bindListeners(this);
+        initFileList(this);
 
         String recordedHpiOutputFile = getHpiOutputFile();
-        String fullName = patientInfo.getFirstName() + " " + patientInfo.getMiddleName() + " " + patientInfo.getLastName();
-        String gender = patientInfo.getGender();
-        String patientAgeGender = patientInfo.getAge() + " yrs. old, " + gender;
-        setPic(profilePic, patientInfo.getProfileImageBytes());
-
-        if (ageGender != null) {
-            ageGender.setText(patientAgeGender);
-        }
-
-        if (chiefComplaint != null) {
-            chiefComplaint.setText(caseRecord.getCaseRecordComplaint());
-        }
-
-        if (controlNumber != null) {
-            controlNumber.setText(caseRecord.getCaseRecordControlNumber());
-        }
-
-        if (patientName != null) {
-            patientName.setText(fullName);
-        }
-
-        if (userLabel != null) {
-            userLabel.setText(midwifeName);
-        }
-
-        if (healthCenterName != null) {
-            healthCenterName.setText(getHealthCenterString(healthCenterId));
-        }
-
         nMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
 
         try {
@@ -176,6 +121,63 @@ public class ViewCaseRecordActivity extends AppCompatActivity implements MediaCo
             }
         });
 
+    }
+
+    private void bindViews(ViewCaseRecordActivity activity) {
+
+        activity.patientName = (TextView)activity.findViewById(R.id.view_case_patient_name);
+        activity.healthCenterName = (TextView)activity.findViewById(R.id.view_case_health_center);
+        activity.ageGender = (TextView)activity.findViewById(R.id.view_case_age_gender);
+        activity.chiefComplaint = (TextView)activity.findViewById(R.id.view_case_chief_complaint);
+        activity.controlNumber = (TextView)activity.findViewById(R.id.view_case_control_number);
+        activity.attachmentList = (RecyclerView)activity.findViewById(R.id.view_case_files_list);
+        activity.profilePic = (ImageView)activity.findViewById(R.id.profile_picture_display);
+        activity.backBtn = (Button)activity.findViewById(R.id.view_case_back_btn);
+        activity.updateCaseBtn = (Button)activity.findViewById(R.id.update_case_record_btn);
+
+        String fullName = patientInfo.getFirstName() + " " + patientInfo.getMiddleName() + " " + patientInfo.getLastName();
+        String gender = patientInfo.getGender();
+        String patientAgeGender = patientInfo.getAge() + " yrs. old, " + gender;
+        setPic(profilePic, patientInfo.getProfileImageBytes());
+
+        ageGender.setText(patientAgeGender);
+        chiefComplaint.setText(caseRecord.getCaseRecordComplaint());
+        controlNumber.setText(caseRecord.getCaseRecordControlNumber());
+        patientName.setText(fullName);
+        healthCenterName.setText(getHealthCenterString(healthCenterId));
+
+    }
+
+    private void bindListeners(ViewCaseRecordActivity activity) {
+
+        activity.backBtn.setOnClickListener(activity);
+        activity.updateCaseBtn.setOnClickListener(activity);
+    }
+
+    private void initFileList(ViewCaseRecordActivity activity) {
+
+        SummaryPageDataAdapter fileAdapter = new SummaryPageDataAdapter(caseAttachments);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(activity);
+        RecyclerView.ItemDecoration dividerItemDecoration = new DividerItemDecoration(activity);
+
+        activity.attachmentList.setHasFixedSize(true);
+        activity.attachmentList.setLayoutManager(layoutManager);
+        activity.attachmentList.setAdapter(fileAdapter);
+        activity.attachmentList.addItemDecoration(dividerItemDecoration);
+        fileAdapter.SetOnItemClickListener(new SummaryPageDataAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(View view, int position) {
+
+                if(caseAttachments.get(position).getAttachmentType() == 1) {
+                    Intent intent = new Intent(ViewCaseRecordActivity.this, ViewImageActivity.class);
+                    intent.putExtra("imageUrl", caseAttachments.get(position).getAttachmentPath());
+                    intent.putExtra("imageTitle", caseAttachments.get(position).getAttachmentDescription());
+                    startActivity(intent);
+                } else {
+                    //do nothing
+                }
+            }
+        });
     }
 
     private void initializeDatabase() {
