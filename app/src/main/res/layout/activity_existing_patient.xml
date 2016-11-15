@@ -72,11 +72,10 @@
             </FrameLayout>
 
 
-
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="36dp"
                 >
 
                 <Button
@@ -113,6 +112,20 @@
                     android:background="@color/blueButton"
                     android:paddingLeft="32dp"
                     android:paddingRight="32dp"/>
+
+                <Button
+                    android:id="@+id/upload_case_record"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toLeftOf="@id/upload_patient_record"
+                    android:layout_marginRight="8dp"
+                    android:text="@string/upload_case_record_button_text"
+                    android:textColor="@color/cardBackground"
+                    android:background="@color/blueButton"
+                    android:paddingLeft="32dp"
+                    android:paddingRight="32dp"/>
+
+
 
             </RelativeLayout>
 

@@ -26,12 +26,11 @@ import java.util.HashMap;
 public class ExistingPatientActivity extends AppCompatActivity implements View.OnClickListener {
 
     private DataAdapter getBetterDb;
-
     private Long selectedPatientId;
     private String patientFirstName;
     private String patientLastName;
-
     private ArrayList<Patient> existingPatients;
+    private ProgressDialog pDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,7 +45,8 @@ public class ExistingPatientActivity extends AppCompatActivity implements View.O
         HashMap<String, String> hc = systemSessionManager.getHealthCenter();
         int healthCenterId = Integer.parseInt(hc.get(SystemSessionManager.HEALTH_CENTER_ID));
 
-        Button newPatientRecBtn = (Button) findViewById(R.id.create_new_patient_btn);
+        Button newPatientRecBtn = (Button)findViewById(R.id.create_new_patient_btn);
+        Button uploadCaseRecBtn = (Button)findViewById(R.id.upload_case_record);
         Button uploadPatientRecBtn = (Button) findViewById(R.id.upload_patient_record);
         Button backBtn = (Button)findViewById(R.id.existing_patient_back_btn);
 
@@ -81,6 +81,7 @@ public class ExistingPatientActivity extends AppCompatActivity implements View.O
 
         newPatientRecBtn.setOnClickListener(this);
         uploadPatientRecBtn.setOnClickListener(this);
+        uploadCaseRecBtn.setOnClickListener(this);
         backBtn.setOnClickListener(this);
     }
 
@@ -125,6 +126,11 @@ public class ExistingPatientActivity extends AppCompatActivity implements View.O
             Intent intent = new Intent(this, UploadPatientToServerActivity.class);
             startActivity(intent);
 
+        } else if (id == R.id.upload_case_record) {
+
+            Intent intent = new Intent(this, UploadCaseRecordToServerActivity.class);
+            startActivity(intent);
+
         } else if (id == R.id.existing_patient_back_btn) {
             finish();
         }
@@ -132,13 +138,11 @@ public class ExistingPatientActivity extends AppCompatActivity implements View.O
 
     private class GetPatientListTask extends AsyncTask<Integer, Void, String> {
 
-        private ProgressDialog progressDialog = new ProgressDialog(ExistingPatientActivity.this);
 
         @Override
         protected void onPreExecute () {
             super.onPreExecute();
-            progressDialog.setMessage("Populating Patient List...");
-            progressDialog.show();
+            showProgressDialog();
         }
 
         @Override
@@ -153,9 +157,34 @@ public class ExistingPatientActivity extends AppCompatActivity implements View.O
         protected void onPostExecute (String results) {
 
             super.onPostExecute(results);
-            progressDialog.hide();
-            progressDialog.dismiss();
+            dismissProgressDialog();
+
         }
+    }
+
+    private void showProgressDialog() {
+        if(pDialog == null) {
+            pDialog = new ProgressDialog(ExistingPatientActivity.this);
+            pDialog.setTitle("Please wait for a few moments");
+            pDialog.setMessage("Populating patient list");
+            pDialog.setIndeterminate(true);
+            pDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        }
+        pDialog.show();
+    }
+
+    private void dismissProgressDialog() {
+
+        if(pDialog != null && pDialog.isShowing()) {
+            pDialog.hide();
+            pDialog.dismiss();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        dismissProgressDialog();
+        super.onDestroy();
     }
 
 
