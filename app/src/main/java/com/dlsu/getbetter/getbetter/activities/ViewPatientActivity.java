@@ -63,7 +63,6 @@ public class ViewPatientActivity extends AppCompatActivity implements View.OnCli
         Button backBtn = (Button)findViewById(R.id.view_patient_back_btn);
         Button updatePatientBtn = (Button)findViewById(R.id.view_patient_update_btn);
         Button newCaseRecordBtn = (Button)findViewById(R.id.view_patient_create_case_btn);
-        Button uploadCaseRecordBtn = (Button)findViewById(R.id.view_patient_upload_btn);
 
         initializeDatabase();
         caseRecords = new ArrayList<>();
@@ -76,6 +75,7 @@ public class ViewPatientActivity extends AppCompatActivity implements View.OnCli
         String patientAgeGender = patient.getAge() + ", " + patient.getGender();
         ageGender.setText(patientAgeGender);
         civilStatus.setText(patient.getCivilStatus());
+        bloodType.setText(patient.getBloodType());
 
         RecyclerView.LayoutManager caseRecordsLayoutManager = new LinearLayoutManager(this);
         RecyclerView.ItemDecoration dividerItemDecoration = new DividerItemDecoration(this);
@@ -178,7 +178,8 @@ public class ViewPatientActivity extends AppCompatActivity implements View.OnCli
 //                patient.getMiddleName(), patient.getLastName(), patient.getBirthdate(),
 //                patient.getGender(), patient.getCivilStatus(), patient.getProfileImageBytes());
         newPatientSessionManager.setPatientInfo(Long.toString(patient.getId()), patient.getFirstName(),
-                patient.getLastName(), patient.getAge(), patient.getGender(), patient.getProfileImageBytes());
+                patient.getLastName(), patient.getAge(), patient.getGender(), patient.getCivilStatus(),
+                patient.getBloodType(), patient.getProfileImageBytes());
 
     }
 
@@ -204,10 +205,6 @@ public class ViewPatientActivity extends AppCompatActivity implements View.OnCli
             Intent intent = new Intent(this, CaptureDocumentsActivity.class);
             startActivity(intent);
             finish();
-
-        } else if(id == R.id.view_patient_upload_btn) {
-
-            Intent intent = new Intent(this, ViewCaseRecordActivity.class);
 
         }
 
