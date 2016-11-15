@@ -289,7 +289,7 @@ public class UploadPatientToServerActivity extends AppCompatActivity implements 
 //            Log.d(TAG, e.getMessage());
 //        }
 
-        asyncHttpClient.post(this, DirectoryConstants.TEST_URL, params, new TextHttpResponseHandler() {
+        asyncHttpClient.post(this, DirectoryConstants.UPLOAD_PATIENT_SERVER_SCRIPT_URL, params, new TextHttpResponseHandler() {
 
             @Override
             public void onStart() {
