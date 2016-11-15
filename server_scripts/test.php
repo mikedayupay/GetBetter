@@ -1,35 +1,19 @@
 <?php
 
-  require_once('db_connect.php');
+  $patients = $_POST['patients'];
 
-  $case_record_id = 1;
-  $user_id = 447;
-  $health_center_id = 51;
-  $complaint = "Fever";
-  $control_number = "44141AABABA";
-
-  if($stmt = $mysqli->prepare("INSERT INTO tbl_case_records
-    (case_record_id, user_id, health_center_id, complaint, control_number)
-    VALUES (?,?,?,?,?)")) {
-
-      $stmt->bind_param('iiiss', $case_record_id, $user_id, $health_center_id, $complaint, $control_number);
-
-      $stmt->execute();
-
-      $stmt->bind_result($result);
-
-      $stmt->fetch();
-
-      printf("Success! %s", $result);
-
-      echo "Successfully Uploaded";
-
-      $stmt->close();
-
-    }
-
-$mysqli->close()
-
+  // echo $_FILES['profile_url']['name'][0];
+  // echo $_FILES['profile_url']['name'][1];
+  $file_path = "uploads/";
+  foreach ($patients as $post => $field) {
+    $image_name = $_FILES['profile_url']['name'][$post];
+    echo $field['user_id'];
+    echo "\n";
+    echo $_FILES['profile_url']['name'][$post];
+    echo "\n";
+    $name = basename($_FILES['profile_url']['name'][$post]);
+    move_uploaded_file($_FILES['profile_url']['tmp_name'][$post], $file_path . $name);
+  }
 
 
 
