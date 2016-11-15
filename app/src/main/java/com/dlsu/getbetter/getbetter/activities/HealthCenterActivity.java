@@ -44,13 +44,12 @@ public class HealthCenterActivity extends AppCompatActivity {
         RecyclerView.ItemDecoration dividerItemDecoration = new DividerItemDecoration(this);
 
 
-        String userName = user.get(SystemSessionManager.LOGIN_USER_NAME);
-        String welcomeText = "Welcome " + userName + "!";
-        userLabel.setText(welcomeText);
+        String email = user.get(SystemSessionManager.LOGIN_USER_NAME);
         healthCenters = new ArrayList<>();
         initializeDatabase();
         getHealthCenterList();
 
+        userLabel.append(" " + getUserName(email) + "!");
         HealthCenterListAdapter healthCenterListAdapter = new HealthCenterListAdapter(healthCenters);
 
         if (healthCenterRecycler != null) {
@@ -100,5 +99,21 @@ public class HealthCenterActivity extends AppCompatActivity {
 
         getBetterDb.closeDatabase();
 
+    }
+
+    private String getUserName(String userEmail) {
+
+
+        try {
+            getBetterDb.openDatabase();
+        }catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        String username = getBetterDb.getUserName(userEmail);
+
+        getBetterDb.closeDatabase();
+
+        return username;
     }
 }
