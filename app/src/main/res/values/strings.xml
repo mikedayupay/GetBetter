@@ -23,6 +23,17 @@
         <item>Female</item>
     </string-array>
 
+    <string-array name="blood_type">
+        <item>O+</item>
+        <item>O-</item>
+        <item>A+</item>
+        <item>A-</item>
+        <item>B+</item>
+        <item>B-</item>
+        <item>AB+</item>
+        <item>AB-</item>
+    </string-array>
+
     <string-array name="record_status">
         <item>New</item>
         <item>Updated</item>
@@ -134,4 +145,10 @@
     <string name="e_stethoscope">E-stethoscope</string>
     <string name="select_a_file_from_tablet">Select a file from tablet</string>
     <string name="date_of_last_consultation">Date of last consultation</string>
+    <string name="blood_type">Blood Type</string>
+    <string name="additional_notes">Additional Notes</string>
+    <string name="none">None</string>
+    <string name="recording_progress_zero">00</string>
+    <string name="colon">:</string>
+    <string name="recording_status">Recording...</string>
 </resources>

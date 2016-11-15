@@ -69,7 +69,7 @@
         <activity android:name=".activities.NewPatientInfoActivity" />
         <activity android:name=".activities.CaptureDocumentsActivity" />
         <activity android:name=".activities.RecordHpiActivity" />
-        <activity android:name=".activities.SummaryActivity"></activity>
+        <activity android:name=".activities.SummaryActivity" />
     </application>
 
 </manifest>
