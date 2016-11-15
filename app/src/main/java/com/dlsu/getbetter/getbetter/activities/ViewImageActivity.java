@@ -29,6 +29,8 @@ public class ViewImageActivity extends AppCompatActivity implements View.OnClick
         ImageButton backBtn = (ImageButton)findViewById(R.id.view_image_back);
         ImageButton deleteBtn = (ImageButton)findViewById(R.id.view_image_delete);
         ImageButton shareBtn = (ImageButton)findViewById(R.id.view_image_share);
+        TextView caption = (TextView)findViewById(R.id.view_image_caption);
+        caption.setText(title);
 
         backBtn.setOnClickListener(this);
         deleteBtn.setOnClickListener(this);
