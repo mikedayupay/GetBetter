@@ -1,5 +1,7 @@
 package com.dlsu.getbetter.getbetter.objects;
 
+import java.util.ArrayList;
+
 /**
  * Created by mikedayupay on 25/02/2016.
  * GetBetter 2016
@@ -8,6 +10,7 @@ public class CaseRecord {
 
     private int caseRecordId;
     private int caseRecordStatusId;
+    private int caseId;
     private int userId;
     private String patientName;
     private String profilePic;
@@ -18,12 +21,14 @@ public class CaseRecord {
     private String caseRecordStatus;
     private String caseRecordUpdatedOn;
     private int caseRecordUpdatedBy;
+    private ArrayList<Attachment> attachments;
     private boolean checked = false;
 
     public CaseRecord() {
 
     }
 
+    //constructor for getCaseRecordHistory db query function
     public CaseRecord(int caseRecordId, int caseRecordStatusId, int caseRecordUpdatedBy, String caseRecordUpdatedOn) {
         this.caseRecordId = caseRecordId;
         this.caseRecordStatusId = caseRecordStatusId;
@@ -48,11 +53,6 @@ public class CaseRecord {
         this.caseRecordUpdatedOn = caseRecordUpdatedOn;
     }
 
-    public CaseRecord(String caseRecordComplaint, String caseRecordControlNumber) {
-        this.caseRecordComplaint = caseRecordComplaint;
-        this.caseRecordControlNumber = caseRecordControlNumber;
-    }
-
     public CaseRecord(int caseRecordId, int userId, String caseRecordComplaint, String caseRecordUpdatedOn) {
         this.caseRecordId = caseRecordId;
         this.userId = userId;
@@ -66,6 +66,19 @@ public class CaseRecord {
         this.userId = userId;
         this.caseRecordControlNumber = caseRecordControlNumber;
         this.caseRecordAdditionalNotes = caseRecordAdditionalNotes;
+    }
+
+    public CaseRecord(int caseRecordId, int caseId, int userId, int caseRecordStatusId, String caseRecordComplaint,
+                      String caseRecordAdditionalNotes, String caseRecordControlNumber, String caseRecordUpdatedOn) {
+
+        this.caseRecordId = caseRecordId;
+        this.caseId = caseId;
+        this.userId = userId;
+        this.caseRecordStatusId = caseRecordStatusId;
+        this.caseRecordComplaint = caseRecordComplaint;
+        this.caseRecordAdditionalNotes = caseRecordAdditionalNotes;
+        this.caseRecordControlNumber = caseRecordControlNumber;
+        this.caseRecordUpdatedOn = caseRecordUpdatedOn;
     }
 
 
@@ -95,6 +108,14 @@ public class CaseRecord {
 
     public int getCaseRecordStatusId() {
         return caseRecordStatusId;
+    }
+
+    public int getCaseId() {
+        return caseId;
+    }
+
+    public void setCaseId(int caseId) {
+        this.caseId = caseId;
     }
 
     public void setCaseRecordStatusId(int caseRecordStatusId) {
@@ -163,6 +184,14 @@ public class CaseRecord {
 
     public void setCaseRecordAdditionalNotes(String caseRecordAdditionalNotes) {
         this.caseRecordAdditionalNotes = caseRecordAdditionalNotes;
+    }
+
+    public ArrayList<Attachment> getAttachments() {
+        return attachments;
+    }
+
+    public void setAttachments(ArrayList<Attachment> attachments) {
+        this.attachments = attachments;
     }
 
     public boolean isChecked() {
