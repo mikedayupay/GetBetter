@@ -19,8 +19,10 @@ import com.dlsu.getbetter.getbetter.DetailsFragment;
 import com.dlsu.getbetter.getbetter.DiagnosedCaseFragment;
 import com.dlsu.getbetter.getbetter.R;
 import com.dlsu.getbetter.getbetter.UrgentCaseFragment;
+import com.dlsu.getbetter.getbetter.database.DataAdapter;
 import com.dlsu.getbetter.getbetter.sessionmanagers.SystemSessionManager;
 
+import java.sql.SQLException;
 import java.util.HashMap;
 
 
@@ -30,6 +32,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         ClosedCaseFragment.OnCaseRecordSelected {
 
     private SystemSessionManager systemSessionManager;
+    private DataAdapter getBetterDb;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,32 +48,16 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 
         String userNameLabel = user.get(SystemSessionManager.LOGIN_USER_NAME);
         String currentHealthCenter = hc.get(SystemSessionManager.HEALTH_CENTER_NAME);
+        initializeDatabase();
 
+        TextView welcomeText = (TextView)findViewById(R.id.home_welcome_text);
         Button viewCreatePatientBtn = (Button)findViewById(R.id.view_create_patient_records_btn);
         Button downloadAdditionalContentBtn = (Button)findViewById(R.id.download_content_btn);
         Button logoutBtn = (Button)findViewById(R.id.logout_btn);
         Button changeHealthCenterBtn = (Button)findViewById(R.id.change_health_center_btn);
-
         TextView healthCenter = (TextView)findViewById(R.id.home_current_health_center);
-
         initializeUpdatedTabs();
-
-//        FragmentTabHost fragmentTabHost = (FragmentTabHost)findViewById(android.R.id.tabhost);
-//        fragmentTabHost.setup(this, getSupportFragmentManager(), android.R.id.tabcontent);
-//
-//        fragmentTabHost.addTab(fragmentTabHost.newTabSpec("urgent").setIndicator("Urgent Cases"),
-//                UrgentCaseFragment.class, null);
-//
-//        fragmentTabHost.addTab(fragmentTabHost.newTabSpec("additional instructions").setIndicator("Cases w/ Additional Instructions"),
-//                AddInstructionsCaseFragment.class, null);
-//
-//        fragmentTabHost.addTab(fragmentTabHost.newTabSpec("diagnosed").setIndicator("Diagnosed Cases"),
-//                DiagnosedCaseFragment.class, null);
-//
-//        fragmentTabHost.addTab(fragmentTabHost.newTabSpec("closed").setIndicator("Closed Cases"),
-//                ClosedCaseFragment.class, null);
-
-
+        welcomeText.append(" " + getUserName(userNameLabel) + "!");
 
         if (healthCenter != null) {
             healthCenter.setText(currentHealthCenter);
@@ -150,6 +137,33 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 
             finish();
         }
+    }
+
+    private void initializeDatabase () {
+
+        getBetterDb = new DataAdapter(this);
+
+        try {
+            getBetterDb.createDatabase();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private String getUserName(String userEmail) {
+
+
+        try {
+            getBetterDb.openDatabase();
+        }catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        String username = getBetterDb.getUserName(userEmail);
+
+        getBetterDb.closeDatabase();
+
+        return username;
     }
 
     @Override
