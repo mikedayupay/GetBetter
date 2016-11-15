@@ -140,15 +140,27 @@ public class CaptureDocumentsActivity extends AppCompatActivity implements View.
 
         } else if(id == R.id.capture_docu_view_patient_info_image) {
 
-            zoomImageFromThumb(viewPatientInfoImage, patientInfoImagePath);
+//            zoomImageFromThumb(viewPatientInfoImage, patientInfoImagePath);
+            Intent intent = new Intent(this, ViewImageActivity.class);
+            intent.putExtra("imageUrl", patientInfoImagePath);
+            intent.putExtra("imageTitle", PATIENT_INFO_FORM_TITLE);
+            startActivity(intent);
 
         } else if(id == R.id.capture_docu_view_chief_complaint_image) {
 
-            zoomImageFromThumb(viewChiefComplaintImage, chiefComplaintImagePath);
+//            zoomImageFromThumb(viewChiefComplaintImage, chiefComplaintImagePath);
+            Intent intent = new Intent(this, ViewImageActivity.class);
+            intent.putExtra("imageUrl", chiefComplaintImagePath);
+            intent.putExtra("imageTitle", CHIEF_COMPLAINT_FORM_TITLE);
+            startActivity(intent);
 
         } else if(id == R.id.capture_docu_view_family_social_image) {
 
-            zoomImageFromThumb(viewSocialFamilyImage, familySocialHistoryImagePath);
+//            zoomImageFromThumb(viewSocialFamilyImage, familySocialHistoryImagePath);
+            Intent intent = new Intent(this, ViewImageActivity.class);
+            intent.putExtra("imageUrl", familySocialHistoryImagePath);
+            intent.putExtra("imageTitle", FAMILY_SOCIAL_HISTORY_FORM_TITLE);
+            startActivity(intent);
 
         } else if(id == R.id.capture_docu_remove_patient_info_image) {
 
@@ -325,7 +337,8 @@ public class CaptureDocumentsActivity extends AppCompatActivity implements View.
         // bounds, since that's the origin for the positioning animation
         // properties (X, Y).
         thumbView.getGlobalVisibleRect(startBounds);
-        findViewById(R.id.container)
+
+        thumbView.findViewById(R.id.container)
                 .getGlobalVisibleRect(finalBounds, globalOffset);
         startBounds.offset(-globalOffset.x, -globalOffset.y);
         finalBounds.offset(-globalOffset.x, -globalOffset.y);
