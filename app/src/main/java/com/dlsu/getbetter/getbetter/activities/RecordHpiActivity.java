@@ -12,6 +12,7 @@ import android.text.InputType;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.dlsu.getbetter.getbetter.R;
@@ -22,6 +23,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.logging.Handler;
 
 public class RecordHpiActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -30,11 +32,19 @@ public class RecordHpiActivity extends AppCompatActivity implements View.OnClick
     private Button playRecord;
     private Button backButton;
     private Button nextButton;
+    private TextView minutesView;
+    private TextView secondsView;
+    private TextView recordingStatus;
+    private boolean isRecording;
 
     private String outputFile;
     private String chiefComplaintName = "";
+    private int seconds, minutes, recordTime, playTime;
     private MediaRecorder hpiRecorder;
+    private MediaPlayer mp;
     private NewPatientSessionManager newPatientSessionManager;
+
+    private android.os.Handler handler;
 
     public RecordHpiActivity() {
         //empty constructor
@@ -50,6 +60,7 @@ public class RecordHpiActivity extends AppCompatActivity implements View.OnClick
             finish();
 
         newPatientSessionManager = new NewPatientSessionManager(this);
+        handler = new android.os.Handler();
 
         bindViews(this);
         bindListeners(this);
@@ -63,6 +74,9 @@ public class RecordHpiActivity extends AppCompatActivity implements View.OnClick
         activity.playRecord = (Button)activity.findViewById(R.id.hpi_play_recorded_btn);
         activity.backButton = (Button)activity.findViewById(R.id.hpi_back_btn);
         activity.nextButton = (Button)activity.findViewById(R.id.hpi_next_btn);
+        activity.minutesView = (TextView)activity.findViewById(R.id.record_minutes);
+        activity.secondsView = (TextView)activity.findViewById(R.id.record_seconds);
+        activity.recordingStatus = (TextView)activity.findViewById(R.id.recording_status);
 
     }
 
@@ -107,9 +121,13 @@ public class RecordHpiActivity extends AppCompatActivity implements View.OnClick
 
         } else if (id == R.id.hpi_record_btn) {
 
+            minutesView.setText(R.string.recording_progress_zero);
+            secondsView.setText(R.string.recording_progress_zero);
+
             try {
                 hpiRecorder.prepare();
                 hpiRecorder.start();
+                recordingStatus.setVisibility(View.VISIBLE);
 
             } catch (IllegalStateException | IOException e) {
 
@@ -117,8 +135,9 @@ public class RecordHpiActivity extends AppCompatActivity implements View.OnClick
 
             }
 
+            isRecording = true;
             stopRecord.setEnabled(true);
-            Toast.makeText(this, "Now Recording....", Toast.LENGTH_LONG).show();
+            handler.post(UpdateRecordTime);
 
         } else if (id == R.id.hpi_stop_record_btn) {
 
@@ -126,6 +145,8 @@ public class RecordHpiActivity extends AppCompatActivity implements View.OnClick
             hpiRecorder.release();
             hpiRecorder = null;
 
+            isRecording = false;
+            recordingStatus.setVisibility(View.GONE);
             stopRecord.setEnabled(false);
             playRecord.setEnabled(true);
 
@@ -133,7 +154,10 @@ public class RecordHpiActivity extends AppCompatActivity implements View.OnClick
 
         } else if (id == R.id.hpi_play_recorded_btn) {
 
-            MediaPlayer mp = new MediaPlayer();
+            mp = new MediaPlayer();
+
+            seconds = 0;
+            minutes = 0;
 
             try {
 
@@ -154,6 +178,39 @@ public class RecordHpiActivity extends AppCompatActivity implements View.OnClick
 
         }
     }
+
+    Runnable UpdateRecordTime = new Runnable() {
+        @Override
+        public void run() {
+            if(isRecording) {
+                if(seconds < 10) {
+                    secondsView.setText("0" + seconds);
+                }
+                else {
+                    secondsView.setText(String.valueOf(seconds));
+                }
+
+                recordTime += 1;
+                seconds += 1;
+
+                if(seconds > 60) {
+                    seconds = 0;
+                    minutes += 1;
+                    minutesView.setText("0" + minutes);
+                }
+                handler.postDelayed(this, 1000);
+            }
+        }
+    };
+
+    Runnable UpdatePlayTime = new Runnable() {
+        @Override
+        public void run() {
+            if(mp.isPlaying()) {
+
+            }
+        }
+    };
 
     private void editImageTitle () {
 
