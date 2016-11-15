@@ -103,7 +103,7 @@ public class DataAdapter {
 
     public int getUserId(String username) {
 
-        int result = 0;
+        int result;
         String sql = "SELECT _id FROM tbl_users WHERE email = '" + username + "'";
         Cursor c = getBetterDb.rawQuery(sql, null);
 
@@ -129,8 +129,22 @@ public class DataAdapter {
         return result;
     }
 
+    public String getUserName (String email) {
+
+        String result;
+        String sql = "SELECT first_name, last_name FROM " + USER_TABLE + " WHERE email = '" + email + "'";
+        Cursor c = getBetterDb.rawQuery(sql, null);
+
+        c.moveToFirst();
+        result = c.getString(c.getColumnIndexOrThrow("first_name")) + " " + c.getString(c.getColumnIndexOrThrow("last_name"));
+
+        c.close();
+
+        return result;
+    }
+
     public long insertPatientInfo(String firstName, String middleName, String lastName,
-                                  String birthDate, String gender, String civilStatus,
+                                  String birthDate, String gender, String civilStatus, String bloodType,
                                   String profileImage, int healthCenterId) {
 
         int genderId;
@@ -156,6 +170,7 @@ public class DataAdapter {
         cv.put("birthdate", birthDate);
         cv.put("gender_id", genderId);
         cv.put("civil_status_id", civilId);
+        cv.put("blood_type", bloodType);
         cv.put("profile_url", profileImage);
         cv.put("role_id", 6);
         cv.put("default_health_center", healthCenterId);
@@ -225,7 +240,7 @@ public class DataAdapter {
 
         String sql = "SELECT u._id AS id, u.first_name AS first_name, u.middle_name AS middle_name, " +
                 "u.last_name AS last_name, u.birthdate AS birthdate, g.gender_name AS gender, " +
-                "c.civil_status_name AS civil_status, u.profile_url AS image " +
+                "c.civil_status_name AS civil_status, u.blood_type AS blood_type, u.profile_url AS image " +
                 "FROM tbl_users AS u, tbl_genders AS g, tbl_civil_statuses AS c " +
                 "WHERE u.gender_id = g._id AND u.civil_status_id = c._id AND u.role_id = 6 AND " +
                 "default_health_center = " + healthCenterId;
@@ -241,6 +256,7 @@ public class DataAdapter {
                     c.getString(c.getColumnIndexOrThrow("birthdate")),
                     c.getString(c.getColumnIndexOrThrow("gender")),
                     c.getString(c.getColumnIndexOrThrow("civil_status")),
+                    c.getString(c.getColumnIndexOrThrow("blood_type")),
                     c.getString(c.getColumnIndexOrThrow("image")));
 
             results.add(patient);
@@ -257,7 +273,7 @@ public class DataAdapter {
 
         String sql = "SELECT u._id AS id, u.first_name AS first_name, u.middle_name AS middle_name, " +
                 "u.last_name AS last_name, u.birthdate AS birthdate, g.gender_name AS gender, " +
-                "c.civil_status_name AS civil_status, u.profile_url AS image " +
+                "c.civil_status_name AS civil_status, u.blood_type AS blood_type, u.profile_url AS image " +
                 "FROM tbl_users_upload AS u, tbl_genders AS g, tbl_civil_statuses AS c " +
                 "WHERE u.gender_id = g._id AND u.civil_status_id = c._id AND u.role_id = 6";
 
@@ -272,6 +288,7 @@ public class DataAdapter {
                     c.getString(c.getColumnIndexOrThrow("birthdate")),
                     c.getString(c.getColumnIndexOrThrow("gender")),
                     c.getString(c.getColumnIndexOrThrow("civil_status")),
+                    c.getString(c.getColumnIndexOrThrow("blood_type")),
                     c.getString(c.getColumnIndexOrThrow("image")));
 
             results.add(patient);
@@ -285,7 +302,7 @@ public class DataAdapter {
 
         String sql = "SELECT u._id AS id, u.first_name AS first_name, u.middle_name AS middle_name, " +
                 "u.last_name AS last_name, u.birthdate AS birthdate, g.gender_name AS gender, " +
-                "c.civil_status_name AS civil_status, u.profile_url AS image " +
+                "c.civil_status_name AS civil_status, u.blood_type AS blood_type, u.profile_url AS image " +
                 "FROM tbl_users AS u, tbl_genders AS g, tbl_civil_statuses AS c " +
                 "WHERE u.gender_id = g._id AND u.civil_status_id = c._id AND u._id = " + patientId;
 
@@ -301,6 +318,7 @@ public class DataAdapter {
                 c.getString(c.getColumnIndexOrThrow("birthdate")),
                 c.getString(c.getColumnIndexOrThrow("gender")),
                 c.getString(c.getColumnIndexOrThrow("civil_status")),
+                c.getString(c.getColumnIndexOrThrow("blood_type")),
                 c.getString(c.getColumnIndexOrThrow("image")));
 
         c.close();
@@ -308,7 +326,7 @@ public class DataAdapter {
 
     }
 
-    public void removePatientUpload (int userId) {
+    public void removePatientUpload (long userId) {
 
         getBetterDb.delete(USER_TABLE_UPLOAD, "_id = " + userId, null);
 
@@ -427,7 +445,6 @@ public class DataAdapter {
 
         String sql = "SELECT * FROM tbl_case_records WHERE user_id = " + patientId;
         Cursor c = getBetterDb.rawQuery(sql, null);
-        Log.e("case", c.getCount() + "");
 
         while(c.moveToNext()) {
             CaseRecord caseRecord = new CaseRecord(c.getInt(c.getColumnIndexOrThrow("_id")),
@@ -446,21 +463,6 @@ public class DataAdapter {
         Cursor c = getBetterDb.rawQuery(sql, null);
 
         c.moveToFirst();
-        CaseRecord result = new CaseRecord(c.getString(c.getColumnIndexOrThrow("complaint")),
-                c.getString(c.getColumnIndexOrThrow("control_number")));
-
-        c.close();
-
-        return result;
-    }
-
-    public CaseRecord getCaseRecordDetail(int caseRecordId) {
-
-        String sql = "SELECT * FROM tbl_case_records WHERE _id = " + caseRecordId;
-        Cursor c = getBetterDb.rawQuery(sql, null);
-
-        c.moveToFirst();
-//        Log.d("control number", c.getString(c.getColumnIndexOrThrow("control_number")));
         CaseRecord result = new CaseRecord(c.getInt(c.getColumnIndexOrThrow("_id")),
                 c.getString(c.getColumnIndexOrThrow("complaint")),
                 c.getInt(c.getColumnIndexOrThrow("user_id")),
@@ -470,45 +472,35 @@ public class DataAdapter {
         c.close();
 
         return result;
-
     }
 
-    public ArrayList<CaseRecord> getCaseRecordsUpload (long patientId) {
+    public ArrayList<CaseRecord> getCaseRecordsUpload () {
 
         ArrayList<CaseRecord> results = new ArrayList<>();
 
-        String sql = "SELECT * FROM tbl_case_records_upload WHERE user_id = " + patientId;
+        String sql = "SELECT * FROM tbl_case_records AS c " +
+                "INNER JOIN (SELECT h.* FROM tbl_case_record_history AS h " +
+                "INNER JOIN (SELECT _id, record_status_id, MAX(updated_on) AS maxdate " +
+                "FROM tbl_case_record_history WHERE record_status_id IN (1, 2) GROUP BY _id) t " +
+                "ON h._id = t._id AND h.updated_on = t.maxdate) d ON c._id = d._id";
+
         Cursor c = getBetterDb.rawQuery(sql, null);
-        Log.e("case", c.getCount() + "");
 
         while(c.moveToNext()) {
             CaseRecord caseRecord = new CaseRecord(c.getInt(c.getColumnIndexOrThrow("_id")),
+                    c.getInt(c.getColumnIndexOrThrow("case_id")),
+                    c.getInt(c.getColumnIndexOrThrow("user_id")),
+                    c.getInt(c.getColumnIndexOrThrow("record_status_id")),
                     c.getString(c.getColumnIndexOrThrow("complaint")),
-                    c.getString(c.getColumnIndexOrThrow("control_number")));
+                    c.getString(c.getColumnIndexOrThrow("additional_notes")),
+                    c.getString(c.getColumnIndexOrThrow("control_number")),
+                    c.getString(c.getColumnIndexOrThrow("updated_on")));
 
             results.add(caseRecord);
         }
         c.close();
 
         return results;
-    }
-
-    public CaseRecord getCaseRecordHistoryUpload (int caseRecordId) {
-
-
-        String sql = "SELECT * FROM tbl_case_record_history WHERE record_status_id = 1 AND _id = " + caseRecordId;
-        Cursor c = getBetterDb.rawQuery(sql, null);
-
-        c.moveToFirst();
-        CaseRecord caseRecordHistory = new CaseRecord(c.getInt(c.getColumnIndexOrThrow("_id")),
-                c.getInt(c.getColumnIndexOrThrow("record_status_id")),
-                c.getInt(c.getColumnIndexOrThrow("updated_by")),
-                c.getString(c.getColumnIndexOrThrow("updated_on")));
-
-        c.close();
-
-        return caseRecordHistory;
-
     }
 
     public ArrayList<String> getCaseRecordHistory (int caseRecordId) {
