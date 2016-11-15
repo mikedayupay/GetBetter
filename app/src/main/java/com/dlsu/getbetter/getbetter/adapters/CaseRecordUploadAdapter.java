@@ -1,11 +1,13 @@
 package com.dlsu.getbetter.getbetter.adapters;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
+import android.widget.RadioButton;
 import android.widget.TextView;
 
 import com.dlsu.getbetter.getbetter.R;
@@ -25,13 +27,14 @@ public class CaseRecordUploadAdapter extends ArrayAdapter<CaseRecord> {
     public CaseRecordUploadAdapter(Context context, int textViewResourceId, ArrayList<CaseRecord> objects) {
         super(context, textViewResourceId, objects);
 
+        this.caseRecordsList = objects;
         inflater = LayoutInflater.from(context);
     }
 
     private class ViewHolder {
 
         TextView controlNumber;
-//        TextView patientName;
+        TextView patientName;
         TextView complaint;
         TextView caseStatus;
         TextView dateUpdated;
@@ -45,7 +48,7 @@ public class CaseRecordUploadAdapter extends ArrayAdapter<CaseRecord> {
                           TextView complaint, TextView caseStatus, TextView dateUpdated, CheckBox checkBox) {
 
             this.controlNumber = controlNumber;
-//            this.patientName = patientName;
+            this.patientName = patientName;
             this.complaint = complaint;
             this.caseStatus = caseStatus;
             this.dateUpdated = dateUpdated;
@@ -93,6 +96,14 @@ public class CaseRecordUploadAdapter extends ArrayAdapter<CaseRecord> {
             this.dateUpdated = dateUpdated;
         }
 
+        public TextView getPatientName() {
+            return patientName;
+        }
+
+        public void setPatientName(TextView patientName) {
+            this.patientName = patientName;
+        }
+
         public CheckBox getCheckBox() {
             return checkBox;
         }
@@ -102,8 +113,9 @@ public class CaseRecordUploadAdapter extends ArrayAdapter<CaseRecord> {
         }
     }
 
+    @NonNull
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(int position, View convertView, @NonNull ViewGroup parent) {
 
         ViewHolder holder = null;
         CaseRecord caseRecord = this.getItem(position);
@@ -113,11 +125,12 @@ public class CaseRecordUploadAdapter extends ArrayAdapter<CaseRecord> {
             convertView = inflater.inflate(R.layout.case_record_item_checkbox, parent, false);
 
             holder = new ViewHolder();
-//            holder.patientName = (TextView)convertView.findViewById(R.id.upload_case_record_patient_name);
+            holder.patientName = (TextView)convertView.findViewById(R.id.upload_caserecord_patient_name);
             holder.controlNumber = (TextView)convertView.findViewById(R.id.upload_control_number);
             holder.complaint = (TextView)convertView.findViewById(R.id.upload_caserecord_chief_complaint);
             holder.checkBox = (CheckBox)convertView.findViewById(R.id.upload_caserecord_checkbox);
             convertView.setTag(holder);
+
 
             holder.checkBox.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -128,15 +141,14 @@ public class CaseRecordUploadAdapter extends ArrayAdapter<CaseRecord> {
                 }
             });
 
+
         } else {
             holder = (ViewHolder)convertView.getTag();
         }
 
         String id = caseRecord.getCaseRecordControlNumber() + "";
-        //String name = patient.getLastName() + ", " + patient.getFirstName();
-//        String name = "Patient Name";
         holder.controlNumber.setText(id);
-//        holder.patientName.setText(name);
+        holder.patientName.setText(caseRecord.getPatientName());
         holder.complaint.setText(caseRecord.getCaseRecordComplaint());
         holder.checkBox.setChecked(caseRecord.isChecked());
         holder.checkBox.setTag(caseRecord);
