@@ -3,6 +3,7 @@ package com.dlsu.getbetter.getbetter.database;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.CursorIndexOutOfBoundsException;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
@@ -547,6 +548,23 @@ public class DataAdapter {
 
         c.close();
         return attachments;
+    }
+
+    public String getHPI (int caseRecordId) {
+
+        String result;
+
+        String sql = "SELECT case_file_url FROM " + CASE_RECORD_ATTACHMENTS_TABLE + " WHERE case_record_attachment_type_id = " + 5 +
+                " AND case_record_id = " + caseRecordId;
+
+        Cursor c = getBetterDb.rawQuery(sql, null);
+
+        c.moveToFirst();
+        result = c.getString(c.getColumnIndexOrThrow("case_file_url"));
+
+        c.close();
+
+        return result;
     }
 
     public void updatePatientInfo (Patient patient, long patientId) {
