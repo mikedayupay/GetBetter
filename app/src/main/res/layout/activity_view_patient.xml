@@ -82,27 +82,39 @@
                                 />
 
                             <TextView
-                                android:id="@+id/view_patient_age_gender"
+                                android:id="@+id/view_patient_age"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="@string/age_gender_placeholder"
+                                android:text="@string/age"
                                 android:layout_marginBottom="3dp"
+                                android:textStyle="italic"
+                                />
+
+                            <TextView
+                                android:id="@+id/view_patient_gender"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/gender"
+                                android:layout_marginBottom="3dp"
+                                android:textStyle="italic"
                                 />
 
                             <TextView
                                 android:id="@+id/view_patient_civil_status"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="@string/civil_status_placeholder"
+                                android:text="@string/civil_status"
                                 android:layout_marginBottom="3dp"
+                                android:textStyle="italic"
                                 />
 
                             <TextView
                                 android:id="@+id/view_patient_blood"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="@string/blood_type_placeholder"
+                                android:text="@string/blood_type"
                                 android:layout_marginBottom="3dp"
+                                android:textStyle="italic"
                                 />
 
                             <!--<TextView-->
