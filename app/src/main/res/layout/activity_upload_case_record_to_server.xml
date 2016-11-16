@@ -20,38 +20,38 @@
         android:layout_marginBottom="8dp"
         android:contentDescription="@string/app_name"/>
 
+    <!--<android.support.v7.widget.CardView-->
+        <!--android:id="@+id/user_label_container"-->
+        <!--android:layout_width="1200dp"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_below="@id/getbetter_title"-->
+        <!--android:layout_centerHorizontal="true"-->
+        <!--app:cardCornerRadius="2dp">-->
+
+        <!--<LinearLayout-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:orientation="horizontal"-->
+            <!--android:padding="10dp">-->
+
+            <!--<TextView-->
+                <!--android:id="@+id/patient_label"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:text="@string/patient_name_placeholder"-->
+                <!--android:textSize="18sp"-->
+                <!--android:textAllCaps="true"-->
+                <!--android:textStyle="bold"-->
+                <!--/>-->
+
+        <!--</LinearLayout>-->
+
+    <!--</android.support.v7.widget.CardView>-->
+
     <android.support.v7.widget.CardView
-        android:id="@+id/user_label_container"
         android:layout_width="1200dp"
         android:layout_height="wrap_content"
         android:layout_below="@id/getbetter_title"
-        android:layout_centerHorizontal="true"
-        app:cardCornerRadius="2dp">
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="10dp">
-
-            <TextView
-                android:id="@+id/patient_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/patient_name_placeholder"
-                android:textSize="18sp"
-                android:textAllCaps="true"
-                android:textStyle="bold"
-                />
-
-        </LinearLayout>
-
-    </android.support.v7.widget.CardView>
-
-    <android.support.v7.widget.CardView
-        android:layout_width="1200dp"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/user_label_container"
         android:layout_marginTop="8dp"
         android:layout_centerHorizontal="true"
         app:cardCornerRadius="2dp">
@@ -81,7 +81,8 @@
             <ListView
                 android:id="@+id/upload_page_case_record_list"
                 android:layout_width="match_parent"
-                android:layout_height="350dp">
+                android:layout_height="350dp"
+                android:divider="@drawable/divider">
 
             </ListView>
 
