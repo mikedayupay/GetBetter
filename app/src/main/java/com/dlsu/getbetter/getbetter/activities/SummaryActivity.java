@@ -32,7 +32,7 @@ import android.widget.TextView;
 
 import com.dlsu.getbetter.getbetter.DirectoryConstants;
 import com.dlsu.getbetter.getbetter.R;
-import com.dlsu.getbetter.getbetter.adapters.SummaryPageDataAdapter;
+import com.dlsu.getbetter.getbetter.adapters.FileAttachmentsAdapter;
 import com.dlsu.getbetter.getbetter.database.DataAdapter;
 import com.dlsu.getbetter.getbetter.objects.Attachment;
 import com.dlsu.getbetter.getbetter.objects.DividerItemDecoration;
@@ -52,6 +52,8 @@ import java.util.Locale;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class SummaryActivity extends AppCompatActivity implements View.OnClickListener, MediaController.MediaPlayerControl {
+
+    private static final String TAG = "SummaryActivity";
 
     private TextView patientNameText;
     private TextView healthCenter;
@@ -82,7 +84,7 @@ public class SummaryActivity extends AppCompatActivity implements View.OnClickLi
     private Patient patient;
 
     private DataAdapter getBetterDb;
-    private SummaryPageDataAdapter fileAdapter;
+    private FileAttachmentsAdapter fileAdapter;
     private long patientId;
     private int caseRecordId;
     private int healthCenterId;
@@ -123,6 +125,7 @@ public class SummaryActivity extends AppCompatActivity implements View.OnClickLi
         if(systemSessionManager.checkLogin())
             finish();
 
+
         newPatientDetails = new NewPatientSessionManager(this);
         HashMap<String, String> user = systemSessionManager.getUserDetails();
         HashMap<String, String> hc = systemSessionManager.getHealthCenter();
@@ -135,8 +138,10 @@ public class SummaryActivity extends AppCompatActivity implements View.OnClickLi
         bindViews(this);
         bindListeners(this);
 
+        Log.d(TAG, "onCreate: " + recordedHpiOutputFile);
+
         attachments = new ArrayList<>();
-        fileAdapter = new SummaryPageDataAdapter(attachments);
+        fileAdapter = new FileAttachmentsAdapter(attachments);
         addPhotoAttachment(patientInfoFormImage, patientInfoFormImageTitle, getDateStamp());
         addPhotoAttachment(familySocialHistoryFormImage, familySocialHistoryFormImageTitle, getDateStamp());
         addPhotoAttachment(chiefComplaintFormImage, chiefComplaintFormImageTitle, getDateStamp());
@@ -206,7 +211,7 @@ public class SummaryActivity extends AppCompatActivity implements View.OnClickLi
         activity.attachmentLists.setAdapter(fileAdapter);
         activity.attachmentLists.setLayoutManager(fileListLayoutManager);
         activity.attachmentLists.addItemDecoration(dividerItemDecoration);
-        fileAdapter.SetOnItemClickListener(new SummaryPageDataAdapter.OnItemClickListener() {
+        fileAdapter.SetOnItemClickListener(new FileAttachmentsAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
                 Intent intent = new Intent(SummaryActivity.this, ViewImageActivity.class);
@@ -292,6 +297,9 @@ public class SummaryActivity extends AppCompatActivity implements View.OnClickLi
             }
 
             newPatientDetails.endSession();
+
+            CaptureDocumentsActivity.getInstance().finish();
+            RecordHpiActivity.getInstance().finish();
             finish();
 
         } else if(id == R.id.summary_page_back_btn) {
@@ -476,6 +484,22 @@ public class SummaryActivity extends AppCompatActivity implements View.OnClickLi
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        nMediaController.setMediaPlayer(activity);
+        nMediaController.setAnchorView(activity.findViewById(R.id.hpi_media_player));
+
+        nMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+            @Override
+            public void onPrepared(MediaPlayer mediaPlayer) {
+                nHandler.post(new Runnable() {
+                    public void run() {
+                        nMediaController.show(0);
+                        nMediaPlayer.start();
+                    }
+                });
+            }
+        });
+
     }
 
     private File createMediaFile(int type) {
@@ -730,7 +754,7 @@ public class SummaryActivity extends AppCompatActivity implements View.OnClickLi
 
         for(int i = 0; i < attachments.size(); i++) {
 
-            Log.e("attachment id", caseRecordId + "");
+            Log.d(TAG, "insertCaseRecordAttachments: " + attachments.get(i).getAttachmentPath());
             attachments.get(i).setCaseRecordId(caseRecordId);
             getBetterDb.insertCaseRecordAttachments(attachments.get(i));
         }
@@ -838,4 +862,6 @@ public class SummaryActivity extends AppCompatActivity implements View.OnClickLi
             nMediaController.hide();
         }
     }
+
+
 }

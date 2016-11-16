@@ -35,6 +35,8 @@ import java.util.Locale;
 
 public class CaptureDocumentsActivity extends AppCompatActivity implements View.OnClickListener {
 
+    private static CaptureDocumentsActivity captureDocumentsActivity;
+
     private ImageView capturePatientInfo;
     private ImageView captureChiefComplaint;
     private ImageView captureSocialFamily;
@@ -76,6 +78,8 @@ public class CaptureDocumentsActivity extends AppCompatActivity implements View.
         SystemSessionManager systemSessionManager = new SystemSessionManager(this);
         if(systemSessionManager.checkLogin())
             finish();
+
+        captureDocumentsActivity = this;
 
         newPatientSessionManager = new NewPatientSessionManager(this);
 
@@ -145,6 +149,7 @@ public class CaptureDocumentsActivity extends AppCompatActivity implements View.
             intent.putExtra("imageUrl", patientInfoImagePath);
             intent.putExtra("imageTitle", PATIENT_INFO_FORM_TITLE);
             startActivity(intent);
+
 
         } else if(id == R.id.capture_docu_view_chief_complaint_image) {
 
@@ -219,7 +224,7 @@ public class CaptureDocumentsActivity extends AppCompatActivity implements View.
     private File createImageFile(String imageTitle) throws IOException {
 
 
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
+        String timeStamp = new SimpleDateFormat("yyyyMMddHHmmss", Locale.US).format(new Date());
         String imageFileName = imageTitle + "_" + timeStamp;
 
         File storageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
@@ -450,5 +455,9 @@ public class CaptureDocumentsActivity extends AppCompatActivity implements View.
                 mCurrentAnimator = set;
             }
         });
+    }
+
+    public static CaptureDocumentsActivity getInstance() {
+        return captureDocumentsActivity;
     }
 }

@@ -27,6 +27,8 @@ import java.util.logging.Handler;
 
 public class RecordHpiActivity extends AppCompatActivity implements View.OnClickListener {
 
+    private static RecordHpiActivity recordHpiActivity;
+
     private Button recordHpi;
     private Button stopRecord;
     private Button playRecord;
@@ -58,6 +60,8 @@ public class RecordHpiActivity extends AppCompatActivity implements View.OnClick
         SystemSessionManager systemSessionManager = new SystemSessionManager(this);
         if(systemSessionManager.checkLogin())
             finish();
+
+        recordHpiActivity = this;
 
         newPatientSessionManager = new NewPatientSessionManager(this);
         handler = new android.os.Handler();
@@ -159,6 +163,9 @@ public class RecordHpiActivity extends AppCompatActivity implements View.OnClick
             seconds = 0;
             minutes = 0;
 
+            secondsView.setText(R.string.recording_progress_zero);
+            minutesView.setText(R.string.recording_progress_zero);
+
             try {
 
                 mp.setDataSource(outputFile);
@@ -175,6 +182,7 @@ public class RecordHpiActivity extends AppCompatActivity implements View.OnClick
             }
 
             mp.start();
+            handler.post(UpdatePlayTime);
 
         }
     }
@@ -207,6 +215,22 @@ public class RecordHpiActivity extends AppCompatActivity implements View.OnClick
         @Override
         public void run() {
             if(mp.isPlaying()) {
+
+                if(seconds < 10) {
+                    secondsView.setText("0" + seconds);
+                }
+                else {
+                    secondsView.setText(String.valueOf(seconds));
+                }
+
+                seconds += 1;
+
+                if(seconds > 60) {
+                    seconds = 0;
+                    minutes += 1;
+                    minutesView.setText("0" + minutes);
+                }
+                handler.postDelayed(this, 1000);
 
             }
         }
@@ -243,6 +267,10 @@ public class RecordHpiActivity extends AppCompatActivity implements View.OnClick
     }
 
     private String getTimeStamp() {
-        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
+        return new SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault()).format(new Date());
+    }
+
+    public static RecordHpiActivity getInstance() {
+        return recordHpiActivity;
     }
 }
