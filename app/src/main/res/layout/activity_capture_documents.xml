@@ -105,7 +105,8 @@
                                 android:textColor="@color/colorAlert"
                                 android:padding="8dp"
                                 android:layout_marginRight="8dp"
-                                style="@style/Base.Widget.AppCompat.Button.Borderless" />
+                                style="@style/Base.Widget.AppCompat.Button.Borderless"
+                                android:visibility="gone"/>
 
                             <Button
                                 android:id="@+id/capture_docu_view_patient_info_image"
@@ -175,7 +176,8 @@
                                 android:textColor="@color/colorAlert"
                                 android:padding="8dp"
                                 android:layout_marginRight="8dp"
-                                style="@style/Base.Widget.AppCompat.Button.Borderless" />
+                                style="@style/Base.Widget.AppCompat.Button.Borderless"
+                                android:visibility="gone"/>
 
                             <Button
                                 android:id="@+id/capture_docu_view_family_social_image"
@@ -246,7 +248,8 @@
                                 android:textColor="@color/colorAlert"
                                 android:padding="8dp"
                                 android:layout_marginRight="8dp"
-                                style="@style/Base.Widget.AppCompat.Button.Borderless" />
+                                style="@style/Base.Widget.AppCompat.Button.Borderless"
+                                android:visibility="gone"/>
 
                             <Button
                                 android:id="@+id/capture_docu_view_chief_complaint_image"
