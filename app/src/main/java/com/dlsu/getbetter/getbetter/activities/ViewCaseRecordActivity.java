@@ -16,10 +16,9 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.MediaController;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.dlsu.getbetter.getbetter.R;
-import com.dlsu.getbetter.getbetter.adapters.SummaryPageDataAdapter;
+import com.dlsu.getbetter.getbetter.adapters.FileAttachmentsAdapter;
 import com.dlsu.getbetter.getbetter.database.DataAdapter;
 import com.dlsu.getbetter.getbetter.objects.Attachment;
 import com.dlsu.getbetter.getbetter.objects.CaseRecord;
@@ -27,23 +26,23 @@ import com.dlsu.getbetter.getbetter.objects.DividerItemDecoration;
 import com.dlsu.getbetter.getbetter.objects.Patient;
 import com.dlsu.getbetter.getbetter.sessionmanagers.SystemSessionManager;
 
-import org.joda.time.LocalDate;
-import org.joda.time.Years;
-
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.StringTokenizer;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ViewCaseRecordActivity extends AppCompatActivity implements MediaController.MediaPlayerControl, View.OnClickListener {
+
+    private static String TAG = "ViewCaseRecordActivity";
 
     private TextView patientName;
     private TextView healthCenterName;
     private TextView ageGender;
     private TextView chiefComplaint;
     private TextView controlNumber;
-    private ImageView profilePic;
+    private CircleImageView profilePic;
     private Button backBtn;
     private Button updateCaseBtn;
     private RecyclerView attachmentList;
@@ -74,12 +73,15 @@ public class ViewCaseRecordActivity extends AppCompatActivity implements MediaCo
 
         killMediaPlayer();
         nMediaPlayer = new MediaPlayer();
-        nMediaController = new MediaController(this) {
+        nMediaController = new MediaController(ViewCaseRecordActivity.this) {
             @Override
             public void hide() {
 
             }
         };
+
+        nMediaController.setMediaPlayer(ViewCaseRecordActivity.this);
+        nMediaController.setAnchorView(findViewById(R.id.hpi_media_player));
 
         initializeDatabase();
         getCaseRecord(caseRecordId);
@@ -89,7 +91,8 @@ public class ViewCaseRecordActivity extends AppCompatActivity implements MediaCo
         bindListeners(this);
         initFileList(this);
 
-        String recordedHpiOutputFile = getHpiOutputFile();
+        String recordedHpiOutputFile = getHpiOutputFile(caseRecordId);
+        Log.d(TAG, "onCreate: " + recordedHpiOutputFile);
         nMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
 
         try {
@@ -97,11 +100,8 @@ public class ViewCaseRecordActivity extends AppCompatActivity implements MediaCo
             nMediaPlayer.prepare();
         } catch (IOException e) {
             e.printStackTrace();
+            Log.d(TAG, "onCreate: " + e.toString());
         }
-
-        nMediaController.setMediaPlayer(this);
-        nMediaController.setAnchorView(findViewById(R.id.hpi_media_player));
-
 
         nMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
@@ -120,7 +120,6 @@ public class ViewCaseRecordActivity extends AppCompatActivity implements MediaCo
                 });
             }
         });
-
     }
 
     private void bindViews(ViewCaseRecordActivity activity) {
@@ -131,7 +130,7 @@ public class ViewCaseRecordActivity extends AppCompatActivity implements MediaCo
         activity.chiefComplaint = (TextView)activity.findViewById(R.id.view_case_chief_complaint);
         activity.controlNumber = (TextView)activity.findViewById(R.id.view_case_control_number);
         activity.attachmentList = (RecyclerView)activity.findViewById(R.id.view_case_files_list);
-        activity.profilePic = (ImageView)activity.findViewById(R.id.profile_picture_display);
+        activity.profilePic = (CircleImageView) activity.findViewById(R.id.profile_picture_display);
         activity.backBtn = (Button)activity.findViewById(R.id.view_case_back_btn);
         activity.updateCaseBtn = (Button)activity.findViewById(R.id.update_case_record_btn);
 
@@ -156,7 +155,7 @@ public class ViewCaseRecordActivity extends AppCompatActivity implements MediaCo
 
     private void initFileList(ViewCaseRecordActivity activity) {
 
-        SummaryPageDataAdapter fileAdapter = new SummaryPageDataAdapter(caseAttachments);
+        FileAttachmentsAdapter fileAdapter = new FileAttachmentsAdapter(caseAttachments);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(activity);
         RecyclerView.ItemDecoration dividerItemDecoration = new DividerItemDecoration(activity);
 
@@ -164,7 +163,7 @@ public class ViewCaseRecordActivity extends AppCompatActivity implements MediaCo
         activity.attachmentList.setLayoutManager(layoutManager);
         activity.attachmentList.setAdapter(fileAdapter);
         activity.attachmentList.addItemDecoration(dividerItemDecoration);
-        fileAdapter.SetOnItemClickListener(new SummaryPageDataAdapter.OnItemClickListener() {
+        fileAdapter.SetOnItemClickListener(new FileAttachmentsAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
 
@@ -268,7 +267,6 @@ public class ViewCaseRecordActivity extends AppCompatActivity implements MediaCo
         // Get the dimensions of the View
         int targetW = 255;//mImageView.getWidth();
         int targetH = 200;// mImageView.getHeight();
-        Log.e("width and height", targetW + targetH + "");
 
         // Get the dimensions of the bitmap
         BitmapFactory.Options bmOptions = new BitmapFactory.Options();
@@ -288,20 +286,20 @@ public class ViewCaseRecordActivity extends AppCompatActivity implements MediaCo
         mImageView.setImageBitmap(bitmap);
     }
 
-    private String getHpiOutputFile() {
+    private String getHpiOutputFile(int caseRecordId) {
 
-        String result = "";
-
-        if(caseAttachments.isEmpty()) {
-            Log.e("attachments is empty", "true");
-        } else {
-            for(int i = 0; i < caseAttachments.size(); i++) {
-
-                if(caseAttachments.get(i).getAttachmentType() == 5) {
-                    result = caseAttachments.get(i).getAttachmentPath();
-                }
-            }
+        try {
+            getBetterDb.openDatabase();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
+
+        String result;
+
+        result = getBetterDb.getHPI(caseRecordId);
+
+        getBetterDb.closeDatabase();
+
         return result;
     }
 
