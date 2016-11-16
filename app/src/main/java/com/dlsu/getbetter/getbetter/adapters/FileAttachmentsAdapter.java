@@ -16,13 +16,13 @@ import java.util.ArrayList;
  * Created by mikedayupay on 13/02/2016.
  * GetBetter 2016
  */
-public class SummaryPageDataAdapter extends RecyclerView.Adapter<SummaryPageDataAdapter.ViewHolder> {
+public class FileAttachmentsAdapter extends RecyclerView.Adapter<FileAttachmentsAdapter.ViewHolder> {
 
     private ArrayList<Attachment> filesDataset;
     private OnItemClickListener mItemClickListener;
     private int selectedItem = 0;
 
-    public SummaryPageDataAdapter (ArrayList<Attachment> filesDataset) {
+    public FileAttachmentsAdapter(ArrayList<Attachment> filesDataset) {
 
         this.filesDataset = filesDataset;
     }
@@ -80,6 +80,10 @@ public class SummaryPageDataAdapter extends RecyclerView.Adapter<SummaryPageData
 
         if(filesDataset.get(position).getAttachmentType() == 1) {
             holder.typeIcon.setImageResource(R.drawable.ic_action_picture);
+        } else if (filesDataset.get(position).getAttachmentType() == 2) {
+            holder.typeIcon.setImageResource(R.drawable.ic_action_video);
+        } else if (filesDataset.get(position).getAttachmentType() == 3 || filesDataset.get(position).getAttachmentType() == 5) {
+            holder.typeIcon.setImageResource(R.drawable.ic_audiotrack);
         }
 
     }
