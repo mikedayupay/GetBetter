@@ -93,13 +93,15 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content">
 
-                            <ImageView
+                            <de.hdodenhof.circleimageview.CircleImageView
                                 android:id="@+id/profile_picture_display"
                                 android:layout_width="255dp"
                                 android:layout_height="200dp"
-                                android:src="@drawable/profile_picture_placeholder"
+                                android:src="@drawable/ic_account_circle"
                                 android:contentDescription="@string/patient_profile_image"
-                                android:padding="6dp"
+                                android:padding="8dp"
+                                app:civ_border_width="2dp"
+                                app:civ_border_color="@color/colorPrimary"
                                 android:layout_alignParentTop="true"
                                 android:layout_alignParentLeft="true"
                                 android:layout_alignParentStart="true"
