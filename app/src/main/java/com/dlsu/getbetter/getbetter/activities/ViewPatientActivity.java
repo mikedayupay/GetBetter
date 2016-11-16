@@ -53,7 +53,8 @@ public class ViewPatientActivity extends AppCompatActivity implements View.OnCli
 
         CircleImageView profileImage = (CircleImageView)findViewById(R.id.view_patient_profile_image);
         TextView patientName = (TextView)findViewById(R.id.view_patient_name);
-        TextView ageGender = (TextView)findViewById(R.id.view_patient_age_gender);
+        TextView age = (TextView)findViewById(R.id.view_patient_age);
+        TextView gender = (TextView)findViewById(R.id.view_patient_gender);
         TextView civilStatus = (TextView)findViewById(R.id.view_patient_civil_status);
         TextView bloodType = (TextView)findViewById(R.id.view_patient_blood);
 //        TextView contactInfo = (TextView)findViewById(R.id.view_patient_contact);
@@ -71,11 +72,11 @@ public class ViewPatientActivity extends AppCompatActivity implements View.OnCli
         createPatientSession(this);
 
         setPic(profileImage, patient.getProfileImageBytes());
-        patientName.setText(patientFullName(patient.getFirstName(), patient.getMiddleName(), patient.getLastName()));
-        String patientAgeGender = patient.getAge() + ", " + patient.getGender();
-        ageGender.setText(patientAgeGender);
-        civilStatus.setText(patient.getCivilStatus());
-        bloodType.setText(patient.getBloodType());
+        patientName.setText(patientFullName(patient.getLastName() + ", ", patient.getFirstName(), patient.getMiddleName()));
+        age.append(": " + patient.getAge() + " Years Old");
+        gender.append(": " + patient.getGender());
+        civilStatus.append(": " + patient.getCivilStatus());
+        bloodType.append(": " + patient.getBloodType());
 
         RecyclerView.LayoutManager caseRecordsLayoutManager = new LinearLayoutManager(this);
         RecyclerView.ItemDecoration dividerItemDecoration = new DividerItemDecoration(this);
