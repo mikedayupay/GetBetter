@@ -6,6 +6,8 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -14,14 +16,19 @@ import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.InputType;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import com.dlsu.getbetter.getbetter.R;
 import com.dlsu.getbetter.getbetter.sessionmanagers.NewPatientSessionManager;
@@ -31,21 +38,26 @@ import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
 
 public class CaptureDocumentsActivity extends AppCompatActivity implements View.OnClickListener {
 
     private static CaptureDocumentsActivity captureDocumentsActivity;
+    private static final String TAG = "Capture";
 
-    private ImageView capturePatientInfo;
-    private ImageView captureChiefComplaint;
-    private ImageView captureSocialFamily;
+    private ImageView patientInfoImage;
+    private ImageView chiefComplaintImage;
+    private ImageView familySocialImage;
     private Button viewPatientInfoImage;
     private Button removePatientInfoImage;
     private Button viewChiefComplaintImage;
     private Button removeChiefComplaintImage;
     private Button viewSocialFamilyImage;
     private Button removeSocialFamilyImage;
+    private Button capturePatientInfo;
+    private Button captureChiefComplaint;
+    private Button captureFamilySocial;
     private Button backButton;
     private Button nextButton;
     private LinearLayout patientInfoActionButtons;
@@ -53,9 +65,9 @@ public class CaptureDocumentsActivity extends AppCompatActivity implements View.
     private LinearLayout socialFamilyActionButtons;
     private Animator mCurrentAnimator;
     private int mShortAnimationDuration;
-    private String patientInfoImagePath = "null";
-    private String familySocialHistoryImagePath = "null";
-    private String chiefComplaintImagePath = "null";
+    private String patientInfoImagePath = "";
+    private String familySocialHistoryImagePath = "";
+    private String chiefComplaintImagePath = "";
     private NewPatientSessionManager newPatientSessionManager;
 
     private static final String PATIENT_INFO_FORM_TITLE = "Patient Information Form";
@@ -86,12 +98,32 @@ public class CaptureDocumentsActivity extends AppCompatActivity implements View.
         bindViews(this);
         bindListeners(this);
 
+        if(!newPatientSessionManager.isDocumentsEmpty()) {
+            Log.d(TAG, "if fired");
+            HashMap<String, String> documents = newPatientSessionManager.getPatientInfo();
+            this.patientInfoImagePath = documents.get(NewPatientSessionManager.NEW_PATIENT_DOC_IMAGE1);
+            this.familySocialHistoryImagePath = documents.get(NewPatientSessionManager.NEW_PATIENT_DOC_IMAGE2);
+            this.chiefComplaintImagePath = documents.get(NewPatientSessionManager.NEW_PATIENT_DOC_IMAGE3);
+            setPic(this.patientInfoImage, this.patientInfoImagePath);
+            setPic(this.familySocialImage, this.familySocialHistoryImagePath);
+            setPic(this.chiefComplaintImage, this.chiefComplaintImagePath);
+            this.captureChiefComplaint.setVisibility(View.GONE);
+            this.capturePatientInfo.setVisibility(View.GONE);
+            this.captureFamilySocial.setVisibility(View.GONE);
+            this.patientInfoActionButtons.setVisibility(View.VISIBLE);
+            this.chiefComplaintActionButtons.setVisibility(View.VISIBLE);
+            this.socialFamilyActionButtons.setVisibility(View.VISIBLE);
+        }
+
     }
 
     private void bindViews(CaptureDocumentsActivity activity) {
-        activity.capturePatientInfo = (ImageView)activity.findViewById(R.id.capture_docu_patient_info_image);
-        activity.captureChiefComplaint = (ImageView)activity.findViewById(R.id.capture_docu_chief_complaint_image);
-        activity.captureSocialFamily = (ImageView)activity.findViewById(R.id.capture_docu_family_social_history_image);
+        activity.patientInfoImage = (ImageView)activity.findViewById(R.id.patient_info_image);
+        activity.chiefComplaintImage = (ImageView)activity.findViewById(R.id.chief_complaint_image);
+        activity.familySocialImage = (ImageView)activity.findViewById(R.id.family_social_history_image);
+        activity.capturePatientInfo = (Button)activity.findViewById(R.id.capture_docu_patient_info_image);
+        activity.captureChiefComplaint = (Button)activity.findViewById(R.id.capture_docu_chief_complaint_image);
+        activity.captureFamilySocial = (Button)activity.findViewById(R.id.capture_docu_family_social_history_image);
         activity.viewPatientInfoImage = (Button)activity.findViewById(R.id.capture_docu_view_patient_info_image);
         activity.viewChiefComplaintImage = (Button)activity.findViewById(R.id.capture_docu_view_chief_complaint_image);
         activity.viewSocialFamilyImage = (Button)activity.findViewById(R.id.capture_docu_view_family_social_image);
@@ -103,15 +135,15 @@ public class CaptureDocumentsActivity extends AppCompatActivity implements View.
         activity.patientInfoActionButtons = (LinearLayout)findViewById(R.id.patient_info_image_action_buttons);
         activity.chiefComplaintActionButtons = (LinearLayout)findViewById(R.id.chief_complaint_image_action_buttons);
         activity.socialFamilyActionButtons = (LinearLayout)findViewById(R.id.family_social_image_action_buttons);
-        activity.patientInfoActionButtons.setVisibility(View.INVISIBLE);
-        activity.chiefComplaintActionButtons.setVisibility(View.INVISIBLE);
-        activity.socialFamilyActionButtons.setVisibility(View.INVISIBLE);
+        activity.patientInfoActionButtons.setVisibility(View.GONE);
+        activity.chiefComplaintActionButtons.setVisibility(View.GONE);
+        activity.socialFamilyActionButtons.setVisibility(View.GONE);
     }
 
     private void bindListeners(CaptureDocumentsActivity activity) {
         activity.capturePatientInfo.setOnClickListener(activity);
         activity.captureChiefComplaint.setOnClickListener(activity);
-        activity.captureSocialFamily.setOnClickListener(activity);
+        activity.captureFamilySocial.setOnClickListener(activity);
         activity.viewPatientInfoImage.setOnClickListener(activity);
         activity.viewChiefComplaintImage.setOnClickListener(activity);
         activity.viewSocialFamilyImage.setOnClickListener(activity);
@@ -129,24 +161,24 @@ public class CaptureDocumentsActivity extends AppCompatActivity implements View.
 
         if(id == R.id.capture_docu_patient_info_image) {
 
-            patientInfoImagePath = captureDocument(PATIENT_INFO_FORM_FILENAME,
+            this.patientInfoImagePath = captureDocument(PATIENT_INFO_FORM_FILENAME,
                     REQUEST_PATIENT_INFO_IMAGE);
 
         } else if(id == R.id.capture_docu_chief_complaint_image) {
 
-            chiefComplaintImagePath = captureDocument(CHIEF_COMPLAINT_FORM_FILENAME,
+            this.chiefComplaintImagePath = captureDocument(CHIEF_COMPLAINT_FORM_FILENAME,
                     REQUEST_CHIEF_COMPLAINT_IMAGE);
 
         } else if(id == R.id.capture_docu_family_social_history_image) {
 
-           familySocialHistoryImagePath = captureDocument(FAMILY_SOCIAL_HISTORY_FORM_FILENAME,
+           this.familySocialHistoryImagePath = captureDocument(FAMILY_SOCIAL_HISTORY_FORM_FILENAME,
                    REQUEST_FAMILY_SOCIAL_IMAGE);
 
         } else if(id == R.id.capture_docu_view_patient_info_image) {
 
 //            zoomImageFromThumb(viewPatientInfoImage, patientInfoImagePath);
             Intent intent = new Intent(this, ViewImageActivity.class);
-            intent.putExtra("imageUrl", patientInfoImagePath);
+            intent.putExtra("imageUrl", this.patientInfoImagePath);
             intent.putExtra("imageTitle", PATIENT_INFO_FORM_TITLE);
             startActivity(intent);
 
@@ -155,7 +187,7 @@ public class CaptureDocumentsActivity extends AppCompatActivity implements View.
 
 //            zoomImageFromThumb(viewChiefComplaintImage, chiefComplaintImagePath);
             Intent intent = new Intent(this, ViewImageActivity.class);
-            intent.putExtra("imageUrl", chiefComplaintImagePath);
+            intent.putExtra("imageUrl", this.chiefComplaintImagePath);
             intent.putExtra("imageTitle", CHIEF_COMPLAINT_FORM_TITLE);
             startActivity(intent);
 
@@ -163,36 +195,47 @@ public class CaptureDocumentsActivity extends AppCompatActivity implements View.
 
 //            zoomImageFromThumb(viewSocialFamilyImage, familySocialHistoryImagePath);
             Intent intent = new Intent(this, ViewImageActivity.class);
-            intent.putExtra("imageUrl", familySocialHistoryImagePath);
+            intent.putExtra("imageUrl", this.familySocialHistoryImagePath);
             intent.putExtra("imageTitle", FAMILY_SOCIAL_HISTORY_FORM_TITLE);
             startActivity(intent);
 
         } else if(id == R.id.capture_docu_remove_patient_info_image) {
 
+            removeImageDialog(REQUEST_PATIENT_INFO_IMAGE);
+
         } else if(id == R.id.capture_docu_remove_chief_complaint_image) {
+
+            removeImageDialog(REQUEST_CHIEF_COMPLAINT_IMAGE);
 
         } else if(id == R.id.capture_docu_remove_family_social_image) {
 
+            removeImageDialog(REQUEST_FAMILY_SOCIAL_IMAGE);
+
         } else if(id == R.id.capture_document_back_btn) {
+
+            Intent intent = new Intent(this, ViewPatientActivity.class);
+            intent.putExtra("patientId", newPatientSessionManager.getPatientInfo().get(NewPatientSessionManager.PATIENT_ID));
+            newPatientSessionManager.endSession();
+            startActivity(intent);
 
             finish();
 
         } else if(id == R.id.capture_document_next_btn) {
 
-            if(patientInfoImagePath.equals("null") || chiefComplaintImagePath.equals("null") ||
-                    familySocialHistoryImagePath.equals("null")) {
+            if(this.patientInfoImagePath.isEmpty() || this.chiefComplaintImagePath.isEmpty() ||
+                    this.familySocialHistoryImagePath.isEmpty()) {
 
-                //todo show snackbar alert missing documents
+                //  todo show snackbar alert missing documents
+                Toast.makeText(captureDocumentsActivity, "Please take a photo of all the required documents.", Toast.LENGTH_SHORT).show();
 
             } else {
 
-                newPatientSessionManager.setDocImages(patientInfoImagePath, familySocialHistoryImagePath, chiefComplaintImagePath,
+                newPatientSessionManager.setDocImages(this.patientInfoImagePath, this.familySocialHistoryImagePath, this.chiefComplaintImagePath,
                         PATIENT_INFO_FORM_TITLE, FAMILY_SOCIAL_HISTORY_FORM_TITLE, CHIEF_COMPLAINT_FORM_TITLE);
                 Intent intent = new Intent(this, RecordHpiActivity.class);
                 startActivity(intent);
 
             }
-
         }
 
     }
@@ -254,20 +297,23 @@ public class CaptureDocumentsActivity extends AppCompatActivity implements View.
 
                 case REQUEST_PATIENT_INFO_IMAGE:
 
-                    setPic(capturePatientInfo, patientInfoImagePath);
-                    patientInfoActionButtons.setVisibility(View.VISIBLE);
+                    setPic(this.patientInfoImage, this.patientInfoImagePath);
+                    this.patientInfoActionButtons.setVisibility(View.VISIBLE);
+                    this.capturePatientInfo.setVisibility(View.GONE);
                     break;
 
                 case REQUEST_CHIEF_COMPLAINT_IMAGE:
 
-                    setPic(captureChiefComplaint, chiefComplaintImagePath);
-                    chiefComplaintActionButtons.setVisibility(View.VISIBLE);
+                    setPic(this.chiefComplaintImage, this.chiefComplaintImagePath);
+                    this.chiefComplaintActionButtons.setVisibility(View.VISIBLE);
+                    this.captureChiefComplaint.setVisibility(View.GONE);
                     break;
 
                 case REQUEST_FAMILY_SOCIAL_IMAGE:
 
-                    setPic(captureSocialFamily, familySocialHistoryImagePath);
-                    socialFamilyActionButtons.setVisibility(View.VISIBLE);
+                    setPic(this.familySocialImage, this.familySocialHistoryImagePath);
+                    this.socialFamilyActionButtons.setVisibility(View.VISIBLE);
+                    this.captureFamilySocial.setVisibility(View.GONE);
                     break;
             }
         }
@@ -275,8 +321,8 @@ public class CaptureDocumentsActivity extends AppCompatActivity implements View.
 
     private void setPic(ImageView mImageView, String mCurrentPhotoPath) {
         // Get the dimensions of the View
-        int targetW = mImageView.getWidth();
-        int targetH = mImageView.getHeight();
+        int targetW = 300;//mImageView.getWidth();
+        int targetH = 220;//mImageView.getHeight();
 
         // Get the dimensions of the bitmap
         BitmapFactory.Options bmOptions = new BitmapFactory.Options();
@@ -296,165 +342,50 @@ public class CaptureDocumentsActivity extends AppCompatActivity implements View.
         mImageView.setImageBitmap(bitmap);
     }
 
-    private void zoomImageFromThumb(final View thumbView, String photoPath) {
+    private void removeImageDialog (final int type) {
 
-        // If there's an animation in progress, cancel it
-        // immediately and proceed with this one.
-        if (mCurrentAnimator != null) {
-            mCurrentAnimator.cancel();
-        }
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("REMOVE IMAGE");
+        builder.setMessage("Are you sure you want to remove the image?");
 
-        // Load the high-resolution "zoomed-in" image.
-        final ImageView expandedImageView = (ImageView)findViewById(
-                R.id.expanded_image);
-
-//        int targetW = expandedImageView.getWidth();
-//        int targetH = expandedImageView.getHeight();
-//
-//        // Get the dimensions of the bitmap
-//        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-//        bmOptions.inJustDecodeBounds = true;
-//        BitmapFactory.decodeFile(photoPath, bmOptions);
-//        int photoW = bmOptions.outWidth;
-//        int photoH = bmOptions.outHeight;
-//
-//        // Determine how much to scale down the image
-//        int scaleFactor = Math.min(photoW/targetW, photoH/targetH);
-//
-//        // Decode the image file into a Bitmap sized to fill the View
-//        bmOptions.inJustDecodeBounds = false;
-//        bmOptions.inSampleSize = scaleFactor;
-//        bmOptions.inPurgeable = true;
-
-        Bitmap bitmap = BitmapFactory.decodeFile(photoPath);
-
-        expandedImageView.setImageBitmap(bitmap);
-
-        // Calculate the starting and ending bounds for the zoomed-in image.
-        // This step involves lots of math. Yay, math.
-        final Rect startBounds = new Rect();
-        final Rect finalBounds = new Rect();
-        final Point globalOffset = new Point();
-
-        // The start bounds are the global visible rectangle of the thumbnail,
-        // and the final bounds are the global visible rectangle of the container
-        // view. Also set the container view's offset as the origin for the
-        // bounds, since that's the origin for the positioning animation
-        // properties (X, Y).
-        thumbView.getGlobalVisibleRect(startBounds);
-
-        thumbView.findViewById(R.id.container)
-                .getGlobalVisibleRect(finalBounds, globalOffset);
-        startBounds.offset(-globalOffset.x, -globalOffset.y);
-        finalBounds.offset(-globalOffset.x, -globalOffset.y);
-
-        // Adjust the start bounds to be the same aspect ratio as the final
-        // bounds using the "center crop" technique. This prevents undesirable
-        // stretching during the animation. Also calculate the start scaling
-        // factor (the end scaling factor is always 1.0).
-        float startScale;
-        if ((float) finalBounds.width() / finalBounds.height()
-                > (float) startBounds.width() / startBounds.height()) {
-            // Extend start bounds horizontally
-            startScale = (float) startBounds.height() / finalBounds.height();
-            float startWidth = startScale * finalBounds.width();
-            float deltaWidth = (startWidth - startBounds.width()) / 2;
-            startBounds.left -= deltaWidth;
-            startBounds.right += deltaWidth;
-        } else {
-            // Extend start bounds vertically
-            startScale = (float) startBounds.width() / finalBounds.width();
-            float startHeight = startScale * finalBounds.height();
-            float deltaHeight = (startHeight - startBounds.height()) / 2;
-            startBounds.top -= deltaHeight;
-            startBounds.bottom += deltaHeight;
-        }
-
-        // Hide the thumbnail and show the zoomed-in view. When the animation
-        // begins, it will position the zoomed-in view in the place of the
-        // thumbnail.
-        thumbView.setAlpha(0f);
-        expandedImageView.setVisibility(View.VISIBLE);
-
-        // Set the pivot point for SCALE_X and SCALE_Y transformations
-        // to the top-left corner of the zoomed-in view (the default
-        // is the center of the view).
-        expandedImageView.setPivotX(0f);
-        expandedImageView.setPivotY(0f);
-
-        // Construct and run the parallel animation of the four translation and
-        // scale properties (X, Y, SCALE_X, and SCALE_Y).
-        AnimatorSet set = new AnimatorSet();
-        set
-                .play(ObjectAnimator.ofFloat(expandedImageView, View.X,
-                        startBounds.left, finalBounds.left))
-                .with(ObjectAnimator.ofFloat(expandedImageView, View.Y,
-                        startBounds.top, finalBounds.top))
-                .with(ObjectAnimator.ofFloat(expandedImageView, View.SCALE_X,
-                        startScale, 1f)).with(ObjectAnimator.ofFloat(expandedImageView,
-                View.SCALE_Y, startScale, 1f));
-        set.setDuration(mShortAnimationDuration);
-        set.setInterpolator(new DecelerateInterpolator());
-        set.addListener(new AnimatorListenerAdapter() {
+        // Set up the buttons
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
             @Override
-            public void onAnimationEnd(Animator animation) {
-                mCurrentAnimator = null;
-            }
+            public void onClick(DialogInterface dialog, int which) {
 
-            @Override
-            public void onAnimationCancel(Animator animation) {
-                mCurrentAnimator = null;
-            }
-        });
-        set.start();
-        mCurrentAnimator = set;
+                if(type == REQUEST_PATIENT_INFO_IMAGE) {
 
-        // Upon clicking the zoomed-in image, it should zoom back down
-        // to the original bounds and show the thumbnail instead of
-        // the expanded image.
-        final float startScaleFinal = startScale;
-        expandedImageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (mCurrentAnimator != null) {
-                    mCurrentAnimator.cancel();
+                    patientInfoImage.setImageResource(R.drawable.ic_insert_photo);
+                    patientInfoImagePath = "";
+                    patientInfoActionButtons.setVisibility(View.GONE);
+                    capturePatientInfo.setVisibility(View.VISIBLE);
+
+                } else if (type == REQUEST_CHIEF_COMPLAINT_IMAGE) {
+
+                    chiefComplaintImage.setImageResource(R.drawable.ic_insert_photo);
+                    chiefComplaintImagePath = "";
+                    chiefComplaintActionButtons.setVisibility(View.GONE);
+                    captureChiefComplaint.setVisibility(View.VISIBLE);
+
+                } else if (type == REQUEST_FAMILY_SOCIAL_IMAGE) {
+
+                    familySocialImage.setImageResource(R.drawable.ic_insert_photo);
+                    familySocialHistoryImagePath = "";
+                    socialFamilyActionButtons.setVisibility(View.GONE);
+                    captureFamilySocial.setVisibility(View.VISIBLE);
+
                 }
-
-                // Animate the four positioning/sizing properties in parallel,
-                // back to their original values.
-                AnimatorSet set = new AnimatorSet();
-                set.play(ObjectAnimator
-                        .ofFloat(expandedImageView, View.X, startBounds.left))
-                        .with(ObjectAnimator
-                                .ofFloat(expandedImageView,
-                                        View.Y,startBounds.top))
-                        .with(ObjectAnimator
-                                .ofFloat(expandedImageView,
-                                        View.SCALE_X, startScaleFinal))
-                        .with(ObjectAnimator
-                                .ofFloat(expandedImageView,
-                                        View.SCALE_Y, startScaleFinal));
-                set.setDuration(mShortAnimationDuration);
-                set.setInterpolator(new DecelerateInterpolator());
-                set.addListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        thumbView.setAlpha(1f);
-                        expandedImageView.setVisibility(View.GONE);
-                        mCurrentAnimator = null;
-                    }
-
-                    @Override
-                    public void onAnimationCancel(Animator animation) {
-                        thumbView.setAlpha(1f);
-                        expandedImageView.setVisibility(View.GONE);
-                        mCurrentAnimator = null;
-                    }
-                });
-                set.start();
-                mCurrentAnimator = set;
             }
         });
+
+        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        builder.show();
     }
 
     public static CaptureDocumentsActivity getInstance() {
