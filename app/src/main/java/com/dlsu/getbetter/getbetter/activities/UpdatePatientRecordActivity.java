@@ -1,14 +1,15 @@
 package com.dlsu.getbetter.getbetter.activities;
 
 import android.app.Activity;
-import android.app.DatePickerDialog;
-import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,39 +17,45 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.DatePicker;
-import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.Spinner;
-import android.widget.TextView;
 
 import com.dlsu.getbetter.getbetter.DirectoryConstants;
 import com.dlsu.getbetter.getbetter.R;
-import com.dlsu.getbetter.getbetter.activities.ExistingPatientActivity;
 import com.dlsu.getbetter.getbetter.database.DataAdapter;
 import com.dlsu.getbetter.getbetter.objects.Patient;
 
 import java.io.File;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 import java.util.StringTokenizer;
 
-public class UpdatePatientRecordActivity extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemSelectedListener {
+import de.hdodenhof.circleimageview.CircleImageView;
+import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
+
+public class UpdatePatientRecordActivity extends AppCompatActivity implements View.OnClickListener,
+        AdapterView.OnItemSelectedListener, DatePickerDialog.OnDateSetListener {
+
+    private Button submitBtn;
+    private Button backBtn;
+    private CircleImageView profileImage;
+    private Spinner genderSpinner;
+    private Spinner civilStatusSpinner;
+    private Spinner bloodTypeSpinner;
+    private TextInputEditText firstNameInput;
+    private TextInputEditText middleNameInput;
+    private TextInputEditText lastNameInput;
+    private TextInputEditText birthdateInput;
 
     private DataAdapter getBetterDb;
-    private EditText firstNameInput;
-    private EditText middleNameInput;
-    private EditText lastNameInput;
-    private TextView displayBirthday;
-    private ImageView setProfilePicBtn;
-    private int year, month, day;
+    private Patient patient;
     private long patientId;
     private String birthDate;
     private String genderSelected;
     private String civilStatusSelected;
-    private String profilePicTitle;
+    private String bloodTypeSelected;
     private String profilePicPath;
 
     private static final int REQUEST_IMAGE1 = 100;
@@ -58,7 +65,7 @@ public class UpdatePatientRecordActivity extends AppCompatActivity implements Vi
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.fragment_new_patient);
+        setContentView(R.layout.activity_new_patient_info);
 
         Bundle extras = getIntent().getExtras();
         patientId = 0;
@@ -70,78 +77,50 @@ public class UpdatePatientRecordActivity extends AppCompatActivity implements Vi
         Log.e("patient id", patientId + "");
 
         initializeDatabase();
-        Patient patient = getPatientInfo(patientId);
+        patient = getPatientInfo(patientId);
+        bindViews(this);
+        initGenderAdapter(this);
+        initCivilStatusAdapter(this);
+        initBloodTypeAdapter(this);
+        showDatePlaceholder();
+        bindListeners(this);
 
-        Button submitBtn = (Button)findViewById(R.id.new_patient_next_btn);
-        Button setBirthday = (Button)findViewById(R.id.new_patient_set_birthday_btn);
-        Spinner genderSpinner = (Spinner)findViewById(R.id.gender_spinner);
-        Spinner civilStatusSpinner = (Spinner)findViewById(R.id.civil_status_spinner);
-        firstNameInput = (EditText)findViewById(R.id.first_name_input);
-        middleNameInput = (EditText)findViewById(R.id.middle_name_input);
-        lastNameInput = (EditText)findViewById(R.id.last_name_input);
-        setProfilePicBtn = (ImageView)findViewById(R.id.profile_picture_select);
-        displayBirthday = (TextView)findViewById(R.id.display_birthday);
-        TextView profilePicPlaceHolder = (TextView) findViewById(R.id.profile_picture_select_placeholder);
 
+    }
+
+    private void bindViews(UpdatePatientRecordActivity activity) {
+
+        activity.profileImage = (CircleImageView)activity.findViewById(R.id.profile_picture_select);
+        activity.firstNameInput = (TextInputEditText)activity.findViewById(R.id.first_name_input);
+        activity.middleNameInput = (TextInputEditText)activity.findViewById(R.id.middle_name_input);
+        activity.lastNameInput = (TextInputEditText)activity.findViewById(R.id.last_name_input);
+        activity.birthdateInput = (TextInputEditText)activity.findViewById(R.id.birthdate_input);
+        activity.genderSpinner = (Spinner)activity.findViewById(R.id.gender_spinner);
+        activity.civilStatusSpinner = (Spinner)activity.findViewById(R.id.civil_status_spinner);
+        activity.bloodTypeSpinner = (Spinner)activity.findViewById(R.id.blood_type_spinner);
+        activity.backBtn = (Button)activity.findViewById(R.id.new_patient_back_btn);
+        activity.submitBtn = (Button)activity.findViewById(R.id.new_patient_next_btn);
+
+        activity.firstNameInput.setError(null);
+        activity.lastNameInput.setError(null);
         firstNameInput.setText(patient.getFirstName());
         middleNameInput.setText(patient.getMiddleName());
         lastNameInput.setText(patient.getLastName());
         profilePicPath = patient.getProfileImageBytes();
-        setPic(setProfilePicBtn, patient.getProfileImageBytes());
+        activity.submitBtn.setText(R.string.save);
+        setPic(profileImage, patient.getProfileImageBytes());
 
-        if (profilePicPlaceHolder != null) {
-            profilePicPlaceHolder.setText("");
-        }
+    }
 
-        ArrayAdapter<CharSequence> genderAdapter = ArrayAdapter.createFromResource(this,
-                R.array.genders, android.R.layout.simple_spinner_item);
+    private void bindListeners(UpdatePatientRecordActivity activity) {
 
-        ArrayAdapter<CharSequence> civilStatusAdapter = ArrayAdapter.createFromResource(this,
-                R.array.civil_statuses, android.R.layout.simple_spinner_item);
-
-        genderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        civilStatusAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
-        if (genderSpinner != null) {
-            genderSpinner.setAdapter(genderAdapter);
-        }
-        if (civilStatusSpinner != null) {
-            civilStatusSpinner.setAdapter(civilStatusAdapter);
-        }
-
-        if (submitBtn != null) {
-            submitBtn.setText(R.string.submit_button_text);
-        }
-
-        if (submitBtn != null) {
-            submitBtn.setOnClickListener(this);
-        }
-
-        if (setBirthday != null) {
-            setBirthday.setOnClickListener(this);
-        }
-
-        if (genderSpinner != null) {
-            genderSpinner.setOnItemSelectedListener(this);
-        }
-
-        if (civilStatusSpinner != null) {
-            civilStatusSpinner.setOnItemSelectedListener(this);
-        }
-
-        setProfilePicBtn.setOnClickListener(this);
-
-        if(patient.getBirthdate() != null) {
-
-            StringTokenizer token = new StringTokenizer(patient.getBirthdate(), "-");
-            year = Integer.parseInt(token.nextElement().toString());
-            month = Integer.parseInt(token.nextElement().toString());
-            day = Integer.parseInt(token.nextElement().toString());
-        }
-
-        showDate(year, month, day);
-
-
+        activity.profileImage.setOnClickListener(this);
+        activity.birthdateInput.setOnClickListener(this);
+        activity.genderSpinner.setOnItemSelectedListener(this);
+        activity.civilStatusSpinner.setOnItemSelectedListener(this);
+        activity.bloodTypeSpinner.setOnItemSelectedListener(this);
+        activity.backBtn.setOnClickListener(this);
+        activity.submitBtn.setOnClickListener(this);
     }
 
     @Override
@@ -151,21 +130,24 @@ public class UpdatePatientRecordActivity extends AppCompatActivity implements Vi
 
         if(id == R.id.new_patient_next_btn) {
 
-            savePatientInfo();
-            Intent intent = new Intent(this, ExistingPatientActivity.class);
-            startActivity(intent);
-            finish();
+            if(checkForMissingFields()) {
+
+            } else {
+                new UpdatePatientInfoTask().execute();
+            }
+
 
         } else if (id == R.id.profile_picture_select) {
 
             takePicture();
 
-        } else if (id == R.id.new_patient_set_birthday_btn) {
-
-            showDialog(999);
-        } else if (id == R.id.newpatient_fragment_back_btn) {
+        } else if (id == R.id.new_patient_back_btn) {
 
             finish();
+        } else if (id == R.id.birthdate_input) {
+
+            datePickerDialog();
+
         }
     }
 
@@ -196,36 +178,22 @@ public class UpdatePatientRecordActivity extends AppCompatActivity implements Vi
         return patient;
 
     }
-    private void showDate (int year, int month, int day) {
-        String sMonth = month + "";
-        String sDay = day + "";
 
-        if(month < 10) {
-            sMonth = "0" + sMonth;
-        }
-
-        if(day < 10) {
-            sDay = "0" + sDay;
-        }
-
-        displayBirthday.setText(new StringBuilder().append(year).append("-")
-                .append(sMonth).append("-").append(sDay));
-    }
-
-    private void savePatientInfo() {
+    private int savePatientInfo() {
 
         String firstName = firstNameInput.getText().toString();
         String middleName = middleNameInput.getText().toString();
         String lastName = lastNameInput.getText().toString();
+        int result;
 
         Patient newPatient = new Patient(firstName, middleName, lastName,
                 birthDate, genderSelected, civilStatusSelected, profilePicPath);
 
-        Log.d("First Name", newPatient.getFirstName());
-        Log.d("Middle Name", newPatient.getMiddleName());
-        Log.d("Last Name", newPatient.getLastName());
-        Log.d("Gender", newPatient.getGender());
-        Log.d("Civil Status", newPatient.getCivilStatus());
+//        Log.d("First Name", newPatient.getFirstName());
+//        Log.d("Middle Name", newPatient.getMiddleName());
+//        Log.d("Last Name", newPatient.getLastName());
+//        Log.d("Gender", newPatient.getGender());
+//        Log.d("Civil Status", newPatient.getCivilStatus());
 
         try {
             getBetterDb.openDatabase();
@@ -233,94 +201,134 @@ public class UpdatePatientRecordActivity extends AppCompatActivity implements Vi
             e.printStackTrace();
         }
 
-        getBetterDb.updatePatientInfo(newPatient, patientId);
+        result = getBetterDb.updatePatientInfo(newPatient, patientId);
         getBetterDb.closeDatabase();
 
+        return result;
+
     }
 
-    @Override
-    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+    private class UpdatePatientInfoTask extends AsyncTask<String, Void, Integer> {
 
-        switch(parent.getId()) {
-            case R.id.gender_spinner:
-                genderSelected = (parent.getItemAtPosition(position)).toString();
-                break;
+        ProgressDialog progressDialog = new ProgressDialog(UpdatePatientRecordActivity.this);
 
-            case R.id.civil_status_spinner:
-                civilStatusSelected = (parent.getItemAtPosition(position)).toString();
-                break;
-
-        }
-    }
-
-    @Override
-    public void onNothingSelected(AdapterView<?> parent) {
-
-        switch(parent.getId()) {
-            case R.id.gender_spinner:
-                genderSelected = (parent.getSelectedItem()).toString();
-                break;
-
-            case R.id.civil_status_spinner:
-                civilStatusSelected = (parent.getSelectedItem()).toString();
-                break;
-
-        }
-    }
-
-    @Override
-    protected Dialog onCreateDialog(int id) {
-
-        if (id == 999) {
-            return new DatePickerDialog(this, myDateListener, year, month, day);
-        }
-        return null;
-    }
-
-    private DatePickerDialog.OnDateSetListener myDateListener = new DatePickerDialog.OnDateSetListener() {
         @Override
-        public void onDateSet(DatePicker arg0, int arg1, int arg2, int arg3) {
-            // arg1 = year
-            // arg2 = month
-            // arg3 = day
-            showDate(arg1, arg2+1, arg3);
-            arg2 += 1;
-            String month = arg2 + "";
-            String day = arg3 + "";
-
-            if(arg2 < 10) {
-                month = "0" + arg2;
-            }
-
-            if(arg3 < 10) {
-                day = "0" + arg3;
-            }
-
-            birthDate = arg1 + "-" + month + "-" + day;
+        protected void onPreExecute() {
+            this.progressDialog.setMessage("Updating Patient Info...");
+            this.progressDialog.show();
         }
-    };
+
+        @Override
+        protected Integer doInBackground(String... strings) {
+
+            return savePatientInfo();
+
+        }
+
+        @Override
+        protected void onPostExecute(Integer aInt) {
+            super.onPostExecute(aInt);
+            if (this.progressDialog.isShowing()) {
+                this.progressDialog.dismiss();
+            }
+
+            Intent intent = new Intent(UpdatePatientRecordActivity.this, ViewPatientActivity.class);
+            intent.putExtra("patientId", patientId);
+            startActivity(intent);
+            finish();
+
+
+        }
+    }
+
+    private boolean checkForMissingFields () {
+
+        String firstName = firstNameInput.getText().toString();
+        String lastName = lastNameInput.getText().toString();
+
+        if(firstName.trim().length() <= 0) {
+            firstNameInput.setError("First name is required");
+            firstNameInput.requestFocus();
+        }
+
+        if(lastName.trim().length() <= 0) {
+            lastNameInput.setError("Last name is required");
+            lastNameInput.requestFocus();
+        }
+
+        return firstNameInput.getText().toString().trim().length() <= 0 || lastNameInput.getText().toString().trim().length() <= 0
+                || birthDate.trim().length() <= 0 || profilePicPath.trim().length() <= 0;
+    }
+
+
+
+    private void datePickerDialog() {
+
+        Calendar now = Calendar.getInstance();
+        com.wdullaer.materialdatetimepicker.date.DatePickerDialog dpd = com.wdullaer.materialdatetimepicker.date.DatePickerDialog.newInstance(UpdatePatientRecordActivity.this,
+                now.get(Calendar.YEAR),
+                now.get(Calendar.MONTH),
+                now.get(Calendar.DAY_OF_MONTH));
+
+        dpd.setThemeDark(true);
+        dpd.setTitle("Birthdate");
+        dpd.showYearPickerFirst(true);
+        dpd.setMaxDate(Calendar.getInstance());
+        dpd.show(getFragmentManager(), "DatePickerDialog");
+
+    }
+
+    @Override
+    public void onDateSet(com.wdullaer.materialdatetimepicker.date.DatePickerDialog view, int year, int monthOfYear, int dayOfMonth) {
+
+        monthOfYear += 1;
+        String month = monthOfYear + "";
+        String day = dayOfMonth + "";
+
+        if(monthOfYear < 10) {
+            month = "0" + monthOfYear;
+        }
+
+        if(dayOfMonth < 10) {
+            day = "0" + dayOfMonth;
+        }
+
+        birthDate = year + "-" + month + "-" + day;
+        String date = day + "/" + month + "/" + year;
+        birthdateInput.setText(date);
+    }
+
+    private void showDatePlaceholder() {
+
+        StringTokenizer token = new StringTokenizer(patient.getBirthdate(), "-");
+        int year = Integer.parseInt(token.nextElement().toString());
+        int month = Integer.parseInt(token.nextElement().toString());
+        int day = Integer.parseInt(token.nextElement().toString());
+
+//        month += 1;
+        String monthString = month + "";
+        String dayString = day + "";
+
+        if(month < 10) {
+            monthString = "0" + month;
+        }
+
+        if(day < 10) {
+            dayString = "0" + day;
+        }
+
+        birthDate = year + "-" + month + "-" + day;
+        String date = dayString + "/" + monthString + "/" + year;
+        birthdateInput.setText(date);
+    }
 
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
         if(requestCode == REQUEST_IMAGE1 && resultCode == Activity.RESULT_OK) {
-
-            setPic(setProfilePicBtn, fileUri.getPath());
-
-//            Bitmap photo = (Bitmap)data.getExtras().get("data");
-//            setProfilePicBtn.setImageBitmap(photo);
-//            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-//            if (photo != null) {
-//                photo.compress(Bitmap.CompressFormat.PNG, 100, baos);
-//            }
-//            byte[] b = baos.toByteArray();
-//
-//            encoded = Base64.encodeToString(b, Base64.DEFAULT);
-//
-//
-//            Log.d("image byte", encoded + "");
-
+            setPic(profileImage, fileUri.getPath());
+            profilePicPath = fileUri.getPath();
         }
     }
 
@@ -328,6 +336,7 @@ public class UpdatePatientRecordActivity extends AppCompatActivity implements Vi
 
         File mediaStorageDir = new File (Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
                 DirectoryConstants.PROFILE_IMAGE_DIRECTORY_NAME);
+
 
         if (!mediaStorageDir.exists()) {
             if (!mediaStorageDir.mkdirs()) {
@@ -337,8 +346,7 @@ public class UpdatePatientRecordActivity extends AppCompatActivity implements Vi
             }
         }
 
-
-        return new File (mediaStorageDir.getPath() + File.pathSeparator + "ProfileIMG_" + getTimeStamp() + ".jpg");
+        return new File (mediaStorageDir.getPath() + File.separator + "profile_image_" + getTimeStamp() + ".jpg");
     }
 
     private void takePicture() {
@@ -351,10 +359,10 @@ public class UpdatePatientRecordActivity extends AppCompatActivity implements Vi
 
     }
 
-    private void setPic(ImageView mImageView, String mCurrentPhotoPath) {
+    private void setPic(CircleImageView mImageView, String mCurrentPhotoPath) {
         // Get the dimensions of the View
-        int targetW = 255; //mImageView.getWidth();
-        int targetH = 138; //mImageView.getHeight();
+        int targetW = 255;//mImageView.getWidth();
+        int targetH = 150;//mImageView.getHeight();
 
         // Get the dimensions of the bitmap
         BitmapFactory.Options bmOptions = new BitmapFactory.Options();
@@ -375,6 +383,75 @@ public class UpdatePatientRecordActivity extends AppCompatActivity implements Vi
     }
 
     private String getTimeStamp() {
-        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
+        return new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss", Locale.getDefault()).format(new Date());
+    }
+
+    private void initGenderAdapter(UpdatePatientRecordActivity activity) {
+
+        ArrayAdapter<CharSequence> genderAdapter = ArrayAdapter.createFromResource(activity,
+                R.array.genders, android.R.layout.simple_spinner_item);
+        genderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        activity.genderSpinner.setAdapter(genderAdapter);
+        int position = genderAdapter.getPosition(patient.getGender());
+        activity.genderSpinner.setSelection(position);
+    }
+
+    private void initCivilStatusAdapter(UpdatePatientRecordActivity activity) {
+
+        ArrayAdapter<CharSequence> civilStatusAdapter = ArrayAdapter.createFromResource(activity,
+                R.array.civil_statuses, android.R.layout.simple_spinner_item);
+        civilStatusAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        activity.civilStatusSpinner.setAdapter(civilStatusAdapter);
+        int position = civilStatusAdapter.getPosition(patient.getCivilStatus());
+        activity.civilStatusSpinner.setSelection(position);
+    }
+
+    private void initBloodTypeAdapter(UpdatePatientRecordActivity activity) {
+
+        ArrayAdapter<CharSequence> bloodTypeAdapter = ArrayAdapter.createFromResource(activity,
+                R.array.blood_type, android.R.layout.simple_spinner_item);
+        bloodTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        activity.bloodTypeSpinner.setAdapter(bloodTypeAdapter);
+        int position = bloodTypeAdapter.getPosition(patient.getBloodType());
+        activity.bloodTypeSpinner.setSelection(position);
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long l) {
+
+        switch(parent.getId()) {
+            case R.id.gender_spinner:
+                genderSelected = (parent.getItemAtPosition(position)).toString();
+                break;
+
+            case R.id.civil_status_spinner:
+                civilStatusSelected = (parent.getItemAtPosition(position)).toString();
+                break;
+
+            case R.id.blood_type_spinner:
+                bloodTypeSelected = (parent.getItemAtPosition(position)).toString();
+                break;
+        }
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+
+        switch(parent.getId()) {
+            case R.id.gender_spinner:
+                genderSelected = (parent.getSelectedItem()).toString();
+//                genderSelected = genderChoice.getText().toString();
+                break;
+
+            case R.id.civil_status_spinner:
+                civilStatusSelected = (parent.getSelectedItem()).toString();
+//                civilStatusSelected = civilStatusChoice.getText().toString();
+                break;
+
+            case R.id.blood_type_spinner:
+                bloodTypeSelected = (parent.getSelectedItem()).toString();
+                break;
+
+        }
     }
 }
