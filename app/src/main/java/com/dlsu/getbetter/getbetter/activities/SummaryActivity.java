@@ -51,6 +51,8 @@ import java.util.Locale;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
+// TODO: 06/12/2016 record audio function
+
 public class SummaryActivity extends AppCompatActivity implements View.OnClickListener, MediaController.MediaPlayerControl {
 
     private static final String TAG = "SummaryActivity";
@@ -73,15 +75,17 @@ public class SummaryActivity extends AppCompatActivity implements View.OnClickLi
     private Button cancelRecording;
     private Button saveRecording;
     private CardView recordAudioContainer;
+    private TextView secondsView;
+    private TextView minutesView;
 
     private NewPatientSessionManager newPatientDetails;
     private MediaRecorder hpiRecorder;
     private MediaPlayer nMediaPlayer;
+    private MediaPlayer mp;
     private MediaController nMediaController;
     private Handler nHandler = new Handler();
     private Uri fileUri;
     private String audioOutputFile;
-    private Patient patient;
 
     private DataAdapter getBetterDb;
     private FileAttachmentsAdapter fileAdapter;
@@ -109,11 +113,15 @@ public class SummaryActivity extends AppCompatActivity implements View.OnClickLi
 
     private static final int REQUEST_IMAGE_ATTACHMENT = 100;
     private static final int REQUEST_VIDEO_ATTACHMENT = 200;
-    private static final int REQUEST_AUDIO_ATTACHMENT = 300;
 
     private static final int MEDIA_TYPE_IMAGE = 1;
     private static final int MEDIA_TYPE_VIDEO = 2;
     private static final int MEDIA_TYPE_AUDIO = 3;
+
+    private Handler handler;
+    private boolean isRecording;
+    private int seconds, minutes, recordTime;
+
 
 
     @Override
@@ -149,7 +157,7 @@ public class SummaryActivity extends AppCompatActivity implements View.OnClickLi
         initializeAttachmentList(this);
         initializeMediaPlayer(this);
 
-        caseRecordId = generateCaseRecordId(patientId);
+        caseRecordId = generateCaseRecordId();
         controlNumber = generateControlNumber(patientId);
 
     }
@@ -214,10 +222,14 @@ public class SummaryActivity extends AppCompatActivity implements View.OnClickLi
         fileAdapter.SetOnItemClickListener(new FileAttachmentsAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                Intent intent = new Intent(SummaryActivity.this, ViewImageActivity.class);
-                intent.putExtra("imageUrl", attachments.get(position).getAttachmentPath());
-                intent.putExtra("imageTitle", attachments.get(position).getAttachmentDescription());
-                startActivity(intent);
+
+                if(attachments.get(position).getAttachmentType() == 1) {
+                    Intent intent = new Intent(SummaryActivity.this, ViewImageActivity.class);
+                    intent.putExtra("imageUrl", attachments.get(position).getAttachmentPath());
+                    intent.putExtra("imageTitle", attachments.get(position).getAttachmentDescription());
+                    startActivity(intent);
+                }
+
             }
         });
 
@@ -320,7 +332,8 @@ public class SummaryActivity extends AppCompatActivity implements View.OnClickLi
 
         } else if(id == R.id.summary_page_rec_sound_btn) {
 
-            initializeMediaRecorder();
+//            initializeMediaRecorder();
+            featureAlertMessage();
 
         } else if(id == R.id.summary_page_audio_record_btn) {
 
@@ -360,27 +373,35 @@ public class SummaryActivity extends AppCompatActivity implements View.OnClickLi
     private String generateControlNumber(long pId) {
 
         String result;
-        String firstChar = patientFirstName.substring(0, 1).toUpperCase();
-        String secondChar = patientLastName.substring(0, 1).toUpperCase();
-        String patientIdChar = String.valueOf(pId);
-
-        result = firstChar + secondChar + patientIdChar + "-" + caseRecordId;
-        Log.e("control number", result);
-
-        return result;
-    }
-
-    private int generateCaseRecordId(long patientId) {
-
-        ArrayList<Integer> storedIds;
-        int caseRecordId;
         int a = 251;
         int c = 134;
         int m = 312;
         int generatedRandomId = m / 2;
 
         generatedRandomId = (a * generatedRandomId + c) % m;
-        caseRecordId = Integer.parseInt(patientId + Integer.toString(generatedRandomId));
+
+        String firstChar = patientFirstName.substring(0, 1).toUpperCase();
+        String secondChar = patientLastName.substring(0, 1).toUpperCase();
+        String lastChar = patientLastName.substring(patientLastName.length() - 1, patientLastName.length()).toUpperCase();
+        String patientIdChar = String.valueOf(pId);
+
+        result = firstChar + secondChar + patientIdChar + "-" + generatedRandomId + lastChar;
+        Log.e("control number", result);
+
+        return result;
+    }
+
+    private int generateCaseRecordId() {
+
+        ArrayList<Integer> storedIds;
+        int caseRecordId = 1;
+//        int a = 251;
+//        int c = 134;
+//        int m = 312;
+//        int generatedRandomId = m / 2;
+//
+//        generatedRandomId = (a * generatedRandomId + c) % m;
+//        caseRecordId = Integer.parseInt(patientId + Integer.toString(generatedRandomId));
 
         try {
             getBetterDb.openDatabase();
@@ -395,9 +416,8 @@ public class SummaryActivity extends AppCompatActivity implements View.OnClickLi
         if(storedIds.isEmpty()) {
             return caseRecordId;
         } else {
-            while(storedIds.contains(caseRecordId)) {
-                generatedRandomId = (a * generatedRandomId + c) % m;
-                caseRecordId = Integer.parseInt(Long.toString(patientId) + Integer.toString(generatedRandomId));
+            while (storedIds.contains(caseRecordId)){
+                caseRecordId += 1;
             }
 
             return caseRecordId;
@@ -406,8 +426,7 @@ public class SummaryActivity extends AppCompatActivity implements View.OnClickLi
 
     private void initializeMediaRecorder() {
 
-        audioOutputFile = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC).getAbsolutePath() + "/" +
-                caseRecordId + "_audio_recording_" + getDateStamp() + ".3gp";
+        audioOutputFile = getOutputMediaFileUri(MEDIA_TYPE_AUDIO).getPath();
         hpiRecorder = new MediaRecorder();
         hpiRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         hpiRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
@@ -444,7 +463,7 @@ public class SummaryActivity extends AppCompatActivity implements View.OnClickLi
 
     private void playRecording() {
 
-        MediaPlayer mp = new MediaPlayer();
+        mp = new MediaPlayer();
 
         try {
 
@@ -504,7 +523,7 @@ public class SummaryActivity extends AppCompatActivity implements View.OnClickLi
 
     private File createMediaFile(int type) {
 
-        String timeStamp = getTimeStamp().substring(0, 9);
+        String timeStamp = getTimeStamp();
         File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS),
                 DirectoryConstants.CASE_RECORD_ATTACHMENT_DIRECTORY_NAME);
 
@@ -520,15 +539,15 @@ public class SummaryActivity extends AppCompatActivity implements View.OnClickLi
 
         if(type == MEDIA_TYPE_IMAGE) {
 
-            mediaFile = new File(mediaStorageDir.getPath() + File.separator + "IMG_" + timeStamp + ".jpg");
+            mediaFile = new File(mediaStorageDir.getPath() + File.separator + "image_attachment_" + timeStamp + ".jpg");
 
         } else if (type == MEDIA_TYPE_VIDEO) {
 
-            mediaFile = new File(mediaStorageDir.getPath() + File.separator + "VID_" + timeStamp + ".mp4");
+            mediaFile = new File(mediaStorageDir.getPath() + File.separator + "video_attachment_" + timeStamp + ".mp4");
 
         } else if (type == MEDIA_TYPE_AUDIO) {
 
-            mediaFile = new File(mediaStorageDir.getPath() + File.separator + "AUD_" + timeStamp + ".3gp");
+            mediaFile = new File(mediaStorageDir.getPath() + File.separator + "audio_attachment_" + timeStamp + ".3gp");
 
         } else {
             return null;
@@ -681,7 +700,7 @@ public class SummaryActivity extends AppCompatActivity implements View.OnClickLi
     }
 
     private String getTimeStamp() {
-        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
+        return new SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault()).format(new Date());
     }
 
     private String getDateStamp() {
@@ -699,7 +718,7 @@ public class SummaryActivity extends AppCompatActivity implements View.OnClickLi
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Feature Not Available!");
-        builder.setMessage("Sorry! This feature is still under construction. :)");
+        builder.setMessage("Sorry! This feature is still under development.");
 
         builder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
             @Override
@@ -719,9 +738,6 @@ public class SummaryActivity extends AppCompatActivity implements View.OnClickLi
             e.printStackTrace();
         }
 
-//        Log.e("id", caseRecordId + "");
-//        Log.e("patientId", patientId + "");
-//        Log.e("chiefComplaintText", chiefComplaintText);
 
         getBetterDb.insertCaseRecord(caseRecordId, patientId, healthCenterId, chiefComplaint,
                 controlNumber);
@@ -738,7 +754,6 @@ public class SummaryActivity extends AppCompatActivity implements View.OnClickLi
             e.printStackTrace();
         }
 
-        Log.e("history id", caseRecordId + "");
         getBetterDb.insertCaseRecordHistory(caseRecordId, userId, getDateStamp());
 
         getBetterDb.closeDatabase();
@@ -756,6 +771,7 @@ public class SummaryActivity extends AppCompatActivity implements View.OnClickLi
 
             Log.d(TAG, "insertCaseRecordAttachments: " + attachments.get(i).getAttachmentPath());
             attachments.get(i).setCaseRecordId(caseRecordId);
+            attachments.get(i).setUploadedBy(userId);
             getBetterDb.insertCaseRecordAttachments(attachments.get(i));
         }
 
@@ -862,6 +878,55 @@ public class SummaryActivity extends AppCompatActivity implements View.OnClickLi
             nMediaController.hide();
         }
     }
+
+    Runnable UpdateRecordTime = new Runnable() {
+        @Override
+        public void run() {
+            if(isRecording) {
+                if(seconds < 10) {
+                    secondsView.setText("0" + seconds);
+                }
+                else {
+                    secondsView.setText(String.valueOf(seconds));
+                }
+
+                recordTime += 1;
+                seconds += 1;
+
+                if(seconds > 60) {
+                    seconds = 0;
+                    minutes += 1;
+                    minutesView.setText("0" + minutes);
+                }
+                handler.postDelayed(this, 1000);
+            }
+        }
+    };
+
+    Runnable UpdatePlayTime = new Runnable() {
+        @Override
+        public void run() {
+            if(mp.isPlaying()) {
+
+                if(seconds < 10) {
+                    secondsView.setText("0" + seconds);
+                }
+                else {
+                    secondsView.setText(String.valueOf(seconds));
+                }
+
+                seconds += 1;
+
+                if(seconds > 60) {
+                    seconds = 0;
+                    minutes += 1;
+                    minutesView.setText("0" + minutes);
+                }
+                handler.postDelayed(this, 1000);
+
+            }
+        }
+    };
 
 
 }
