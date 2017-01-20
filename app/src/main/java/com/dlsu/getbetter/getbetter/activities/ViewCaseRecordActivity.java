@@ -35,7 +35,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ViewCaseRecordActivity extends AppCompatActivity implements MediaController.MediaPlayerControl, View.OnClickListener {
 
-    private static String TAG = "ViewCaseRecordActivity";
+    private static final String TAG = "ViewCaseRecordActivity";
 
     private TextView patientName;
     private TextView healthCenterName;
@@ -144,6 +144,7 @@ public class ViewCaseRecordActivity extends AppCompatActivity implements MediaCo
         controlNumber.setText(caseRecord.getCaseRecordControlNumber());
         patientName.setText(fullName);
         healthCenterName.setText(getHealthCenterString(healthCenterId));
+        activity.updateCaseBtn.setVisibility(View.INVISIBLE);
 
     }
 

@@ -13,6 +13,7 @@ public class Attachment {
     private String attachmentDescription;
     private int attachmentType;
     private String uploadedDate;
+    private int uploadedBy;
     private File fileName;
 
     public Attachment(String attachmentPath, String attachmentDescription, int attachmentType, String uploadedDate) {
@@ -28,12 +29,13 @@ public class Attachment {
     }
 
     public Attachment(int caseRecordId, String attachmentPath, String attachmentDescription,
-                      int attachmentType, String uploadedDate) {
+                      int attachmentType, String uploadedDate, int uploadedBy) {
         this.caseRecordId = caseRecordId;
         this.attachmentPath = attachmentPath;
         this.attachmentDescription = attachmentDescription;
         this.attachmentType = attachmentType;
         this.uploadedDate = uploadedDate;
+        this.uploadedBy = uploadedBy;
     }
 
     public Attachment(String attachmentPath, File fileName) {
@@ -87,5 +89,13 @@ public class Attachment {
 
     public void setFileName(File fileName) {
         this.fileName = fileName;
+    }
+
+    public int getUploadedBy() {
+        return uploadedBy;
+    }
+
+    public void setUploadedBy(int uploadedBy) {
+        this.uploadedBy = uploadedBy;
     }
 }

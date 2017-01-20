@@ -99,4 +99,9 @@
     <string name="recording_progress_zero">00</string>
     <string name="colon">:</string>
     <string name="recording_status">Recording...</string>
+    <string name="age">Age</string>
+    <string name="click_to_change_profile_image">Tap to change Profile Image</string>
+    <string name="done">Done</string>
+    <string name="save">Save</string>
+    <string name="record_audio">Record Audio</string>
 </resources>

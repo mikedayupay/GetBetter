@@ -107,7 +107,7 @@
                     android:layout_alignParentEnd="true"
                     android:paddingRight="30dp"
                     android:paddingLeft="30dp"
-                        android:layout_alignBottom="@+id/current_health_center_container" />
+                    android:layout_alignBottom="@+id/current_health_center_container" />
 
 
 

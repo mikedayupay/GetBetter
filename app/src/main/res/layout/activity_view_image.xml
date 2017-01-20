@@ -70,7 +70,6 @@
             android:background="@color/blueButton"
             android:text="@string/back_button_text"
             android:textColor="@color/cardBackground"
-
             android:layout_marginTop="24dp"
             android:layout_marginStart="8dp"
             android:layout_marginLeft="8dp"

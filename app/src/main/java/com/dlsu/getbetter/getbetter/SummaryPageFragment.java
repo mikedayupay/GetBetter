@@ -35,7 +35,7 @@ import android.widget.Toast;
 import android.widget.MediaController;
 
 import com.dlsu.getbetter.getbetter.activities.ViewImageActivity;
-import com.dlsu.getbetter.getbetter.adapters.SummaryPageDataAdapter;
+import com.dlsu.getbetter.getbetter.adapters.FileAttachmentsAdapter;
 import com.dlsu.getbetter.getbetter.database.DataAdapter;
 import com.dlsu.getbetter.getbetter.objects.Attachment;
 import com.dlsu.getbetter.getbetter.objects.DividerItemDecoration;
@@ -67,6 +67,7 @@ public class SummaryPageFragment extends Fragment implements View.OnClickListene
     private String patientBirthdate;
     private String patientGender;
     private String patientCivilStatus;
+    private String patientBloodType;
     private String chiefComplaint;
     private String controlNumber;
     private String uploadedDate;
@@ -87,7 +88,7 @@ public class SummaryPageFragment extends Fragment implements View.OnClickListene
 
     private ArrayList<Attachment> attachments;
 
-    private SummaryPageDataAdapter fileAdapter;
+    private FileAttachmentsAdapter fileAdapter;
     private RecyclerView.LayoutManager fileListLayoutManager;
     private ImageView summaryProfileImage;
     private CardView recordSoundContainer;
@@ -137,6 +138,7 @@ public class SummaryPageFragment extends Fragment implements View.OnClickListene
         patientBirthdate = patientDetails.get(NewPatientSessionManager.NEW_PATIENT_BIRTHDATE);
         patientGender = patientDetails.get(NewPatientSessionManager.NEW_PATIENT_GENDER);
         patientCivilStatus = patientDetails.get(NewPatientSessionManager.NEW_PATIENT_CIVIL_STATUS);
+        patientBloodType = patientDetails.get(NewPatientSessionManager.NEW_PATIENT_BLOOD_TYPE);
         chiefComplaint = patientDetails.get(NewPatientSessionManager.NEW_PATIENT_CHIEF_COMPLAINT);
         String recordedHpiOutputFile = patientDetails.get(NewPatientSessionManager.NEW_PATIENT_DOC_HPI_RECORD);
         Patient patient = new Patient(patientFirstName, patientMiddleName, patientLastName, patientBirthdate,
@@ -161,7 +163,7 @@ public class SummaryPageFragment extends Fragment implements View.OnClickListene
         attachments = new ArrayList<>();
         uploadedDate = getTimeStamp();
 
-        fileAdapter = new SummaryPageDataAdapter(attachments);
+        fileAdapter = new FileAttachmentsAdapter(attachments);
         addPhotoAttachment(patientInfoFormImage, patientInfoFormImageTitle, uploadedDate);
         addPhotoAttachment(familySocialHistoryFormImage, familySocialHistoryFormImageTitle, uploadedDate);
         addPhotoAttachment(chiefComplaintFormImage, chiefComplaintFormImageTitle, uploadedDate);
@@ -302,7 +304,7 @@ public class SummaryPageFragment extends Fragment implements View.OnClickListene
         attachmentFileList.setLayoutManager(fileListLayoutManager);
         attachmentFileList.setAdapter(fileAdapter);
         attachmentFileList.addItemDecoration(dividerItemDecoration);
-        fileAdapter.SetOnItemClickListener(new SummaryPageDataAdapter.OnItemClickListener() {
+        fileAdapter.SetOnItemClickListener(new FileAttachmentsAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
                 Intent intent = new Intent(getActivity(), ViewImageActivity.class);
@@ -343,7 +345,7 @@ public class SummaryPageFragment extends Fragment implements View.OnClickListene
             if(newPatientDetails.isActivityNewPatient()) {
 
                 new InsertPatientTask().execute(patientFirstName, patientMiddleName, patientLastName,
-                        patientBirthdate, patientGender, patientCivilStatus, patientProfileImage);
+                        patientBirthdate, patientGender, patientCivilStatus, patientBloodType, patientProfileImage);
             } else {
 
                 new InsertCaseRecordTask().execute();
@@ -613,7 +615,7 @@ public class SummaryPageFragment extends Fragment implements View.OnClickListene
             }
 
             rowId = getBetterDb.insertPatientInfo(params[0], params[1], params[2], params[3], params[4],
-                    params[5], params[6], healthCenterId);
+                    params[5], params[6], params[7], healthCenterId);
 
             getBetterDb.closeDatabase();
 

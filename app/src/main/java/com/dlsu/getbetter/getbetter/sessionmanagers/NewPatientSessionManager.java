@@ -40,6 +40,8 @@ public class NewPatientSessionManager {
     public static final String NEW_PATIENT_DOC_HPI_RECORD = "newPatientHpiRecord";
     public static final String NEW_PATIENT_CHIEF_COMPLAINT = "newPatientChiefComplaint";
     private static final String IS_ACTIVITY_NEW_PATIENT = "isActivityNewPatient";
+    private static final String IS_DOCUMENTS_EMPTY = "isDocumentsEmpty";
+    private static final String IS_HPI_EMPTY = "isHpiEmpty";
 
 
     public NewPatientSessionManager (Context context) {
@@ -122,6 +124,7 @@ public class NewPatientSessionManager {
         editor.putString(NEW_PATIENT_DOC_IMAGE1_TITLE, docImage1Title);
         editor.putString(NEW_PATIENT_DOC_IMAGE2_TITLE, docImage2Title);
         editor.putString(NEW_PATIENT_DOC_IMAGE3_TITLE, docImage3Title);
+        editor.putBoolean(IS_DOCUMENTS_EMPTY, false);
         editor.commit();
     }
 
@@ -129,6 +132,7 @@ public class NewPatientSessionManager {
 
         editor.putString(NEW_PATIENT_DOC_HPI_RECORD, hpiRecord);
         editor.putString(NEW_PATIENT_CHIEF_COMPLAINT, chiefComplaint);
+        editor.putBoolean(IS_HPI_EMPTY, false);
         editor.commit();
     }
 
@@ -160,6 +164,14 @@ public class NewPatientSessionManager {
 
     public boolean isActivityNewPatient () {
         return pref.getBoolean(IS_ACTIVITY_NEW_PATIENT, false);
+    }
+
+    public boolean isDocumentsEmpty() {
+        return pref.getBoolean(IS_DOCUMENTS_EMPTY, true);
+    }
+
+    public boolean isHpiEmpty() {
+        return pref.getBoolean(IS_HPI_EMPTY, true);
     }
 
 

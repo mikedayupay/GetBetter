@@ -20,6 +20,7 @@ public class Patient {
     private String civilStatus;
     private String bloodType;
     private String profileImageBytes;
+    private String dateLastConsultation;
     private boolean checked = false;
 
 
@@ -70,21 +71,36 @@ public class Patient {
 
     public String getAge() {
 
-        int[] birthdateTemp = new int[3];
-        StringTokenizer tok = new StringTokenizer(getBirthdate(), "-");
-        int i = 0;
-        while(tok.hasMoreTokens()) {
+        try {
 
-            birthdateTemp[i] = Integer.parseInt(tok.nextToken());
-            i++;
+            int[] birthdateTemp = new int[3];
+            StringTokenizer tok = new StringTokenizer(getBirthdate(), "-");
+            int i = 0;
+            while(tok.hasMoreTokens()) {
+
+                birthdateTemp[i] = Integer.parseInt(tok.nextToken());
+                i++;
+            }
+
+            LocalDate birthdate = new LocalDate(birthdateTemp[0], birthdateTemp[1], birthdateTemp[2]);
+            LocalDate now = new LocalDate();
+
+            Years years = Years.yearsBetween(birthdate, now);
+            return years.getYears() + "";
+
+        }catch (NullPointerException e) {
+
+            e.printStackTrace();
+            return String.valueOf(0);
         }
+    }
 
-        LocalDate birthdate = new LocalDate(birthdateTemp[0], birthdateTemp[1], birthdateTemp[2]);
-        LocalDate now = new LocalDate();
+    public String getDateLastConsultation() {
+        return dateLastConsultation;
+    }
 
-        Years years = Years.yearsBetween(birthdate, now);
-
-        return years.getYears() + "";
+    public void setDateLastConsultation(String dateLastConsultation) {
+        this.dateLastConsultation = dateLastConsultation;
     }
 
     public String getGender() {

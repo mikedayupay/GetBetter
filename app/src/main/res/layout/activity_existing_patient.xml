@@ -57,6 +57,7 @@
                 />
 
             <FrameLayout
+                android:id="@+id/existing_patient_container"
                 android:layout_width="match_parent"
                 android:layout_height="350dp">
 

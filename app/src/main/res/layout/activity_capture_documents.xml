@@ -34,7 +34,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:cardCornerRadius="2dp"
-            android:layout_margin="4dp">
+            android:layout_margin="2dp">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -67,7 +67,7 @@
                 android:layout_width="0dp"
                 android:layout_height="350dp"
                 android:layout_weight="1"
-                android:layout_margin="4dp"
+                android:layout_margin="2dp"
                 app:cardCornerRadius="2dp">
 
                 <RelativeLayout
@@ -153,7 +153,7 @@
                 android:layout_width="0dp"
                 android:layout_height="350dp"
                 android:layout_weight="1"
-                android:layout_margin="4dp"
+                android:layout_margin="2dp"
                 app:cardCornerRadius="2dp">
 
                 <RelativeLayout
@@ -241,7 +241,7 @@
                 android:layout_width="0dp"
                 android:layout_height="350dp"
                 android:layout_weight="1"
-                android:layout_margin="4dp"
+                android:layout_margin="2dp"
                 app:cardCornerRadius="2dp">
 
                 <RelativeLayout
@@ -330,7 +330,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:cardCornerRadius="2dp"
-            android:layout_margin="4dp">
+            android:layout_margin="2dp">
 
             <RelativeLayout
                 android:layout_width="match_parent"

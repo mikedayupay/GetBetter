@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">GetBetter</string>
+    <string name="app_name">GetBetter Mobile</string>
     <string name="login_desc_title">GetBetter Tele-Diagnosis System</string>
     <string name="login_desc">As part of a research project of De La Salle University, the GetBetter
         Tele-Diagnosis System was designed and developed with financial support form UNICEF, UNDP,
@@ -128,8 +128,8 @@
     <string name="birthdate">Birthdate</string>
     <string name="middle_name">Middle Name</string>
     <string name="first_name">First Name</string>
-    <string name="gender">Gender:</string>
-    <string name="civil_status">Civil Status:</string>
+    <string name="gender">Gender</string>
+    <string name="civil_status">Civil Status</string>
     <string name="patient_record">PATIENT RECORD</string>
     <string name="required_forms">Required Forms</string>
     <string name="height_cm">Height (CM)</string>
@@ -151,4 +151,9 @@
     <string name="recording_progress_zero">00</string>
     <string name="colon">:</string>
     <string name="recording_status">Recording...</string>
+    <string name="age">Age</string>
+    <string name="click_to_change_profile_image">Tap to change Profile Image</string>
+    <string name="done">Done</string>
+    <string name="save">Save</string>
+    <string name="record_audio">Record Audio</string>
 </resources>

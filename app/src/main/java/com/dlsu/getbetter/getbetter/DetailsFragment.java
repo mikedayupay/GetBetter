@@ -159,7 +159,7 @@ public class DetailsFragment extends Fragment implements MediaController.MediaPl
             e.printStackTrace();
         }
 
-        caseRecord = getBetterDb.getCaseRecordDetail(caseRecordId);
+        caseRecord = getBetterDb.getCaseRecord(caseRecordId);
 
         patientInfo = getBetterDb.getPatient((long) caseRecord.getUserId());
         String patientName = patientInfo.getFirstName() + " " + patientInfo.getLastName();

@@ -38,6 +38,8 @@ public class ViewPatientActivity extends AppCompatActivity implements View.OnCli
     private NewPatientSessionManager newPatientSessionManager;
     private Patient patient;
 
+    private static final String TAG = "ViewPatient";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,6 +52,8 @@ public class ViewPatientActivity extends AppCompatActivity implements View.OnCli
         Bundle extras = getIntent().getExtras();
         if(extras != null)
             patientId = extras.getLong("patientId");
+
+        Log.d(TAG, "onCreate: " + patientId);
 
         CircleImageView profileImage = (CircleImageView)findViewById(R.id.view_patient_profile_image);
         TextView patientName = (TextView)findViewById(R.id.view_patient_name);
@@ -192,6 +196,8 @@ public class ViewPatientActivity extends AppCompatActivity implements View.OnCli
         if(id == R.id.view_patient_back_btn) {
 
             newPatientSessionManager.endSession();
+//            Intent intent = new Intent(ViewPatientActivity.this, ExistingPatientActivity.class);
+//            startActivity(intent);
             finish();
 
         } else if(id == R.id.view_patient_update_btn) {
