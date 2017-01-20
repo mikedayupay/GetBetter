@@ -2,7 +2,7 @@
 
   define('HOST', 'localhost');
   define('USER', 'getbetter');
-  define('PASS', 'g3tB3tt3r');
+  define('PASS', 'g3tb3tt3r');
   define('DB', 'get_better');
 
   // $con = mysqli_connect(HOST, USER, PASS, DB) or die ('unable to connect');

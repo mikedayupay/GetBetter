@@ -1,6 +1,7 @@
 package com.dlsu.getbetter.getbetter.activities;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.net.Uri;
@@ -22,12 +23,19 @@ import com.dlsu.getbetter.getbetter.adapters.CaseRecordDownloadAdapter;
 import com.dlsu.getbetter.getbetter.database.DataAdapter;
 import com.dlsu.getbetter.getbetter.objects.Attachment;
 import com.dlsu.getbetter.getbetter.objects.CaseRecord;
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.loopj.android.http.FileAsyncHttpResponseHandler;
+import com.loopj.android.http.JsonHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
+import com.loopj.android.http.TextHttpResponseHandler;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -37,6 +45,8 @@ import java.net.URL;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import cz.msebera.android.httpclient.Header;
 
 public class DownloadContentActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -51,14 +61,14 @@ public class DownloadContentActivity extends AppCompatActivity implements View.O
     private static final String TAG_UPDATED_ON = "updated_on";
     private static final String TAG_DESCRIPTION = "description";
     private static final String TAG_FILE_PATH = "file_path";
-    private static final String TAG_ENCODED_IMAGE = "encoded_image";
     private static final String TAG_CASE_ATTACHMENT_TYPE = "case_attachment_type";
     private static final String TAG_UPLOADED_ON = "uploaded_on";
-    private static final String RESULT_MESSAGE = "DOWNLOAD SUCCESS";
+    private static final String TAG_UPLOADED_BY = "uploaded_by";
 
     private String myJSON;
     private String myJSONAttachments;
     private ArrayList<CaseRecord> caseRecordsData;
+    private ArrayList<Long> patientIds;
 
     private DataAdapter getBetterDb;
     private ProgressDialog dDialog = null;
@@ -82,7 +92,9 @@ public class DownloadContentActivity extends AppCompatActivity implements View.O
         ArrayList<Attachment> caseRecordAttachments = new ArrayList<>();
 
         initializeDatabase();
-        getDownloadableData();
+        getPatientIds();
+        getDownloadList();
+//        getDownloadableData();
     }
 
     private void initializeDatabase () {
@@ -115,165 +127,61 @@ public class DownloadContentActivity extends AppCompatActivity implements View.O
                 }
             }
 
-            updateCaseRecordAdditionalNotes(selectedCaseRecordList);
-            updateLocalCaseRecordHistory(selectedCaseRecordList);
-            downloadSelectedData(selectedCaseRecordList);
+            updateCaseRecord(selectedCaseRecordList);
+//            updateCaseRecordAdditionalNotes(selectedCaseRecordList);
+//            updateLocalCaseRecordHistory(selectedCaseRecordList);
+//            downloadSelectedData(selectedCaseRecordList);
 
         }
     }
 
-    private void getDownloadableData() {
+    private void getPatientIds() {
 
-        class GetCaseRecordList extends AsyncTask<String, Void, String> {
-
-            RequestHandler rh = new RequestHandler();
-
-            @Override
-            protected void onPreExecute() {
-                showDownloadingDialog("Populating record list...");
-            }
-
-            @Override
-            protected String doInBackground(String... params) {
-
-                String result = null;
-
-                result = rh.getPostRequest(DirectoryConstants.DOWNLOAD_CASE_RECORD_LIST_URL);
-
-                return result;
-            }
-
-            @Override
-            protected void onPostExecute(String s) {
-                dismissProgressDialog();
-                myJSON = s;
-                populateCaseRecordsList();
-
-            }
-        }
-
-        GetCaseRecordList getCaseRecordList = new GetCaseRecordList();
-        getCaseRecordList.execute();
-
-    }
-
-    private void downloadSelectedData(ArrayList<CaseRecord> caseRecords) {
-
-        class DownloadSelectedData extends AsyncTask<ArrayList<CaseRecord>, Void, String> {
-
-            RequestHandler rh = new RequestHandler();
-
-            @Override
-            protected void onPreExecute() {
-                showDownloadingDialog("Downloading data...");
-            }
-
-            @SafeVarargs
-            @Override
-            protected final String doInBackground(ArrayList<CaseRecord>... params) {
-
-                ArrayList<CaseRecord> selectedCaseRecords = params[0];
-                String result = null;
-//                File mediaStorageDir = new File (Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC), "sample_audio");
-//                File profileImageFile = new File (mediaStorageDir.getPath() + File.pathSeparator + "audio2.mp3");
-
-                for(int i = 0; i < selectedCaseRecords.size(); i++) {
-
-                    HashMap<String, String> data = new HashMap<>();
-                    data.put(TAG_CASE_RECORD_ID, String.valueOf(selectedCaseRecords.get(i).getCaseRecordId()));
-//                    rh.getAudioFile(profileImageFile.getPath());
-                    result = rh.sendPostRequest(DirectoryConstants.DOWNLOAD_CASE_RECORD_NEW_ATTACHMENTS_SERVER_SCRIPT_URL, data);
-                }
-
-                return result;
-            }
-
-            @Override
-            protected void onPostExecute(String s) {
-                dismissProgressDialog();
-
-//                Log.e("s", s);
-
-//                StringBuilder message = new StringBuilder(s);
-
-                if(!s.isEmpty() && s != null) {
-                    myJSONAttachments = s;
-                    insertNewAttachmentsToLocalDB();
-//                    getAudioFile();
-//                    featureAlertMessage("Download Complete!");
-                } else {
-                    featureAlertMessage("Download Failed.");
-                }
-            }
-        }
-
-        DownloadSelectedData downloadSelectedData = new DownloadSelectedData();
-        downloadSelectedData.execute(caseRecords);
-
-    }
-
-    private void insertNewAttachmentsToLocalDB() {
-
-        String path = "";
-        File fileName = null;
-        ArrayList<Attachment> attachmentPaths = new ArrayList<>();
-        ArrayList<Attachment> attachmentData = new ArrayList<>();
-
-        try{
-            JSONObject jsonObject = new JSONObject(myJSONAttachments);
-            JSONArray caseAttachments = jsonObject.getJSONArray(TAG_CASE_ATTACHMENTS);
-            Log.d("CASE ATTACHMENT LENGTH", caseAttachments.length() + "");
-
-            for(int i = 0; i < caseAttachments.length(); i++) {
-                JSONObject o = caseAttachments.getJSONObject(i);
-                int caseRecordId = Integer.parseInt(o.getString(TAG_CASE_RECORD_ID));
-                String description = o.getString(TAG_DESCRIPTION);
-                String filePath = o.getString(TAG_FILE_PATH);
-//                String encodedImage = o.getString(TAG_ENCODED_IMAGE);
-                int attachmentTypeId = Integer.parseInt(o.getString(TAG_CASE_ATTACHMENT_TYPE));
-                String uploadedOn = o.getString(TAG_UPLOADED_ON);
-
-//                Log.d("encoded image", encodedImage);
-
-//                writeImageToDirectory(encodedImage, fileName);
-//                if(attachmentTypeId == 1) {
-//
-//                    fileName = createImageFile(uploadedOn);
-//                    path = Uri.fromFile(fileName).getPath();
-//
-//                } else if (attachmentTypeId == 3) {
-//
-//                    fileName = createAudioFile(uploadedOn);
-//                    path = Uri.fromFile(fileName).getPath();
-//                }
-
-                Log.d("DOWNLOADCONTENTACTIVITY", filePath);
-
-                fileName = createAttachmentFile(description, uploadedOn, attachmentTypeId);
-                path = Uri.fromFile(fileName).getPath();
-
-                Attachment caseAttachment = new Attachment(caseRecordId, path, description,
-                        attachmentTypeId, uploadedOn);
-
-                attachmentData.add(caseAttachment);
-
-//                insertCaseAttachment(caseAttachment);
-
-                Attachment fileAttachment = new Attachment(filePath, fileName);
-                attachmentPaths.add(fileAttachment);
-
-            }
-
-        }catch (JSONException e) {
+        try {
+            getBetterDb.openDatabase();
+        }catch (SQLException e) {
             e.printStackTrace();
-            featureAlertMessage("Download Failed!");
-            Log.d("DownloadContentActivity", e.getMessage());
         }
 
-        writeFileToDirectory(attachmentPaths, attachmentData);
+        patientIds = getBetterDb.getPatientIds();
+        getBetterDb.closeDatabase();
 
     }
 
+    private String getHealthCenterName(int healthCenterId) {
+
+        try {
+            getBetterDb.openDatabase();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        String result;
+        result = getBetterDb.getHealthCenterString(healthCenterId);
+
+        getBetterDb.closeDatabase();
+
+        return result;
+    }
+
+    private void getDownloadList() {
+
+        AsyncHttpClient client = new AsyncHttpClient();
+        RequestParams params = new RequestParams();
+        params.put("patientIds", patientIds);
+        client.get(DirectoryConstants.DOWNLOAD_CASE_RECORD_LIST_URL, params, new TextHttpResponseHandler() {
+            @Override
+            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+
+            }
+
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, String responseString) {
+                myJSON = responseString;
+                populateCaseRecordsList();
+            }
+        });
+    }
 
     private void populateCaseRecordsList() {
 
@@ -306,6 +214,245 @@ public class DownloadContentActivity extends AppCompatActivity implements View.O
             e.printStackTrace();
         }
     }
+
+    private void updateCaseRecord(ArrayList<CaseRecord> caseRecords) {
+
+
+        class UpdateCaseRecords extends AsyncTask<ArrayList<CaseRecord>, Integer, Integer> {
+
+            @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+                showProgressDialog("Updating Case Record");
+            }
+
+            @Override
+            protected Integer doInBackground(ArrayList<CaseRecord>... arrayLists) {
+                ArrayList<CaseRecord> params = arrayLists[0];
+
+                try {
+                    getBetterDb.openDatabase();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+
+                int totalRecords = params.size();
+
+                for (int i = 0; i < params.size(); i++) {
+                    getBetterDb.updateCaseRecordAdditionalNotes(params.get(i).getCaseRecordId(),
+                            params.get(i).getCaseRecordAdditionalNotes());
+                    getBetterDb.updateLocalCaseRecordHistory(params.get(i));
+                    publishProgress((i/totalRecords) * 100);
+                    if (isCancelled()) break;
+                }
+
+                getBetterDb.closeDatabase();
+
+                return totalRecords;
+            }
+
+            @Override
+            protected void onProgressUpdate(Integer... values) {
+                super.onProgressUpdate(values[0]);
+            }
+
+            @Override
+            protected void onPostExecute(Integer s) {
+                super.onPostExecute(s);
+                dismissProgressDialog();
+                featureAlertMessage("Updated " + s + " case records.");
+            }
+        }
+
+        new UpdateCaseRecords().execute(caseRecords);
+    }
+
+    private void downloadSelectedData(ArrayList<CaseRecord> caseRecords) {
+
+        final ArrayList<String> fileUrl = new ArrayList<>();
+
+        AsyncHttpClient client = new AsyncHttpClient();
+        RequestParams params = new RequestParams();
+        params.put("caseRecords", caseRecords);
+        File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS),
+                DirectoryConstants.CASE_RECORD_ATTACHMENT_DIRECTORY_NAME);
+        client.post(DirectoryConstants.DOWNLOAD_CASE_RECORD_NEW_ATTACHMENTS_SERVER_SCRIPT_URL, params, new TextHttpResponseHandler() {
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+
+            }
+
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, String responseString) {
+                fileUrl.add(responseString);
+            }
+        });
+
+
+        for (int i = 0; i < fileUrl.size(); i++) {
+
+            AsyncHttpClient fileClient = new AsyncHttpClient();
+            fileClient.get(fileUrl.get(i), new FileAsyncHttpResponseHandler(this) {
+                @Override
+                public void onFailure(int statusCode, Header[] headers, Throwable throwable, File file) {
+
+                }
+
+                @Override
+                public void onSuccess(int statusCode, Header[] headers, File file) {
+                    FileInputStream inputStream = null;
+                    FileOutputStream outputStream = null;
+
+
+                    try {
+                        inputStream = new FileInputStream(file);
+                        outputStream = openFileOutput(file.getName(), Context.MODE_PRIVATE);
+                        byte[] buffer = new byte[1024];
+                        int bytesRead;
+                        while ((bytesRead = inputStream.read(buffer)) > 0) {
+                            outputStream.write(buffer, 0, bytesRead);
+                        }
+
+                    }catch (Exception e) {
+                        e.printStackTrace();
+                    }finally {
+                        try {
+                            inputStream.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        try {
+                            outputStream.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            });
+        }
+
+
+
+
+//        class DownloadSelectedData extends AsyncTask<ArrayList<CaseRecord>, Void, String> {
+//
+//            RequestHandler rh = new RequestHandler();
+//
+//            @Override
+//            protected void onPreExecute() {
+//                showDownloadingDialog("Downloading data...");
+//            }
+//
+//            @SafeVarargs
+//            @Override
+//            protected final String doInBackground(ArrayList<CaseRecord>... params) {
+//
+//                ArrayList<CaseRecord> selectedCaseRecords = params[0];
+//                String result = null;
+////                File mediaStorageDir = new File (Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC), "sample_audio");
+////                File profileImageFile = new File (mediaStorageDir.getPath() + File.pathSeparator + "audio2.mp3");
+//
+//                for(int i = 0; i < selectedCaseRecords.size(); i++) {
+//
+//                    HashMap<String, String> data = new HashMap<>();
+//                    data.put(TAG_CASE_RECORD_ID, String.valueOf(selectedCaseRecords.get(i).getCaseRecordId()));
+////                    rh.getAudioFile(profileImageFile.getPath());
+//                    result = rh.sendPostRequest(DirectoryConstants.DOWNLOAD_CASE_RECORD_NEW_ATTACHMENTS_SERVER_SCRIPT_URL, data);
+//                }
+//
+//                return result;
+//            }
+//
+//            @Override
+//            protected void onPostExecute(String s) {
+//                dismissProgressDialog();
+//
+////                Log.e("s", s);
+//
+////                StringBuilder message = new StringBuilder(s);
+//
+//                if(!s.isEmpty() && s != null) {
+//                    myJSONAttachments = s;
+//                    insertNewAttachmentsToLocalDB();
+////                    getAudioFile();
+////                    featureAlertMessage("Download Complete!");
+//                } else {
+//                    featureAlertMessage("Download Failed.");
+//                }
+//            }
+//        }
+//
+//        DownloadSelectedData downloadSelectedData = new DownloadSelectedData();
+//        downloadSelectedData.execute(caseRecords);
+
+    }
+
+    private void insertNewAttachmentsToLocalDB() {
+
+        String path = "";
+        File fileName = null;
+        ArrayList<Attachment> attachmentPaths = new ArrayList<>();
+        ArrayList<Attachment> attachmentData = new ArrayList<>();
+
+        try{
+            JSONObject jsonObject = new JSONObject(myJSONAttachments);
+            JSONArray caseAttachments = jsonObject.getJSONArray(TAG_CASE_ATTACHMENTS);
+            Log.d("CASE ATTACHMENT LENGTH", caseAttachments.length() + "");
+
+            for(int i = 0; i < caseAttachments.length(); i++) {
+                JSONObject o = caseAttachments.getJSONObject(i);
+                int caseRecordId = Integer.parseInt(o.getString(TAG_CASE_RECORD_ID));
+                String description = o.getString(TAG_DESCRIPTION);
+                String filePath = o.getString(TAG_FILE_PATH);
+//                String encodedImage = o.getString(TAG_ENCODED_IMAGE);
+                int attachmentTypeId = Integer.parseInt(o.getString(TAG_CASE_ATTACHMENT_TYPE));
+                String uploadedOn = o.getString(TAG_UPLOADED_ON);
+                int uploadedBy = Integer.parseInt(o.getString(TAG_UPLOADED_BY));
+
+//                Log.d("encoded image", encodedImage);
+
+//                writeImageToDirectory(encodedImage, fileName);
+//                if(attachmentTypeId == 1) {
+//
+//                    fileName = createImageFile(uploadedOn);
+//                    path = Uri.fromFile(fileName).getPath();
+//
+//                } else if (attachmentTypeId == 3) {
+//
+//                    fileName = createAudioFile(uploadedOn);
+//                    path = Uri.fromFile(fileName).getPath();
+//                }
+
+                Log.d("DOWNLOADCONTENTACTIVITY", filePath);
+
+                fileName = createAttachmentFile(description, uploadedOn, attachmentTypeId);
+                path = Uri.fromFile(fileName).getPath();
+
+                Attachment caseAttachment = new Attachment(caseRecordId, path, description,
+                        attachmentTypeId, uploadedOn, uploadedBy);
+
+                attachmentData.add(caseAttachment);
+
+//                insertCaseAttachment(caseAttachment);
+
+                Attachment fileAttachment = new Attachment(filePath, fileName);
+                attachmentPaths.add(fileAttachment);
+
+            }
+
+        }catch (JSONException e) {
+            e.printStackTrace();
+            featureAlertMessage("Download Failed!");
+            Log.d("DownloadContentActivity", e.getMessage());
+        }
+
+        writeFileToDirectory(attachmentPaths, attachmentData);
+
+    }
+
+
+
 
     private String getCaseRecordStatusString(int caseRecordStatusId) {
 
@@ -350,7 +497,14 @@ public class DownloadContentActivity extends AppCompatActivity implements View.O
         }
 
         String result;
-        result = getBetterDb.getPatientName(userId);
+
+        try {
+            result = getBetterDb.getPatientName(userId);
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+            result = "New Patient";
+        }
+
 
         getBetterDb.closeDatabase();
 
@@ -387,22 +541,6 @@ public class DownloadContentActivity extends AppCompatActivity implements View.O
                     selectedCaseRecords.get(i).getCaseRecordAdditionalNotes());
 
         getBetterDb.closeDatabase();
-    }
-
-    private String getHealthCenterName(int healthCenterId) {
-
-        try {
-            getBetterDb.openDatabase();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        String result;
-        result = getBetterDb.getHealthCenterString(healthCenterId);
-
-        getBetterDb.closeDatabase();
-
-        return result;
     }
 
     private void updateLocalCaseRecordHistory(ArrayList<CaseRecord> caseRecords) {
