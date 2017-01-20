@@ -2,6 +2,7 @@ package com.dlsu.getbetter.getbetter.activities;
 
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -45,11 +46,16 @@ public class UploadPatientToServerActivity extends AppCompatActivity implements 
     private static final String CIVIL_STATUS_KEY = "civil_status_id";
     private static final String IMAGE_NAME_KEY = "image_name";
     private static final String HEALTH_CENTER_KEY = "default_health_center";
+    private static final String BLOOD_TYPE_KEY = "blood_type";
+    private static final String PROFILE_URL_KEY = "profile_url";
+
+    private static final int TIMEOUT_VALUE = 60 * 1000;
 
     private ArrayList<Patient> patientsUpload;
     private DataAdapter getBetterDb;
     private int healthCenterId;
     private ProgressDialog pDialog = null;
+    private long newUserId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -149,6 +155,21 @@ public class UploadPatientToServerActivity extends AppCompatActivity implements 
 
     }
 
+    private void updateUserId (long newId, long oldId) {
+
+        try {
+            getBetterDb.openDatabase();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        Log.d(TAG, "updateUserId: " + newId);
+        getBetterDb.updateUserId(newId, oldId);
+
+        getBetterDb.closeDatabase();
+
+    }
+
     @Override
     public void onClick(View v) {
 
@@ -156,17 +177,17 @@ public class UploadPatientToServerActivity extends AppCompatActivity implements 
 
         if (id == R.id.upload_patient_upload_btn) {
 
-            ArrayList<Patient> selectedPatientsList = new ArrayList<>();
+//            ArrayList<Patient> selectedPatientsList = new ArrayList<>();
 
             for(int i = 0; i < patientsUpload.size(); i++) {
-                Patient selectedPatients = patientsUpload.get(i);
+                Patient selectedPatient = patientsUpload.get(i);
 
-                if(selectedPatients.isChecked()) {
-                    selectedPatientsList.add(selectedPatients);
-
+                if(selectedPatient.isChecked()) {
+//                    selectedPatientsList.add(selectedPatients);
+                    uploadPatient(selectedPatient);
                 }
             }
-            uploadPatient(selectedPatientsList);
+//            uploadPatient(selectedPatientsList);
 
 //            for(int i = 0; i < selectedPatientsList.size(); i++) {
 //                getStringImage(selectedPatientsList.get(i).getProfileImageBytes());
@@ -177,6 +198,8 @@ public class UploadPatientToServerActivity extends AppCompatActivity implements 
 
         } else if (id == R.id.upload_patient_back_btn) {
 
+            Intent intent = new Intent(this, ExistingPatientActivity.class);
+            startActivity(intent);
             finish();
         }
     }
@@ -217,79 +240,61 @@ public class UploadPatientToServerActivity extends AppCompatActivity implements 
         }
     }
 
-    private void uploadPatient(ArrayList<Patient> patientsUpload) {
+    private void uploadPatient(final Patient patientUpload) {
 
         AsyncHttpClient asyncHttpClient = new AsyncHttpClient();
+        asyncHttpClient.setTimeout(TIMEOUT_VALUE);
         RequestParams params = new RequestParams();
         final String contentType = RequestParams.APPLICATION_OCTET_STREAM;
         params.setForceMultipartEntityContentType(true);
-        List<Map<String, String>> patients = new ArrayList<Map<String, String>>();
+//        List<Map<String, String>> patients = new ArrayList<Map<String, String>>();
 
-        Log.d(TAG, "uploadPatient: size " + patientsUpload.size());
+//        Map<String, String> patient = new HashMap<>();
 
-        for(int i = 0; i < patientsUpload.size(); i++) {
+        String imageFileName = patientUpload.getFirstName().toLowerCase() + "_" +
+                patientUpload.getLastName().toLowerCase() + ".jpg";
+        String patientId = String.valueOf(patientUpload.getId());
 
-            Map<String, String> patient = new HashMap<>();
-            String imageFileName = patientsUpload.get(i).getFirstName().toLowerCase() + "_" +
-                    patientsUpload.get(i).getLastName().toLowerCase() + ".jpg";
-            String patientId = String.valueOf(patientsUpload.get(i).getId());
+        params.put(ID_KEY, patientId);
+        params.put(FIRST_NAME_KEY, patientUpload.getFirstName());
+        params.put(MIDDLE_NAME_KEY, patientUpload.getMiddleName());
+        params.put(LAST_NAME_KEY, patientUpload.getLastName());
+        params.put(BIRTHDATE_KEY, patientUpload.getBirthdate());
+        params.put(GENDER_ID_KEY, getGenderId(patientUpload.getGender()));
+        params.put(CIVIL_STATUS_KEY, getCivilStatusId(patientUpload.getCivilStatus()));
+        params.put(BLOOD_TYPE_KEY, patientUpload.getBloodType());
+        params.put(HEALTH_CENTER_KEY, healthCenterId);
 
-            patient.put(ID_KEY, patientId);
-            patient.put(FIRST_NAME_KEY, patientsUpload.get(i).getFirstName());
-            patient.put(MIDDLE_NAME_KEY, patientsUpload.get(i).getMiddleName());
-            patient.put(LAST_NAME_KEY, patientsUpload.get(i).getLastName());
-            patient.put(BIRTHDATE_KEY, patientsUpload.get(i).getBirthdate());
-            patient.put(GENDER_ID_KEY, String.valueOf(getGenderId(patientsUpload.get(i).getGender())));
-            patient.put(CIVIL_STATUS_KEY, String.valueOf(getCivilStatusId(patientsUpload.get(i).getCivilStatus())));
-            patient.put(IMAGE_NAME_KEY, imageFileName);
-            patient.put(HEALTH_CENTER_KEY, String.valueOf(healthCenterId));
-            patients.add(patient);
+//        patient.put(ID_KEY, patientId);
+//        patient.put(FIRST_NAME_KEY, patientUpload.getFirstName());
+//        patient.put(MIDDLE_NAME_KEY, patientUpload.getMiddleName());
+//        patient.put(LAST_NAME_KEY, patientUpload.getLastName());
+//        patient.put(BIRTHDATE_KEY, patientUpload.getBirthdate());
+//        patient.put(GENDER_ID_KEY, String.valueOf(getGenderId(patientUpload.getGender())));
+//        patient.put(CIVIL_STATUS_KEY, String.valueOf(getCivilStatusId(patientUpload.getCivilStatus())));
+//        patient.put(IMAGE_NAME_KEY, imageFileName);
+//        patient.put(HEALTH_CENTER_KEY, String.valueOf(healthCenterId));
+//        patients.add(patient);
 
-            File profileImage = new File(patientsUpload.get(i).getProfileImageBytes());
-            try {
-                params.put(patientId, profileImage, contentType, imageFileName);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
+        File profileImage = new File(patientUpload.getProfileImageBytes());
+
+        try {
+            params.put(PROFILE_URL_KEY, profileImage, contentType, imageFileName);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
         }
 
-        params.put("patients", patients);
+//        for(int i = 0; i < patientsUpload.size(); i++) {
+//
+//
+//        }
+
+//        params.put("patients", patient);
         params.setHttpEntityIsRepeatable(true);
         params.setUseJsonStreamer(false);
 
 
-//        try {
-//            params.put("profile_url", imageFiles);
-//        } catch (FileNotFoundException e) {
-//            e.printStackTrace();
-//        }
-//        String imageFileName = patient.getLastName() + "_" +
-//                        patient.getFirstName() + ".jpg";
-//
-//        int genderId = getGenderId(patient.getGender());
-//        int civilStatusId = getCivilStatusId(patient.getCivilStatus());
-//
-//        Log.d(TAG, patient.getProfileImageBytes());
-//        File imageFile = new File(patient.getProfileImageBytes());
-//
-//        params.put(ID_KEY, patient.getId());
-//        params.put(FIRST_NAME_KEY, patient.getFirstName());
-//        params.put(MIDDLE_NAME_KEY, patient.getMiddleName());
-//        params.put(LAST_NAME_KEY, patient.getLastName());
-//        params.put(BIRTHDATE_KEY, patient.getBirthdate());
-//        params.put(GENDER_ID_KEY, genderId);
-//        params.put(CIVIL_STATUS_KEY, civilStatusId);
-//        params.put(IMAGE_NAME_KEY, imageFileName);
-//        params.put(HEALTH_CENTER_KEY, healthCenterId);
-//
-//        try {
-//            params.put(IMAGE, imageFile);
-//        } catch (FileNotFoundException e) {
-//            e.printStackTrace();
-//            Log.d(TAG, e.getMessage());
-//        }
-
-        asyncHttpClient.post(this, DirectoryConstants.UPLOAD_PATIENT_SERVER_SCRIPT_URL, params, new TextHttpResponseHandler() {
+        asyncHttpClient.post(this, DirectoryConstants.UPLOAD_PATIENT_SERVER_SCRIPT_URL , params, new TextHttpResponseHandler() {
 
             @Override
             public void onStart() {
@@ -302,7 +307,10 @@ public class UploadPatientToServerActivity extends AppCompatActivity implements 
 
                 featureAlertMessage("Upload Success");
                 Log.d(TAG, responseBody);
-//                removePatientUpload(patient.getId());
+
+                newUserId = Long.parseLong(responseBody);
+                updateUserId(newUserId, patientUpload.getId());
+                removePatientUpload(patientUpload.getId());
             }
 
             @Override
@@ -326,7 +334,6 @@ public class UploadPatientToServerActivity extends AppCompatActivity implements 
             public void onFinish() {
                 super.onFinish();
                 dismissProgressDialog();
-
             }
         });
     }
@@ -334,7 +341,7 @@ public class UploadPatientToServerActivity extends AppCompatActivity implements 
     private void featureAlertMessage(String result) {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("UPLOAD STATUS");
+        builder.setTitle("STATUS");
         builder.setMessage(result);
 
         builder.setNeutralButton("OK", new DialogInterface.OnClickListener() {

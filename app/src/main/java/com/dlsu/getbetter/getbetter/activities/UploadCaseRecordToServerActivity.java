@@ -2,7 +2,9 @@ package com.dlsu.getbetter.getbetter.activities;
 
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -54,12 +56,15 @@ public class UploadCaseRecordToServerActivity extends AppCompatActivity implemen
     private static final String ATTACHMENT_TYPE_ID_KEY = "case_record_attachment_type_id";
     private static final String UPLOADED_ON_KEY = "uploaded_on";
 
+    private static final int TIMEOUT_VALUE = 60 * 1000;
+
     private ArrayList<CaseRecord> caseRecordsUpload;
     private int userId;
     private int healthCenterId;
     private ProgressDialog pDialog = null;
 
     private DataAdapter getBetterDb;
+    private Handler handler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -161,7 +166,7 @@ public class UploadCaseRecordToServerActivity extends AppCompatActivity implemen
         }
 
         ArrayList<Attachment> caseAttachments = new ArrayList<>();
-        caseAttachments.addAll(getBetterDb.getCaseRecordAttachments(caseRecordId));
+        caseAttachments.addAll(getBetterDb.getAttachments(caseRecordId));
 
         getBetterDb.closeDatabase();
 
@@ -181,12 +186,27 @@ public class UploadCaseRecordToServerActivity extends AppCompatActivity implemen
         getBetterDb.closeDatabase();
     }
 
+    private void updateCaseRecordId (int newId, int oldId) {
+
+        try {
+            getBetterDb.openDatabase();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        getBetterDb.updateCaseRecordId(newId, oldId);
+
+        getBetterDb.closeDatabase();
+    }
+
     @Override
     public void onClick(View v) {
         int id = v.getId();
 
         if(id == R.id.upload_caserecord_back_btn) {
 
+            Intent intent = new Intent(this, ExistingPatientActivity.class);
+            startActivity(intent);
             finish();
 
         } else if(id == R.id.upload_caserecord_upload_btn) {
@@ -235,6 +255,7 @@ public class UploadCaseRecordToServerActivity extends AppCompatActivity implemen
     private void uploadCaseRecord(final CaseRecord caseRecordsUpload) {
 
         AsyncHttpClient asyncHttpClient = new AsyncHttpClient();
+        asyncHttpClient.setTimeout(TIMEOUT_VALUE);
         RequestParams params = new RequestParams();
         final String contentType = RequestParams.APPLICATION_OCTET_STREAM;
         List<Map<String, String>> attachments = new ArrayList<Map<String, String>>();
@@ -261,8 +282,16 @@ public class UploadCaseRecordToServerActivity extends AppCompatActivity implemen
             attachment.put(ATTACHMENT_TYPE_ID_KEY, String.valueOf(attachmentList.get(i).getAttachmentType()));
             attachments.add(attachment);
 
-            File attachmentFile = new File(caseRecordsUpload.getAttachments().get(i).getAttachmentPath());
-            String attachmentName = caseRecordsUpload.getAttachments().get(i).getAttachmentDescription();
+            String attachmentName = attachmentList.get(i).getAttachmentDescription();
+            File attachmentFile = new File(attachmentList.get(i).getAttachmentPath());
+            if(attachmentList.get(i).getAttachmentType() == 1) {
+                attachmentName = attachmentName.concat(".jpg");
+            } else if (attachmentList.get(i).getAttachmentType() == 2) {
+                attachmentName = attachmentName.concat(".mp4");
+            } else if (attachmentList.get(i).getAttachmentType() == 3 || attachmentList.get(i).getAttachmentType() == 5) {
+                attachmentName = attachmentName.concat(".3gp");
+            }
+
             try {
                 params.put(caseRecordId + attachmentName.substring(0,1), attachmentFile, contentType, attachmentName);
             } catch (FileNotFoundException e) {
@@ -277,7 +306,7 @@ public class UploadCaseRecordToServerActivity extends AppCompatActivity implemen
 
 
         asyncHttpClient.post(UploadCaseRecordToServerActivity.this,
-                DirectoryConstants.TEST_URL, params, new TextHttpResponseHandler() {
+                DirectoryConstants.TEST_URL_POST, params, new TextHttpResponseHandler() {
 
                     @Override
                     public void onStart() {
@@ -295,7 +324,8 @@ public class UploadCaseRecordToServerActivity extends AppCompatActivity implemen
                     @Override
                     public void onSuccess(int statusCode, Header[] headers, String responseString) {
 
-                        Log.d(TAG, "onSuccess: " + responseString);
+                        Log.d(TAG, responseString);
+                        featureAlertMessage("Upload Complete");
 //                        removeCaseRecordsUpload(caseRecordsUpload.getCaseRecordId());
                     }
 
@@ -304,6 +334,7 @@ public class UploadCaseRecordToServerActivity extends AppCompatActivity implemen
 
                         super.onFinish();
                         dismissProgressDialog();
+
 
                     }
 
@@ -319,7 +350,7 @@ public class UploadCaseRecordToServerActivity extends AppCompatActivity implemen
     private void featureAlertMessage(String result) {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("UPLOAD STATUS");
+        builder.setTitle("STATUS");
         builder.setMessage(result);
 
         builder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
@@ -333,12 +364,21 @@ public class UploadCaseRecordToServerActivity extends AppCompatActivity implemen
         builder.show();
     }
 
+    Runnable UpdateRecordTime = new Runnable() {
+        @Override
+        public void run() {
+
+
+            handler.postDelayed(this, 1000);
+        }
+    };
+
     private void showProgressDialog() {
         if(pDialog == null) {
             pDialog = new ProgressDialog(UploadCaseRecordToServerActivity.this);
             pDialog.setMessage("Uploading case record");
             pDialog.setProgress(0);
-            pDialog.setMax(100);
+            pDialog.incrementProgressBy(1);
             pDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         }
         pDialog.show();
