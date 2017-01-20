@@ -209,6 +209,7 @@ public class NewPatientInfoActivity extends AppCompatActivity implements DatePic
             long patientId = result;
             Intent intent = new Intent(NewPatientInfoActivity.this, ViewPatientActivity.class);
             intent.putExtra("patientId", patientId);
+            Log.d(TAG, "onPostExecute: " + patientId);
             startActivity(intent);
             finish();
 
@@ -249,10 +250,10 @@ public class NewPatientInfoActivity extends AppCompatActivity implements DatePic
         dpd.setThemeDark(true);
         dpd.setTitle("Birthdate");
         dpd.showYearPickerFirst(true);
+        dpd.setMaxDate(Calendar.getInstance());
         dpd.show(getFragmentManager(), "DatePickerDialog");
 
     }
-
 
     @Override
     public void onDateSet(DatePickerDialog view, int year, int monthOfYear, int dayOfMonth) {
@@ -293,6 +294,7 @@ public class NewPatientInfoActivity extends AppCompatActivity implements DatePic
             dayString = "0" + day;
         }
 
+        birthDate = year + "-" + month + "-" + day;
         String date = dayString + "/" + monthString + "/" + year;
         birthdateInput.setText(date);
     }
@@ -409,6 +411,10 @@ public class NewPatientInfoActivity extends AppCompatActivity implements DatePic
             case R.id.civil_status_spinner:
                 civilStatusSelected = (parent.getSelectedItem()).toString();
 //                civilStatusSelected = civilStatusChoice.getText().toString();
+                break;
+
+            case R.id.blood_type_spinner:
+                bloodTypeSelected = (parent.getSelectedItem()).toString();
                 break;
 
         }
