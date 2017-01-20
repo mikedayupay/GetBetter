@@ -1,5 +1,6 @@
 package com.dlsu.getbetter.getbetter.activities;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.ConnectivityManager;
@@ -33,6 +34,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 
     private SystemSessionManager systemSessionManager;
     private DataAdapter getBetterDb;
+    private boolean isConnected;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +48,11 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         HashMap<String, String> user = systemSessionManager.getUserDetails();
         HashMap<String, String> hc = systemSessionManager.getHealthCenter();
 
+        ConnectivityManager cm = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+
+        isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+
         String userNameLabel = user.get(SystemSessionManager.LOGIN_USER_NAME);
         String currentHealthCenter = hc.get(SystemSessionManager.HEALTH_CENTER_NAME);
         initializeDatabase();
@@ -56,8 +63,27 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         Button logoutBtn = (Button)findViewById(R.id.logout_btn);
         Button changeHealthCenterBtn = (Button)findViewById(R.id.change_health_center_btn);
         TextView healthCenter = (TextView)findViewById(R.id.home_current_health_center);
-        initializeUpdatedTabs();
+
         welcomeText.append(" " + getUserName(userNameLabel) + "!");
+
+
+        FragmentTabHost fragmentTabHost = (FragmentTabHost)findViewById(android.R.id.tabhost);
+//        FragmentTabHost fragmentTabHost = new FragmentTabHost(this);
+        fragmentTabHost.setup(this, getSupportFragmentManager(), android.R.id.tabcontent);
+
+
+        fragmentTabHost.addTab(fragmentTabHost.newTabSpec("urgent").setIndicator("Urgent Cases"),
+                UrgentCaseFragment.class, null);
+
+        fragmentTabHost.addTab(fragmentTabHost.newTabSpec("additional instructions").setIndicator("Cases w/ Additional Instructions"),
+                AddInstructionsCaseFragment.class, null);
+
+        fragmentTabHost.addTab(fragmentTabHost.newTabSpec("diagnosed").setIndicator("Diagnosed Cases"),
+                DiagnosedCaseFragment.class, null);
+
+        fragmentTabHost.addTab(fragmentTabHost.newTabSpec("closed").setIndicator("Closed Cases"),
+                ClosedCaseFragment.class, null);
+
 
         if (healthCenter != null) {
             healthCenter.setText(currentHealthCenter);
@@ -110,8 +136,8 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
             } else {
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setTitle("Internet Connection Status");
-                builder.setMessage("Cannot download data without Internet Connection, Please connect to the Internet first.");
+                builder.setTitle("Feature under development.");
+                builder.setMessage("Sorry. This feature is still being fixed.");
 
                 builder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
                     @Override
@@ -189,22 +215,8 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         return (activeNetwork != null && activeNetwork.isConnectedOrConnecting());
     }
 
-    private void initializeUpdatedTabs() {
+    private void initializeUpdatedTabs(HomeActivity activity) {
 
-        FragmentTabHost fragmentTabHost = (FragmentTabHost)findViewById(android.R.id.tabhost);
-        fragmentTabHost.setup(this, getSupportFragmentManager(), android.R.id.tabcontent);
-
-        fragmentTabHost.addTab(fragmentTabHost.newTabSpec("urgent").setIndicator("Urgent Cases"),
-                UrgentCaseFragment.class, null);
-
-        fragmentTabHost.addTab(fragmentTabHost.newTabSpec("additional instructions").setIndicator("Cases w/ Additional Instructions"),
-                AddInstructionsCaseFragment.class, null);
-
-        fragmentTabHost.addTab(fragmentTabHost.newTabSpec("diagnosed").setIndicator("Diagnosed Cases"),
-                DiagnosedCaseFragment.class, null);
-
-        fragmentTabHost.addTab(fragmentTabHost.newTabSpec("closed").setIndicator("Closed Cases"),
-                ClosedCaseFragment.class, null);
 
     }
 }
