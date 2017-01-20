@@ -1,15 +1,23 @@
 package com.dlsu.getbetter.getbetter.activities;
 
 import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.TextView;
 
 import com.dlsu.getbetter.getbetter.R;
 import com.dlsu.getbetter.getbetter.adapters.ExistingPatientAdapter;
@@ -32,6 +40,8 @@ public class ExistingPatientActivity extends AppCompatActivity implements View.O
     private ArrayList<Patient> existingPatients;
     private ProgressDialog pDialog;
 
+    private boolean isConnected;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,11 +54,17 @@ public class ExistingPatientActivity extends AppCompatActivity implements View.O
         HashMap<String, String> user = systemSessionManager.getUserDetails();
         HashMap<String, String> hc = systemSessionManager.getHealthCenter();
         int healthCenterId = Integer.parseInt(hc.get(SystemSessionManager.HEALTH_CENTER_ID));
+        ConnectivityManager cm = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+
+        isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
 
         Button newPatientRecBtn = (Button)findViewById(R.id.create_new_patient_btn);
         Button uploadCaseRecBtn = (Button)findViewById(R.id.upload_case_record);
         Button uploadPatientRecBtn = (Button) findViewById(R.id.upload_patient_record);
         Button backBtn = (Button)findViewById(R.id.existing_patient_back_btn);
+        FrameLayout container = (FrameLayout)findViewById(R.id.existing_patient_container);
+
 
         RecyclerView existingPatientListView = (RecyclerView) findViewById(R.id.existing_patient_list);
         RecyclerView.LayoutManager existingPatientLayoutManager = new LinearLayoutManager(this);
@@ -57,7 +73,7 @@ public class ExistingPatientActivity extends AppCompatActivity implements View.O
         existingPatients = new ArrayList<>();
         initializeDatabase();
         new GetPatientListTask().execute(healthCenterId);
-        Log.e("patient size", existingPatients.size() + "");
+
         ExistingPatientAdapter existingPatientsAdapter = new ExistingPatientAdapter(existingPatients);
 
         existingPatientListView.setHasFixedSize(true);
@@ -73,11 +89,20 @@ public class ExistingPatientActivity extends AppCompatActivity implements View.O
                 Intent intent = new Intent(ExistingPatientActivity.this, ViewPatientActivity.class);
                 intent.putExtra("patientId", selectedPatientId);
                 startActivity(intent);
-                finish();
+                ExistingPatientActivity.this.finish();
 
             }
         });
+//        if(existingPatients.isEmpty()) {
+//            TextView textView = new TextView(this);
+//            textView.setText("Patient List Empty");
+//            textView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+//            container.addView(textView);
+//            existingPatientListView.setVisibility(View.GONE);
+//        }
+//        else{
 
+//        }
 
         newPatientRecBtn.setOnClickListener(this);
         uploadPatientRecBtn.setOnClickListener(this);
@@ -111,6 +136,19 @@ public class ExistingPatientActivity extends AppCompatActivity implements View.O
 
     }
 
+    private void getLatestCaseRecordHistory(int patientId) {
+
+        try {
+            getBetterDb.openDatabase();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // TODO: 16/11/2016 get last consultation date
+
+        getBetterDb.closeDatabase();
+    }
+
     @Override
     public void onClick(View v) {
 
@@ -123,13 +161,25 @@ public class ExistingPatientActivity extends AppCompatActivity implements View.O
 
         } else if (id == R.id.upload_patient_record) {
 
-            Intent intent = new Intent(this, UploadPatientToServerActivity.class);
-            startActivity(intent);
+            if(isConnected) {
+                Intent intent = new Intent(this, UploadPatientToServerActivity.class);
+                startActivity(intent);
+                finish();
+            } else {
+                featureAlertMessage("No Internet connection detected. Please make sure you are connected to the internet.");
+            }
+
 
         } else if (id == R.id.upload_case_record) {
 
-            Intent intent = new Intent(this, UploadCaseRecordToServerActivity.class);
-            startActivity(intent);
+            if(isConnected) {
+                Intent intent = new Intent(this, UploadCaseRecordToServerActivity.class);
+                startActivity(intent);
+                finish();
+            } else {
+                featureAlertMessage("No Internet connection detected. Please make sure you are connected to the internet.");
+            }
+
 
         } else if (id == R.id.existing_patient_back_btn) {
             finish();
@@ -185,6 +235,22 @@ public class ExistingPatientActivity extends AppCompatActivity implements View.O
     protected void onDestroy() {
         dismissProgressDialog();
         super.onDestroy();
+    }
+
+    private void featureAlertMessage(String result) {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("INTERNET CONNECTION");
+        builder.setMessage(result);
+
+        builder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+
+        builder.show();
     }
 
 
