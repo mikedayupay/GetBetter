@@ -89,10 +89,6 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
             healthCenter.setText(currentHealthCenter);
         }
 
-        TextView userLabel = (TextView)findViewById(R.id.user_label);
-        if (userLabel != null) {
-            userLabel.setText(userNameLabel);
-        }
 
         if (viewCreatePatientBtn != null) {
             viewCreatePatientBtn.setOnClickListener(this);

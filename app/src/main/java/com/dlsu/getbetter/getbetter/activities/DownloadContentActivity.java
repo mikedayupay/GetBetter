@@ -238,6 +238,7 @@ public class DownloadContentActivity extends AppCompatActivity implements View.O
 
                 int totalRecords = params.size();
 
+
                 for (int i = 0; i < params.size(); i++) {
                     getBetterDb.updateCaseRecordAdditionalNotes(params.get(i).getCaseRecordId(),
                             params.get(i).getCaseRecordAdditionalNotes());

@@ -156,4 +156,6 @@
     <string name="done">Done</string>
     <string name="save">Save</string>
     <string name="record_audio">Record Audio</string>
+    <string name="title_page_list">Pages</string>
+    <string name="title_page_detail">Page Detail</string>
 </resources>

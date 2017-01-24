@@ -70,6 +70,8 @@
         <activity android:name=".activities.CaptureDocumentsActivity" />
         <activity android:name=".activities.RecordHpiActivity" />
         <activity android:name=".activities.SummaryActivity" />
+        <activity android:name=".activities.ViewVideoActivity" />
+        <activity android:name=".activities.MainActivity"></activity>
     </application>
 
 </manifest>
