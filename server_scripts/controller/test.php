@@ -79,6 +79,7 @@ class Test extends MY_Controller
 
 
       }
+      echo $case_record->case_record_id;
     }
     else
     {

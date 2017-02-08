@@ -38,7 +38,7 @@ class Android_upload_case_records extends MY_Controller
 
         $attachment = $this->input->post('attachments');
         $attachment['uploaded_on'] = gmdate($format);
-        
+
         $user_directory = $this->common->user_directory . $post['user_id'] . $this->common->directory_separator . 'case_records';
         if (!file_exists($user_directory))
         {
@@ -68,8 +68,9 @@ class Android_upload_case_records extends MY_Controller
           $this->upload->initialize($config);
 
         }
-      }
 
+        echo $case_record->case_record_id;
+      }
 
     }
   }
