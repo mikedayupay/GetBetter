@@ -42,10 +42,12 @@ public class CaseRecord {
         this.caseRecordControlNumber = caseRecordControlNumber;
     }
 
-    public CaseRecord(int caseRecordId, String patientName, String caseRecordComplaint, String caseRecordAdditionalNotes,
+    public CaseRecord(int caseRecordId, String patientName, String caseRecordControlNumber,
+                      String caseRecordComplaint, String caseRecordAdditionalNotes,
                       String healthCenter, String caseRecordStatus, String caseRecordUpdatedOn) {
         this.caseRecordId = caseRecordId;
         this.patientName = patientName;
+        this.caseRecordControlNumber = caseRecordControlNumber;
         this.caseRecordComplaint = caseRecordComplaint;
         this.caseRecordAdditionalNotes = caseRecordAdditionalNotes;
         this.healthCenter = healthCenter;
