@@ -1,87 +1,84 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content"
+    android:background="@drawable/list_status_drawable">
 
-    <android.support.v7.widget.CardView
-        android:id="@+id/existing_caserecord_item_card"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="50dp"
+        android:padding="16dp">
 
-        <RelativeLayout
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/download_control_number"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="10dp">
+            android:text="@string/control_number_placeholder"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_centerVertical="true"
+            />
 
-            <CheckBox
-                android:id="@+id/upload_caserecord_checkbox"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/download_patient_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/patient_name_placeholder"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@id/download_control_number"
+            android:layout_toEndOf="@id/download_control_number"
+            android:layout_marginLeft="30dp"
+            android:layout_marginStart="30dp"
+            />
 
-            <TextView
-                android:id="@+id/upload_control_number"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/control_number_placeholder"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:layout_centerVertical="true"
-                android:layout_marginLeft="30dp"
-                android:layout_toRightOf="@id/upload_caserecord_checkbox"
-                android:layout_toEndOf="@id/upload_caserecord_checkbox"/>
+        <TextView
+            android:id="@+id/download_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/status_placeholder"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="30dp"
+            android:layout_toRightOf="@id/download_patient_name"
+            android:layout_toEndOf="@id/download_patient_name"/>
 
-            <TextView
-                android:id="@+id/upload_case_record_patient_name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/patient_name_placeholder"
-                android:textStyle="bold"
-                android:textSize="16sp"
-                android:layout_centerVertical="true"
-                android:layout_toRightOf="@id/upload_control_number"
-                android:layout_toEndOf="@id/upload_control_number"
-                android:layout_marginLeft="30dp"
-                />
+        <TextView
+            android:id="@+id/download_chief_complaint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/chief_complaint_placeholder"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginStart="30dp"
+            android:layout_centerVertical="true"
+            android:layout_toEndOf="@+id/download_status" />
 
-            <TextView
-                android:id="@+id/upload_caserecord_status"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Status"
-                android:textStyle="bold"
-                android:textSize="16sp"
-                android:layout_centerVertical="true"
-                android:layout_marginLeft="30dp"
-                android:layout_toRightOf="@id/upload_case_record_patient_name"
-                android:layout_toEndOf="@id/upload_case_record_patient_name"/>
+        <TextView
+            android:id="@+id/download_doctor_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/download_chief_complaint"
+            android:layout_toEndOf="@id/download_chief_complaint"
+            android:layout_marginStart="30dp"
+            android:layout_marginLeft="30dp"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            />
 
-            <TextView
-                android:id="@+id/upload_caserecord_chief_complaint"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Chief Complaint"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:layout_marginStart="30dp"
-                android:layout_centerVertical="true"
-                android:layout_toEndOf="@+id/upload_caserecord_status" />
+        <TextView
+            android:id="@+id/download_updated_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:layout_toEndOf="@id/download_doctor_name"
+            android:layout_toRightOf="@id/download_doctor_name"
+            android:layout_marginLeft="30dp"
+            android:layout_marginStart="30dp"/>
 
-            <TextView
-                android:id="@+id/upload_caserecord_health_center"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text=""
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:layout_marginStart="30dp"
-                android:layout_centerVertical="true"
-                android:layout_toEndOf="@+id/upload_caserecord_chief_complaint" />
-
-
-
-        </RelativeLayout>
-
-
-    </android.support.v7.widget.CardView>
+    </RelativeLayout>
 
 </LinearLayout>
