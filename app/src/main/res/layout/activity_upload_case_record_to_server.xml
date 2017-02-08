@@ -78,13 +78,12 @@
                 android:layout_marginBottom="8dp"
                 />
 
-            <ListView
+            <android.support.v7.widget.RecyclerView
                 android:id="@+id/upload_page_case_record_list"
                 android:layout_width="match_parent"
-                android:layout_height="350dp"
-                android:divider="@drawable/divider">
+                android:layout_height="350dp">
 
-            </ListView>
+            </android.support.v7.widget.RecyclerView>
 
             <RelativeLayout
                 android:layout_width="match_parent"

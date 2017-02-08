@@ -8,6 +8,8 @@ import android.os.Handler;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -20,6 +22,7 @@ import com.dlsu.getbetter.getbetter.adapters.CaseRecordUploadAdapter;
 import com.dlsu.getbetter.getbetter.database.DataAdapter;
 import com.dlsu.getbetter.getbetter.objects.Attachment;
 import com.dlsu.getbetter.getbetter.objects.CaseRecord;
+import com.dlsu.getbetter.getbetter.objects.DividerItemDecoration;
 import com.dlsu.getbetter.getbetter.sessionmanagers.SystemSessionManager;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.RequestParams;
@@ -59,6 +62,7 @@ public class UploadCaseRecordToServerActivity extends AppCompatActivity implemen
     private static final int TIMEOUT_VALUE = 60 * 1000;
 
     private ArrayList<CaseRecord> caseRecordsUpload;
+    private CaseRecord selectedCaseRecord;
     private int userId;
     private int healthCenterId;
     private ProgressDialog pDialog = null;
@@ -85,8 +89,12 @@ public class UploadCaseRecordToServerActivity extends AppCompatActivity implemen
 
         Button backBtn = (Button)findViewById(R.id.upload_caserecord_back_btn);
         Button uploadBtn = (Button)findViewById(R.id.upload_caserecord_upload_btn);
-        ListView caseRecordList = (ListView)findViewById(R.id.upload_page_case_record_list);
-
+        RecyclerView.ItemDecoration dividerItemDecoration = new DividerItemDecoration(this);
+        RecyclerView.LayoutManager fileListLayoutManager = new LinearLayoutManager(this);
+        RecyclerView caseRecordList = (RecyclerView)findViewById(R.id.upload_page_case_record_list);
+        caseRecordList.setHasFixedSize(true);
+        caseRecordList.setLayoutManager(fileListLayoutManager);
+        caseRecordList.addItemDecoration(dividerItemDecoration);
 
         uploadBtn.setOnClickListener(this);
         backBtn.setOnClickListener(this);
@@ -94,11 +102,14 @@ public class UploadCaseRecordToServerActivity extends AppCompatActivity implemen
         initializeDatabase();
         userId = getUserId(user.get(SystemSessionManager.LOGIN_USER_NAME));
         new PopulateCaseRecordListTask().execute();
-
-        CaseRecordUploadAdapter caseRecordUploadAdapter = new CaseRecordUploadAdapter(this,
-                R.layout.case_record_item_checkbox, caseRecordsUpload);
-
+        CaseRecordUploadAdapter caseRecordUploadAdapter = new CaseRecordUploadAdapter(caseRecordsUpload);
         caseRecordList.setAdapter(caseRecordUploadAdapter);
+        caseRecordUploadAdapter.SetOnItemClickListener(new CaseRecordUploadAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(View view, int position) {
+                selectedCaseRecord = caseRecordsUpload.get(position);
+            }
+        });
     }
 
     private void initializeDatabase () {
@@ -211,27 +222,18 @@ public class UploadCaseRecordToServerActivity extends AppCompatActivity implemen
 
         } else if(id == R.id.upload_caserecord_upload_btn) {
 
-            ArrayList<CaseRecord> selectedCaseRecordsList = new ArrayList<>();
-
-
             for (int i = 0; i < caseRecordsUpload.size(); i++) {
 
                 CaseRecord selectedCaseRecord = caseRecordsUpload.get(i);
 
                 if (selectedCaseRecord.isChecked()) {
-//                    selectedCaseRecordsList.add(selectedCaseRecord);
                     uploadCaseRecord(selectedCaseRecord);
                 }
             }
-
-//            uploadCaseRecord(selectedCaseRecordsList);
-
         }
     }
 
     private class PopulateCaseRecordListTask extends AsyncTask<Void, Void, Void> {
-
-
 
         @Override
         protected void onPreExecute() {
@@ -271,9 +273,7 @@ public class UploadCaseRecordToServerActivity extends AppCompatActivity implemen
         record.put(COMPLAINT_KEY, caseRecordsUpload.getCaseRecordComplaint());
         record.put(CONTROL_NUMBER_KEY, caseRecordsUpload.getCaseRecordControlNumber());
         record.put(ADDITIONAL_NOTES_KEY, caseRecordsUpload.getCaseRecordAdditionalNotes());
-//        record.put(CASE_RECORD_STATUS_ID_KEY, String.valueOf(caseRecordsUpload.getCaseRecordStatusId()));
         record.put(UPDATED_BY_KEY, String.valueOf(userId));
-//        caseRecords.add(record);
 
         for (int i = 0; i < attachmentList.size(); i++) {
 
@@ -301,7 +301,7 @@ public class UploadCaseRecordToServerActivity extends AppCompatActivity implemen
 
         params.put("case_record", record);
         params.put("attachments", attachments);
-        params.setHttpEntityIsRepeatable(true);
+//        params.setHttpEntityIsRepeatable(true);
         params.setUseJsonStreamer(false);
 
 
@@ -325,8 +325,9 @@ public class UploadCaseRecordToServerActivity extends AppCompatActivity implemen
                     public void onSuccess(int statusCode, Header[] headers, String responseString) {
 
                         Log.d(TAG, responseString);
+                        updateCaseRecordId(Integer.parseInt(responseString), caseRecordsUpload.getCaseRecordId());
                         featureAlertMessage("Upload Complete");
-//                        removeCaseRecordsUpload(caseRecordsUpload.getCaseRecordId());
+                        removeCaseRecordsUpload(caseRecordsUpload.getCaseRecordId());
                     }
 
                     @Override
@@ -373,6 +374,17 @@ public class UploadCaseRecordToServerActivity extends AppCompatActivity implemen
         }
     };
 
+    private void showPopulateProgressDialog() {
+        if(pDialog == null) {
+            pDialog = new ProgressDialog(UploadCaseRecordToServerActivity.this);
+            pDialog.setTitle("Populating Case Record List");
+            pDialog.setMessage("Please wait a moment...");
+            pDialog.setIndeterminate(true);
+            pDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        }
+        pDialog.show();
+    }
+
     private void showProgressDialog() {
         if(pDialog == null) {
             pDialog = new ProgressDialog(UploadCaseRecordToServerActivity.this);
@@ -393,8 +405,8 @@ public class UploadCaseRecordToServerActivity extends AppCompatActivity implemen
 
     @Override
     protected void onDestroy() {
-        dismissProgressDialog();
         super.onDestroy();
+        dismissProgressDialog();
     }
 
 }

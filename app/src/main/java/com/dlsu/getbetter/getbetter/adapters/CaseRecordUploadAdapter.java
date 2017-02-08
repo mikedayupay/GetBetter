@@ -2,6 +2,7 @@ package com.dlsu.getbetter.getbetter.adapters;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,140 +20,72 @@ import java.util.ArrayList;
  * Created by mikedayupay on 15/04/2016.
  * GetBetter 2016
  */
-public class CaseRecordUploadAdapter extends ArrayAdapter<CaseRecord> {
+public class CaseRecordUploadAdapter extends RecyclerView.Adapter<CaseRecordUploadAdapter.ViewHolder> {
 
     private ArrayList<CaseRecord> caseRecordsList;
-    private LayoutInflater inflater;
+    private int selectedItem = 0;
+    private OnItemClickListener mItemClickListener;
 
-    public CaseRecordUploadAdapter(Context context, int textViewResourceId, ArrayList<CaseRecord> objects) {
-        super(context, textViewResourceId, objects);
-
+    public CaseRecordUploadAdapter(ArrayList<CaseRecord> objects) {
         this.caseRecordsList = objects;
-        inflater = LayoutInflater.from(context);
+
     }
 
-    private class ViewHolder {
+    @Override
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.case_record_item_checkbox, parent, false);
+
+        return new ViewHolder(v);
+    }
+
+    @Override
+    public void onBindViewHolder(ViewHolder holder, int position) {
+        holder.controlNumber.setText(caseRecordsList.get(position).getCaseRecordControlNumber());
+        holder.patientName.setText(caseRecordsList.get(position).getPatientName());
+        holder.complaint.setText(caseRecordsList.get(position).getCaseRecordComplaint());
+        holder.complaint.setText(caseRecordsList.get(position).getCaseRecordStatus());
+        holder.itemView.setSelected(selectedItem == position);
+    }
+
+    @Override
+    public int getItemCount() {
+        return caseRecordsList.size();
+    }
+
+    class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         TextView controlNumber;
         TextView patientName;
         TextView complaint;
         TextView caseStatus;
         TextView dateUpdated;
-        CheckBox checkBox;
 
-        public ViewHolder() {
+        ViewHolder(View inflate) {
+            super(inflate);
 
-        }
-
-        public ViewHolder(TextView controlNumber, TextView patientName,
-                          TextView complaint, TextView caseStatus, TextView dateUpdated, CheckBox checkBox) {
-
-            this.controlNumber = controlNumber;
-            this.patientName = patientName;
-            this.complaint = complaint;
-            this.caseStatus = caseStatus;
-            this.dateUpdated = dateUpdated;
-            this.checkBox = checkBox;
+            this.controlNumber = (TextView)inflate.findViewById(R.id.upload_control_number);
+            this.patientName = (TextView)inflate.findViewById(R.id.upload_caserecord_patient_name);
+            this.complaint = (TextView)inflate.findViewById(R.id.upload_caserecord_chief_complaint);
+            this.caseStatus = (TextView)inflate.findViewById(R.id.upload_caserecord_status);
+            inflate.setOnClickListener(this);
 
         }
 
-        public TextView getControlNumber() {
-            return controlNumber;
-        }
-
-        public void setControlNumber(TextView controlNumber) {
-            this.controlNumber = controlNumber;
-        }
-
-//        public TextView getPatientName() {
-//            return patientName;
-//        }
-//
-//        public void setPatientName(TextView patientName) {
-//            this.patientName = patientName;
-//        }
-
-        public TextView getComplaint() {
-            return complaint;
-        }
-
-        public void setComplaint(TextView complaint) {
-            this.complaint = complaint;
-        }
-
-        public TextView getCaseStatus() {
-            return caseStatus;
-        }
-
-        public void setCaseStatus(TextView caseStatus) {
-            this.caseStatus = caseStatus;
-        }
-
-        public TextView getDateUpdated() {
-            return dateUpdated;
-        }
-
-        public void setDateUpdated(TextView dateUpdated) {
-            this.dateUpdated = dateUpdated;
-        }
-
-        public TextView getPatientName() {
-            return patientName;
-        }
-
-        public void setPatientName(TextView patientName) {
-            this.patientName = patientName;
-        }
-
-        public CheckBox getCheckBox() {
-            return checkBox;
-        }
-
-        public void setCheckBox(CheckBox checkBox) {
-            this.checkBox = checkBox;
+        @Override
+        public void onClick(View view) {
+            mItemClickListener.onItemClick(view, getAdapterPosition());
+            notifyItemChanged(selectedItem);
+            selectedItem = getAdapterPosition();
+            notifyItemChanged(selectedItem);
         }
     }
 
-    @NonNull
-    @Override
-    public View getView(int position, View convertView, @NonNull ViewGroup parent) {
 
-        ViewHolder holder = null;
-        CaseRecord caseRecord = this.getItem(position);
+    public interface OnItemClickListener {
+        public void onItemClick(View view, int position);
+    }
 
-        if(convertView == null) {
-
-            convertView = inflater.inflate(R.layout.case_record_item_checkbox, parent, false);
-
-            holder = new ViewHolder();
-            holder.patientName = (TextView)convertView.findViewById(R.id.upload_caserecord_patient_name);
-            holder.controlNumber = (TextView)convertView.findViewById(R.id.upload_control_number);
-            holder.complaint = (TextView)convertView.findViewById(R.id.upload_caserecord_chief_complaint);
-            holder.checkBox = (CheckBox)convertView.findViewById(R.id.upload_caserecord_checkbox);
-            convertView.setTag(holder);
-
-
-            holder.checkBox.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    CheckBox cb = (CheckBox) v;
-                    CaseRecord caseRecord = (CaseRecord) cb.getTag();
-                    caseRecord.setChecked(cb.isChecked());
-                }
-            });
-
-
-        } else {
-            holder = (ViewHolder)convertView.getTag();
-        }
-
-        String id = caseRecord.getCaseRecordControlNumber() + "";
-        holder.controlNumber.setText(id);
-        holder.patientName.setText(caseRecord.getPatientName());
-        holder.complaint.setText(caseRecord.getCaseRecordComplaint());
-        holder.checkBox.setChecked(caseRecord.isChecked());
-        holder.checkBox.setTag(caseRecord);
-
-        return convertView;
+    public void SetOnItemClickListener(final OnItemClickListener mItemClickListener) {
+        this.mItemClickListener = mItemClickListener;
     }
 }
