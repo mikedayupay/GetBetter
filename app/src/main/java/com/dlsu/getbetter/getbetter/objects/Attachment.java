@@ -38,6 +38,15 @@ public class Attachment {
         this.uploadedBy = uploadedBy;
     }
 
+    public Attachment(int caseRecordId, String attachmentPath, String attachmentDescription,
+                      int attachmentType, String uploadedDate) {
+        this.caseRecordId = caseRecordId;
+        this.attachmentPath = attachmentPath;
+        this.attachmentDescription = attachmentDescription;
+        this.attachmentType = attachmentType;
+        this.uploadedDate = uploadedDate;
+    }
+
     public Attachment(String attachmentPath, File fileName) {
         this.attachmentPath = attachmentPath;
         this.fileName = fileName;
