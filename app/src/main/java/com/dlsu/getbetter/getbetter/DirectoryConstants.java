@@ -24,8 +24,8 @@ public class DirectoryConstants {
 
     public static final String DOWNLOAD_CASE_RECORD_NEW_ATTACHMENTS_SERVER_SCRIPT_URL = "http://128.199.205.226/get_better/download_selected_data.php";
 
-    public static final String TEST_URL = "http://requestb.in/1fddxip1";
+    public static final String TEST_URL_POST = "http://128.199.205.226/getbetter/android_upload_case_record/";
 
-    public static final String TEST_URL_POST = "http://128.199.205.226/getbetter/test/";
+    public static final String ATTACHMENT_POST_URL = "http://128.199.205.226/getbetter/android_upload_attachments";
 
 }
