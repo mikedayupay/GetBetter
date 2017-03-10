@@ -513,7 +513,7 @@ public class SummaryActivity extends AppCompatActivity implements View.OnClickLi
                 nHandler.post(new Runnable() {
                     public void run() {
                         nMediaController.show(0);
-                        nMediaPlayer.start();
+//                        nMediaPlayer.start();
                     }
                 });
             }
@@ -807,6 +807,9 @@ public class SummaryActivity extends AppCompatActivity implements View.OnClickLi
             }
         }
     }
+
+
+    /* media recorder and player actions below */
 
     @Override
     public boolean canPause() {
