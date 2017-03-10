@@ -151,7 +151,7 @@ public class UploadPatientToServerActivity extends AppCompatActivity implements 
 
     }
 
-    private void updateUserId (long newId, long oldId) {
+    private void updateUserId(long newUserId, long oldUserId) {
 
         try {
             getBetterDb.openDatabase();
@@ -159,8 +159,20 @@ public class UploadPatientToServerActivity extends AppCompatActivity implements 
             e.printStackTrace();
         }
 
-        Log.d(TAG, "updateUserId: " + newId);
-        getBetterDb.updateUserId(newId, oldId);
+        getBetterDb.updateUserId(newUserId, oldUserId);
+
+        getBetterDb.closeDatabase();
+    }
+
+    private void updateUser (long updatedUserId) {
+
+        try {
+            getBetterDb.openDatabase();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        getBetterDb.updateUserUploaded(updatedUserId);
 
         getBetterDb.closeDatabase();
 
@@ -224,7 +236,7 @@ public class UploadPatientToServerActivity extends AppCompatActivity implements 
                 patientUpload.getLastName().toLowerCase() + ".jpg";
         String patientId = String.valueOf(patientUpload.getId());
 
-        params.put(ID_KEY, patientId);
+//        params.put(ID_KEY, patientId);
         params.put(FIRST_NAME_KEY, patientUpload.getFirstName());
         params.put(MIDDLE_NAME_KEY, patientUpload.getMiddleName());
         params.put(LAST_NAME_KEY, patientUpload.getLastName());
@@ -261,8 +273,9 @@ public class UploadPatientToServerActivity extends AppCompatActivity implements 
                 Log.d(TAG, responseBody);
 
                 newUserId = Long.parseLong(responseBody);
+                updateUser(patientUpload.getId());
                 updateUserId(newUserId, patientUpload.getId());
-                removePatientUpload(patientUpload.getId());
+//                removePatientUpload(patientUpload.getId());
             }
 
             @Override
@@ -271,13 +284,6 @@ public class UploadPatientToServerActivity extends AppCompatActivity implements 
                 featureAlertMessage("Upload Failed");
                 Log.d(TAG, "onFailure: " + responseBody);
                 Log.d(TAG, "onFailure: " + statusCode);
-
-            }
-
-            @Override
-            public void onProgress(long bytesWritten, long totalSize) {
-                super.onProgress(bytesWritten, totalSize);
-                pDialog.setProgress((int)bytesWritten);
 
             }
 
@@ -323,9 +329,10 @@ public class UploadPatientToServerActivity extends AppCompatActivity implements 
             pDialog = new ProgressDialog(UploadPatientToServerActivity.this);
             pDialog.setTitle("Uploading Patient Records");
             pDialog.setMessage("Please wait a moment...");
-            pDialog.setProgress(0);
-            pDialog.setMax(100);
-            pDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+//            pDialog.setProgress(0);
+//            pDialog.setMax(100);
+            pDialog.setIndeterminate(true);
+            pDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         }
         pDialog.show();
     }
