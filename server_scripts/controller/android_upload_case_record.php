@@ -32,7 +32,7 @@ class Android_upload_case_record extends MY_Controller
         $this->case_records->create_history(array(
           'case_record_id' => $case_record->case_record_id,
           'record_status_id' => 1,
-          'updated_by' => $post['case_record']['updated_by'],
+          'updated_by' => 444, //$post['case_record']['updated_by'],
           'updated_on' => gmdate($format)
         ));
 
