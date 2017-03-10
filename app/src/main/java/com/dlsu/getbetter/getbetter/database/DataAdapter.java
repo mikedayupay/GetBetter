@@ -176,10 +176,9 @@ public class DataAdapter {
         cv.put("default_health_center", healthCenterId);
 
         rowId = getBetterDb.insert(USER_TABLE, null, cv);
-
         cv.put("_id", rowId);
 
-        getBetterDb.insert(USER_TABLE_UPLOAD, null, cv);
+//        getBetterDb.insert(USER_TABLE_UPLOAD, null, cv);
 
         return rowId;
     }
@@ -198,7 +197,7 @@ public class DataAdapter {
         cv.put("control_number", controlNumber);
 
         rowId = getBetterDb.insert(CASE_RECORD_TABLE, null, cv);
-        getBetterDb.insert(CASE_RECORD_TABLE_UPLOAD, null, cv);
+//        getBetterDb.insert(CASE_RECORD_TABLE_UPLOAD, null, cv);
 
         return rowId;
     }
@@ -276,8 +275,8 @@ public class DataAdapter {
         String sql = "SELECT u._id AS id, u.first_name AS first_name, u.middle_name AS middle_name, " +
                 "u.last_name AS last_name, u.birthdate AS birthdate, g.gender_name AS gender, " +
                 "c.civil_status_name AS civil_status, u.blood_type AS blood_type, u.profile_url AS image " +
-                "FROM tbl_users_upload AS u, tbl_genders AS g, tbl_civil_statuses AS c " +
-                "WHERE u.gender_id = g._id AND u.civil_status_id = c._id AND u.role_id = 6";
+                "FROM tbl_users AS u, tbl_genders AS g, tbl_civil_statuses AS c " +
+                "WHERE u.gender_id = g._id AND u.civil_status_id = c._id AND u.role_id = 6 AND u.is_uploaded = 0";
 
         Cursor c = getBetterDb.rawQuery(sql, null);
 
@@ -330,13 +329,13 @@ public class DataAdapter {
 
     public void removePatientUpload (long userId) {
 
-        getBetterDb.delete(USER_TABLE_UPLOAD, "_id = " + userId, null);
+        getBetterDb.delete(USER_TABLE, "_id = " + userId, null);
 
     }
 
     public void removeCaseRecordUpload (int caseRecordId) {
 
-        getBetterDb.delete(CASE_RECORD_TABLE_UPLOAD, "_id = " + caseRecordId, null);
+        getBetterDb.delete(CASE_RECORD_TABLE, "_id = " + caseRecordId, null);
     }
 
     public ArrayList<HealthCenter> getHealthCenters() {
@@ -484,7 +483,7 @@ public class DataAdapter {
                 "INNER JOIN (SELECT h.* FROM tbl_case_record_history AS h " +
                 "INNER JOIN (SELECT _id, record_status_id, MAX(updated_on) AS maxdate " +
                 "FROM tbl_case_record_history WHERE record_status_id IN (1, 2) GROUP BY _id) t " +
-                "ON h._id = t._id AND h.updated_on = t.maxdate) d ON c._id = d._id";
+                "ON h._id = t._id AND h.updated_on = t.maxdate) d ON c._id = d._id AND c.is_uploaded = 0";
 
         Cursor c = getBetterDb.rawQuery(sql, null);
 
@@ -780,5 +779,25 @@ public class DataAdapter {
 
         getBetterDb.update(CASE_RECORD_ATTACHMENTS_TABLE, cv, "case_record_id = " + oldId, null);
 
+    }
+
+    public void updateCaseRecordUploaded(int caseRecordId) {
+
+        ContentValues cv = new ContentValues();
+        cv.put("is_uploaded", 1);
+
+        getBetterDb.update(CASE_RECORD_TABLE, cv, "_id = " + caseRecordId, null);
+
+        cv.clear();
+    }
+
+    public void updateUserUploaded(long userId) {
+
+        ContentValues cv = new ContentValues();
+        cv.put("is_uploaded", 1);
+
+        getBetterDb.update(USER_TABLE, cv, "_id = " + userId, null);
+
+        cv.clear();
     }
 }
