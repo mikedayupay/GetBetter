@@ -35,6 +35,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     private SystemSessionManager systemSessionManager;
     private DataAdapter getBetterDb;
     private boolean isConnected;
+    private DetailsFragment fragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -119,9 +120,11 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 
         if(id == R.id.view_create_patient_records_btn) {
 
+//            if (!fragment.isDetached()) {
+//                getSupportFragmentManager().beginTransaction().remove(fragment).commit();
+//            }
 //            systemSessionManager.setHealthCenter(healthCenterName, String.valueOf(healthCenterId));
             Intent intent = new Intent(this, ExistingPatientActivity.class);
-
             startActivity(intent);
 
 
@@ -129,6 +132,9 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 
             if(getInternetConnectivityStatus()) {
 
+//                if (!fragment.isDetached()) {
+//                    getSupportFragmentManager().beginTransaction().remove(fragment).commit();
+//                }
                 //            systemSessionManager.setHealthCenter(healthCenterName, String.valueOf(healthCenterId));
                 Intent intent = new Intent(this, DownloadContentActivity.class);
                 startActivity(intent);
@@ -158,10 +164,9 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         } else if (id == R.id.change_health_center_btn) {
 
             Intent intent = new Intent(this, HealthCenterActivity.class);
-
             startActivity(intent);
-
             finish();
+
         }
     }
 
@@ -199,7 +204,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
             Log.d("choice", caseRecordId + "");
             Bundle arguments = new Bundle();
             arguments.putInt("case record id", caseRecordId);
-            DetailsFragment fragment = new DetailsFragment();
+            fragment = new DetailsFragment();
             fragment.setArguments(arguments);
             getSupportFragmentManager().beginTransaction().replace(R.id.case_detail, fragment).commit();
         }

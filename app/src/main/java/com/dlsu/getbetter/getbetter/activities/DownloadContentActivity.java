@@ -1,7 +1,6 @@
 package com.dlsu.getbetter.getbetter.activities;
 
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.net.Uri;
@@ -10,23 +9,21 @@ import android.os.Environment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Base64;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ListView;
 
 import com.dlsu.getbetter.getbetter.DirectoryConstants;
 import com.dlsu.getbetter.getbetter.R;
-import com.dlsu.getbetter.getbetter.RequestHandler;
 import com.dlsu.getbetter.getbetter.adapters.CaseRecordDownloadAdapter;
 import com.dlsu.getbetter.getbetter.database.DataAdapter;
 import com.dlsu.getbetter.getbetter.objects.Attachment;
 import com.dlsu.getbetter.getbetter.objects.CaseRecord;
+import com.dlsu.getbetter.getbetter.objects.DividerItemDecoration;
 import com.loopj.android.http.AsyncHttpClient;
-import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.FileAsyncHttpResponseHandler;
-import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 import com.loopj.android.http.TextHttpResponseHandler;
 
@@ -44,7 +41,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import cz.msebera.android.httpclient.Header;
 
@@ -54,6 +50,7 @@ public class DownloadContentActivity extends AppCompatActivity implements View.O
     private static final String TAG_CASE_ATTACHMENTS = "case_attachments";
     private static final String TAG_CASE_RECORD_ID = "case_record_id";
     private static final String TAG_USER_ID = "user_id";
+    private static final String TAG_CONTROL_NUMBER = "control_number";
     private static final String TAG_COMPLAINT = "complaint";
     private static final String TAG_ADDITIONAL_NOTES = "additional_notes";
     private static final String TAG_HEALTH_CENTER_ID = "health_center_id";
@@ -64,15 +61,19 @@ public class DownloadContentActivity extends AppCompatActivity implements View.O
     private static final String TAG_CASE_ATTACHMENT_TYPE = "case_attachment_type";
     private static final String TAG_UPLOADED_ON = "uploaded_on";
     private static final String TAG_UPLOADED_BY = "uploaded_by";
+    private static final String TAG = "downloadactivity";
 
     private String myJSON;
     private String myJSONAttachments;
+    private int index, total;
+    private CaseRecord selectedCaseRecord;
     private ArrayList<CaseRecord> caseRecordsData;
     private ArrayList<Long> patientIds;
+    private ArrayList<Attachment> attachments;
 
     private DataAdapter getBetterDb;
     private ProgressDialog dDialog = null;
-    private ListView caseRecordList;
+    private RecyclerView recyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,7 +82,12 @@ public class DownloadContentActivity extends AppCompatActivity implements View.O
 
         Button backBtn = (Button)findViewById(R.id.download_back_btn);
         Button downloadBtn = (Button)findViewById(R.id.download_selected_btn);
-        caseRecordList = (ListView)findViewById(R.id.download_page_case_record_list);
+        RecyclerView.ItemDecoration dividerItemDecoration = new DividerItemDecoration(this);
+        RecyclerView.LayoutManager fileListLayoutManager = new LinearLayoutManager(this);
+        recyclerView = (RecyclerView)findViewById(R.id.download_recycler_view);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(fileListLayoutManager);
+        recyclerView.addItemDecoration(dividerItemDecoration);
 
         backBtn.setOnClickListener(this);
         downloadBtn.setOnClickListener(this);
@@ -116,22 +122,10 @@ public class DownloadContentActivity extends AppCompatActivity implements View.O
             finish();
         } else if (id == R.id.download_selected_btn) {
 
-            ArrayList<CaseRecord> selectedCaseRecordList = new ArrayList<>();
-
-            for(int i = 0; i < caseRecordsData.size(); i++) {
-
-                CaseRecord selectedCaseRecord = caseRecordsData.get(i);
-
-                if(selectedCaseRecord.isChecked()) {
-                    selectedCaseRecordList.add(selectedCaseRecord);
-                }
-            }
-
-            updateCaseRecord(selectedCaseRecordList);
+            updateCaseRecord(selectedCaseRecord);
 //            updateCaseRecordAdditionalNotes(selectedCaseRecordList);
 //            updateLocalCaseRecordHistory(selectedCaseRecordList);
 //            downloadSelectedData(selectedCaseRecordList);
-
         }
     }
 
@@ -170,6 +164,7 @@ public class DownloadContentActivity extends AppCompatActivity implements View.O
         RequestParams params = new RequestParams();
         params.put("patientIds", patientIds);
         client.get(DirectoryConstants.DOWNLOAD_CASE_RECORD_LIST_URL, params, new TextHttpResponseHandler() {
+
             @Override
             public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
 
@@ -192,33 +187,69 @@ public class DownloadContentActivity extends AppCompatActivity implements View.O
             for(int i = 0; i < caseRecords.length(); i++) {
                 JSONObject c = caseRecords.getJSONObject(i);
                 int caseRecordId = Integer.parseInt(c.getString(TAG_CASE_RECORD_ID));
+                String controlNumber = c.getString(TAG_CONTROL_NUMBER);
                 String patientName = getUserName(Integer.parseInt(c.getString(TAG_USER_ID)));
                 String complaint = c.getString(TAG_COMPLAINT);
                 String additionalNotes = c.getString(TAG_ADDITIONAL_NOTES);
                 String healthCenter = getHealthCenterName(Integer.parseInt(c.getString(TAG_HEALTH_CENTER_ID)));
                 String recordStatus = getCaseRecordStatusString(Integer.parseInt(c.getString(TAG_RECORD_STATUS_ID)));
                 String updatedOn = c.getString(TAG_UPDATED_ON);
+                //// TODO: 03/02/2017 add doctors name
 
-                CaseRecord caseRecord = new CaseRecord(caseRecordId, patientName, complaint, additionalNotes,
-                        healthCenter, recordStatus, updatedOn);
+                CaseRecord caseRecord = new CaseRecord(caseRecordId, patientName, controlNumber,
+                        complaint, additionalNotes, healthCenter, recordStatus, updatedOn);
                 caseRecord.setCaseRecordStatusId(Integer.parseInt(c.getString(TAG_RECORD_STATUS_ID)));
                 caseRecordsData.add(caseRecord);
 
                 Log.e("case records data", caseRecordsData.size() + "");
             }
 
-            CaseRecordDownloadAdapter caseRecordDownloadAdapter = new CaseRecordDownloadAdapter(this, R.layout.case_record_item_checkbox, caseRecordsData);
-            caseRecordList.setAdapter(caseRecordDownloadAdapter);
+            CaseRecordDownloadAdapter caseRecordDownloadAdapter = new CaseRecordDownloadAdapter(caseRecordsData);
+            recyclerView.setAdapter(caseRecordDownloadAdapter);
+            caseRecordDownloadAdapter.SetOnItemClickListener(new CaseRecordDownloadAdapter.OnItemClickListener() {
+                @Override
+                public void onItemClick(View view, int position) {
+                    selectedCaseRecord = caseRecordsData.get(position);
+                    Log.d(TAG, "onItemClick: " + selectedCaseRecord.getCaseRecordStatus());
+
+                }
+            });
 
         }catch (JSONException e) {
             e.printStackTrace();
         }
     }
 
-    private void updateCaseRecord(ArrayList<CaseRecord> caseRecords) {
+    private void populateAttachmentList() {
+
+        try {
+            JSONObject jsonObject = new JSONObject(myJSON);
+            JSONArray caseAttachments = jsonObject.getJSONArray(TAG_CASE_ATTACHMENTS);
+
+            for (int i = 0; i < caseAttachments.length(); i++) {
+                JSONObject c = caseAttachments.getJSONObject(i);
+                int caseRecordId = Integer.parseInt(c.getString(TAG_CASE_RECORD_ID));
+                String description = c.getString(TAG_DESCRIPTION);
+                String filePath = c.getString(TAG_FILE_PATH);
+                int caseAttachmentTypeId = Integer.parseInt(c.getString(TAG_CASE_ATTACHMENT_TYPE));
+                String uploadedOn = c.getString(TAG_UPLOADED_ON);
+
+                Attachment attachment = new Attachment(caseRecordId, filePath, description, caseAttachmentTypeId, uploadedOn);
+                attachments.add(attachment);
+                Log.d(TAG, "populateAttachmentList: " + attachments.size());
+                downloadAttachment(attachment);
+            }
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
 
-        class UpdateCaseRecords extends AsyncTask<ArrayList<CaseRecord>, Integer, Integer> {
+    }
+
+    private void updateCaseRecord(CaseRecord caseRecord) {
+
+        class UpdateCaseRecords extends AsyncTask<CaseRecord, Integer, Integer> {
 
             @Override
             protected void onPreExecute() {
@@ -227,8 +258,7 @@ public class DownloadContentActivity extends AppCompatActivity implements View.O
             }
 
             @Override
-            protected Integer doInBackground(ArrayList<CaseRecord>... arrayLists) {
-                ArrayList<CaseRecord> params = arrayLists[0];
+            protected Integer doInBackground(CaseRecord... caseRecord) {
 
                 try {
                     getBetterDb.openDatabase();
@@ -236,35 +266,133 @@ public class DownloadContentActivity extends AppCompatActivity implements View.O
                     e.printStackTrace();
                 }
 
-                int totalRecords = params.size();
+                updateLocalCaseRecordHistory(caseRecord[0]);
+                updateCaseRecordAdditionalNotes(caseRecord[0]);
 
-                for (int i = 0; i < params.size(); i++) {
-                    getBetterDb.updateCaseRecordAdditionalNotes(params.get(i).getCaseRecordId(),
-                            params.get(i).getCaseRecordAdditionalNotes());
-                    getBetterDb.updateLocalCaseRecordHistory(params.get(i));
-                    publishProgress((i/totalRecords) * 100);
-                    if (isCancelled()) break;
-                }
 
-                getBetterDb.closeDatabase();
-
-                return totalRecords;
-            }
-
-            @Override
-            protected void onProgressUpdate(Integer... values) {
-                super.onProgressUpdate(values[0]);
+                return null;
             }
 
             @Override
             protected void onPostExecute(Integer s) {
                 super.onPostExecute(s);
                 dismissProgressDialog();
-                featureAlertMessage("Updated " + s + " case records.");
+                getAttachmentdata(selectedCaseRecord.getCaseRecordId());
             }
         }
+        new UpdateCaseRecords().execute(caseRecord);
+    }
 
-        new UpdateCaseRecords().execute(caseRecords);
+    private void getAttachmentdata(int caseRecordId) {
+
+        Log.d(TAG, "getAttachmentdata: method fire " + caseRecordId);
+        AsyncHttpClient httpClient = new AsyncHttpClient();
+        RequestParams params = new RequestParams();
+        params.put(TAG_CASE_RECORD_ID, caseRecordId);
+
+        httpClient.post(this, DirectoryConstants.DOWNLOAD_CASE_RECORD_NEW_ATTACHMENTS_SERVER_SCRIPT_URL, params, new TextHttpResponseHandler() {
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                Log.d(TAG, "onFailure: failed to get");
+            }
+
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, String responseString) {
+                Log.d(TAG, "onSuccess: " + responseString);
+                myJSON = responseString;
+                populateAttachmentList();
+            }
+        });
+    }
+
+    private void downloadAttachment(Attachment attachment) {
+
+        AsyncHttpClient fileClient = new AsyncHttpClient();
+
+        String uploadedOn = attachment.getUploadedDate();
+        int attachmentType = attachment.getAttachmentType();
+        String attachmentDescription = attachment.getAttachmentDescription();
+
+        final File destinationFile = createAttachmentFile(attachmentDescription, uploadedOn, attachmentType);
+
+        fileClient.get(attachment.getAttachmentPath(), new FileAsyncHttpResponseHandler(this) {
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, Throwable throwable, File file) {
+                Log.d(TAG, "onFailure: " + statusCode + file.getName());
+            }
+
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, File file) {
+                new WriteToLocalTask().execute(file, destinationFile);
+//                writeFileToLocal(file, destinationFile.getPath());
+
+            }
+        });
+    }
+
+    private class WriteToLocalTask extends AsyncTask<File, Integer, Void> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            showDownloadingDialog();
+
+        }
+
+        @Override
+        protected Void doInBackground(File... files) {
+//            writeFileToLocal(files[0], files[1].getPath());
+            FileInputStream inputStream = null;
+            FileOutputStream outputStream = null;
+            dDialog.setMax((int) files[0].length());
+
+            try {
+                inputStream = new FileInputStream(files[0]);
+                outputStream = new FileOutputStream(files[1]);
+
+
+                byte[] buffer = new byte[1024];
+                int bytesRead;
+
+                while ((bytesRead = inputStream.read(buffer)) > 0) {
+                    outputStream.write(buffer, 0, bytesRead);
+                    publishProgress((int)((bytesRead / (float)files.length) * 100));
+                    if (isCancelled()) break;
+                }
+
+            }catch (Exception e) {
+                e.printStackTrace();
+            }finally {
+                try {
+                    if (inputStream != null) {
+                        inputStream.close();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                try {
+                    if (outputStream != null) {
+                        outputStream.close();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            dDialog.setProgress(values[0]);
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+        }
     }
 
     private void downloadSelectedData(ArrayList<CaseRecord> caseRecords) {
@@ -274,7 +402,7 @@ public class DownloadContentActivity extends AppCompatActivity implements View.O
         AsyncHttpClient client = new AsyncHttpClient();
         RequestParams params = new RequestParams();
         params.put("caseRecords", caseRecords);
-        File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS),
+        final File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS),
                 DirectoryConstants.CASE_RECORD_ATTACHMENT_DIRECTORY_NAME);
         client.post(DirectoryConstants.DOWNLOAD_CASE_RECORD_NEW_ATTACHMENTS_SERVER_SCRIPT_URL, params, new TextHttpResponseHandler() {
 
@@ -304,10 +432,9 @@ public class DownloadContentActivity extends AppCompatActivity implements View.O
                     FileInputStream inputStream = null;
                     FileOutputStream outputStream = null;
 
-
                     try {
                         inputStream = new FileInputStream(file);
-                        outputStream = openFileOutput(file.getName(), Context.MODE_PRIVATE);
+                        outputStream = new FileOutputStream(mediaStorageDir + "/" + file.getName());
                         byte[] buffer = new byte[1024];
                         int bytesRead;
                         while ((bytesRead = inputStream.read(buffer)) > 0) {
@@ -332,127 +459,7 @@ public class DownloadContentActivity extends AppCompatActivity implements View.O
             });
         }
 
-
-
-
-//        class DownloadSelectedData extends AsyncTask<ArrayList<CaseRecord>, Void, String> {
-//
-//            RequestHandler rh = new RequestHandler();
-//
-//            @Override
-//            protected void onPreExecute() {
-//                showDownloadingDialog("Downloading data...");
-//            }
-//
-//            @SafeVarargs
-//            @Override
-//            protected final String doInBackground(ArrayList<CaseRecord>... params) {
-//
-//                ArrayList<CaseRecord> selectedCaseRecords = params[0];
-//                String result = null;
-////                File mediaStorageDir = new File (Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC), "sample_audio");
-////                File profileImageFile = new File (mediaStorageDir.getPath() + File.pathSeparator + "audio2.mp3");
-//
-//                for(int i = 0; i < selectedCaseRecords.size(); i++) {
-//
-//                    HashMap<String, String> data = new HashMap<>();
-//                    data.put(TAG_CASE_RECORD_ID, String.valueOf(selectedCaseRecords.get(i).getCaseRecordId()));
-////                    rh.getAudioFile(profileImageFile.getPath());
-//                    result = rh.sendPostRequest(DirectoryConstants.DOWNLOAD_CASE_RECORD_NEW_ATTACHMENTS_SERVER_SCRIPT_URL, data);
-//                }
-//
-//                return result;
-//            }
-//
-//            @Override
-//            protected void onPostExecute(String s) {
-//                dismissProgressDialog();
-//
-////                Log.e("s", s);
-//
-////                StringBuilder message = new StringBuilder(s);
-//
-//                if(!s.isEmpty() && s != null) {
-//                    myJSONAttachments = s;
-//                    insertNewAttachmentsToLocalDB();
-////                    getAudioFile();
-////                    featureAlertMessage("Download Complete!");
-//                } else {
-//                    featureAlertMessage("Download Failed.");
-//                }
-//            }
-//        }
-//
-//        DownloadSelectedData downloadSelectedData = new DownloadSelectedData();
-//        downloadSelectedData.execute(caseRecords);
-
     }
-
-    private void insertNewAttachmentsToLocalDB() {
-
-        String path = "";
-        File fileName = null;
-        ArrayList<Attachment> attachmentPaths = new ArrayList<>();
-        ArrayList<Attachment> attachmentData = new ArrayList<>();
-
-        try{
-            JSONObject jsonObject = new JSONObject(myJSONAttachments);
-            JSONArray caseAttachments = jsonObject.getJSONArray(TAG_CASE_ATTACHMENTS);
-            Log.d("CASE ATTACHMENT LENGTH", caseAttachments.length() + "");
-
-            for(int i = 0; i < caseAttachments.length(); i++) {
-                JSONObject o = caseAttachments.getJSONObject(i);
-                int caseRecordId = Integer.parseInt(o.getString(TAG_CASE_RECORD_ID));
-                String description = o.getString(TAG_DESCRIPTION);
-                String filePath = o.getString(TAG_FILE_PATH);
-//                String encodedImage = o.getString(TAG_ENCODED_IMAGE);
-                int attachmentTypeId = Integer.parseInt(o.getString(TAG_CASE_ATTACHMENT_TYPE));
-                String uploadedOn = o.getString(TAG_UPLOADED_ON);
-                int uploadedBy = Integer.parseInt(o.getString(TAG_UPLOADED_BY));
-
-//                Log.d("encoded image", encodedImage);
-
-//                writeImageToDirectory(encodedImage, fileName);
-//                if(attachmentTypeId == 1) {
-//
-//                    fileName = createImageFile(uploadedOn);
-//                    path = Uri.fromFile(fileName).getPath();
-//
-//                } else if (attachmentTypeId == 3) {
-//
-//                    fileName = createAudioFile(uploadedOn);
-//                    path = Uri.fromFile(fileName).getPath();
-//                }
-
-                Log.d("DOWNLOADCONTENTACTIVITY", filePath);
-
-                fileName = createAttachmentFile(description, uploadedOn, attachmentTypeId);
-                path = Uri.fromFile(fileName).getPath();
-
-                Attachment caseAttachment = new Attachment(caseRecordId, path, description,
-                        attachmentTypeId, uploadedOn, uploadedBy);
-
-                attachmentData.add(caseAttachment);
-
-//                insertCaseAttachment(caseAttachment);
-
-                Attachment fileAttachment = new Attachment(filePath, fileName);
-                attachmentPaths.add(fileAttachment);
-
-            }
-
-        }catch (JSONException e) {
-            e.printStackTrace();
-            featureAlertMessage("Download Failed!");
-            Log.d("DownloadContentActivity", e.getMessage());
-        }
-
-        writeFileToDirectory(attachmentPaths, attachmentData);
-
-    }
-
-
-
 
     private String getCaseRecordStatusString(int caseRecordStatusId) {
 
@@ -505,13 +512,11 @@ public class DownloadContentActivity extends AppCompatActivity implements View.O
             result = "New Patient";
         }
 
-
         getBetterDb.closeDatabase();
-
         return result;
     }
 
-    public String getDoctorName (int updatedBy) {
+    private void updateCaseRecordAdditionalNotes(CaseRecord selectedCaseRecord) {
 
         try {
             getBetterDb.openDatabase();
@@ -519,16 +524,13 @@ public class DownloadContentActivity extends AppCompatActivity implements View.O
             e.printStackTrace();
         }
 
-        String result;
-
-        result = getBetterDb.getUserName(updatedBy);
+        getBetterDb.updateCaseRecordAdditionalNotes(selectedCaseRecord.getCaseRecordId(),
+                selectedCaseRecord.getCaseRecordAdditionalNotes());
 
         getBetterDb.closeDatabase();
-
-        return result;
     }
 
-    private void updateCaseRecordAdditionalNotes(ArrayList<CaseRecord> selectedCaseRecords) {
+    private void updateLocalCaseRecordHistory(CaseRecord selectedCaseRecord) {
 
         try {
             getBetterDb.openDatabase();
@@ -536,47 +538,10 @@ public class DownloadContentActivity extends AppCompatActivity implements View.O
             e.printStackTrace();
         }
 
-        for(int i = 0; i < selectedCaseRecords.size(); i++)
-            getBetterDb.updateCaseRecordAdditionalNotes(selectedCaseRecords.get(i).getCaseRecordId(),
-                    selectedCaseRecords.get(i).getCaseRecordAdditionalNotes());
+        getBetterDb.updateLocalCaseRecordHistory(selectedCaseRecord);
+
 
         getBetterDb.closeDatabase();
-    }
-
-    private void updateLocalCaseRecordHistory(ArrayList<CaseRecord> caseRecords) {
-
-        class UpdateLocalCaseRecordHistory extends AsyncTask<ArrayList<CaseRecord>, Void, String> {
-
-            @SafeVarargs
-            @Override
-            protected final String doInBackground(ArrayList<CaseRecord>... params) {
-
-                ArrayList<CaseRecord> data = params[0];
-                try {
-                    getBetterDb.openDatabase();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-
-                for(int i = 0; i < data.size(); i++) {
-
-                    getBetterDb.updateLocalCaseRecordHistory(data.get(i));
-                }
-
-                getBetterDb.closeDatabase();
-
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(String s) {
-
-            }
-        }
-
-        UpdateLocalCaseRecordHistory updateLocalCaseRecordHistory = new UpdateLocalCaseRecordHistory();
-        updateLocalCaseRecordHistory.execute(caseRecords);
-
     }
 
     private void insertCaseAttachment(Attachment attachment) {
@@ -592,23 +557,6 @@ public class DownloadContentActivity extends AppCompatActivity implements View.O
         getBetterDb.closeDatabase();
     }
 
-//    private File createAudioFile(String uploaded_on) {
-//
-//        File mediaStorageDir = new File (Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC),
-//                DirectoryConstants.CASE_RECORD_ATTACHMENT_DIRECTORY_NAME);
-//
-//        if (!mediaStorageDir.exists()) {
-//            if (!mediaStorageDir.mkdirs()) {
-//                Log.d("Debug", "Oops! Failed create "
-//                        + DirectoryConstants.CASE_RECORD_ATTACHMENT_DIRECTORY_NAME + " directory");
-//                return null;
-//            }
-//        }
-//
-//        File audioFile = new File (mediaStorageDir.getPath() + File.pathSeparator + "AUDIO_" + uploaded_on + ".3gp");
-//
-//        return audioFile;
-//    }
 
     private File createAttachmentFile(String description, String uploaded_on, int attachmentType) {
 
@@ -643,25 +591,6 @@ public class DownloadContentActivity extends AppCompatActivity implements View.O
 
         return attachmentFile;
     }
-
-//    private File createImageFile(String uploaded_on) {
-//
-//        File mediaStorageDir = new File (Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
-//                DirectoryConstants.CASE_RECORD_ATTACHMENT_DIRECTORY_NAME);
-//
-//        if (!mediaStorageDir.exists()) {
-//            if (!mediaStorageDir.mkdirs()) {
-//                Log.d("Debug", "Oops! Failed create "
-//                        + DirectoryConstants.CASE_RECORD_ATTACHMENT_DIRECTORY_NAME + " directory");
-//                return null;
-//            }
-//        }
-//
-//        File profileImageFile = new File (mediaStorageDir.getPath() + File.pathSeparator + "IMG_" + uploaded_on + ".jpg");
-//
-//
-//        return profileImageFile;
-//    }
 
     private void writeFileToDirectory (ArrayList<Attachment> attachmentFile, ArrayList<Attachment> attachmentData) {
 
@@ -783,23 +712,6 @@ public class DownloadContentActivity extends AppCompatActivity implements View.O
         }
     }
 
-    private void writeImageToDirectory(String encodedImage, File file) {
-
-        FileOutputStream fos = null;
-
-        try {
-            fos = new FileOutputStream(file);
-            byte[] decodedImage = Base64.decode(encodedImage, Base64.DEFAULT);
-            fos.write(decodedImage);
-
-            fos.flush();
-            fos.close();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     private void featureAlertMessage(String result) {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -817,13 +729,14 @@ public class DownloadContentActivity extends AppCompatActivity implements View.O
         builder.show();
     }
 
-    private void showDownloadingDialog(String message) {
+    private void showDownloadingDialog() {
         if(dDialog == null) {
 
             dDialog = new ProgressDialog(DownloadContentActivity.this);
-            dDialog.setMessage(message);
-            dDialog.setIndeterminate(true);
-            dDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            dDialog.setTitle("Downloading Attachment");
+            dDialog.setMessage("Downloading " + index + " out of " + total + "...");
+            dDialog.setIndeterminate(false);
+            dDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
 
         }
         dDialog.show();
@@ -836,10 +749,8 @@ public class DownloadContentActivity extends AppCompatActivity implements View.O
             dDialog = new ProgressDialog(DownloadContentActivity.this);
             dDialog.setTitle("Download Status");
             dDialog.setMessage(message);
-            dDialog.setIndeterminate(false);
-            dDialog.setMax(100);
-            dDialog.setProgress(0);
-            dDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+            dDialog.setIndeterminate(true);
+            dDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
 
         }
         dDialog.show();

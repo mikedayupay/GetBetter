@@ -42,6 +42,7 @@ public class ViewCaseRecordActivity extends AppCompatActivity implements MediaCo
     private TextView ageGender;
     private TextView chiefComplaint;
     private TextView controlNumber;
+    private TextView additionalNotes;
     private CircleImageView profilePic;
     private Button backBtn;
     private Button updateCaseBtn;
@@ -129,6 +130,7 @@ public class ViewCaseRecordActivity extends AppCompatActivity implements MediaCo
         activity.ageGender = (TextView)activity.findViewById(R.id.view_case_age_gender);
         activity.chiefComplaint = (TextView)activity.findViewById(R.id.view_case_chief_complaint);
         activity.controlNumber = (TextView)activity.findViewById(R.id.view_case_control_number);
+        activity.additionalNotes = (TextView)activity.findViewById(R.id.view_case_additional_notes);
         activity.attachmentList = (RecyclerView)activity.findViewById(R.id.view_case_files_list);
         activity.profilePic = (CircleImageView) activity.findViewById(R.id.profile_picture_display);
         activity.backBtn = (Button)activity.findViewById(R.id.view_case_back_btn);
@@ -142,6 +144,8 @@ public class ViewCaseRecordActivity extends AppCompatActivity implements MediaCo
         ageGender.setText(patientAgeGender);
         chiefComplaint.setText(caseRecord.getCaseRecordComplaint());
         controlNumber.setText(caseRecord.getCaseRecordControlNumber());
+        if (!caseRecord.getCaseRecordAdditionalNotes().isEmpty())
+            additionalNotes.setText(caseRecord.getCaseRecordAdditionalNotes());
         patientName.setText(fullName);
         healthCenterName.setText(getHealthCenterString(healthCenterId));
         activity.updateCaseBtn.setVisibility(View.INVISIBLE);

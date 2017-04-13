@@ -48,6 +48,7 @@ public class DetailsFragment extends Fragment implements MediaController.MediaPl
     private ImageView profilePic;
     private Patient patientInfo;
     private ArrayList<Attachment> caseAttachments;
+    private String recordedHPIOutputFile;
 
 
     public DetailsFragment() {
@@ -64,7 +65,8 @@ public class DetailsFragment extends Fragment implements MediaController.MediaPl
         if(getArguments().containsKey("case record id")) {
             caseRecordId = getArguments().getInt("case record id");
             getCaseDetails(caseRecordId);
-            getCaseAttachments(caseRecordId);
+//            getCaseAttachments(caseRecordId);
+            recordedHPIOutputFile = getHpiOutputFile(caseRecordId);
             prepareMediaPlayer();
         }
 
@@ -129,8 +131,6 @@ public class DetailsFragment extends Fragment implements MediaController.MediaPl
         });
 
         startMediaPlayer();
-
-
         return rootView;
     }
 
@@ -181,23 +181,32 @@ public class DetailsFragment extends Fragment implements MediaController.MediaPl
         caseAttachments.addAll(getBetterDb.getCaseRecordAttachments(caseRecordId));
 
         getBetterDb.closeDatabase();
-
     }
 
-    private String getHpiOutputFile() {
+    private String getHpiOutputFile(int caseRecordId) {
 
         String result = "";
 
-        if(caseAttachments.isEmpty()) {
-            Log.e("attachments is empty", "true");
-        } else {
-            for(int i = 0; i < caseAttachments.size(); i++) {
-
-                if(caseAttachments.get(i).getAttachmentType() == 5) {
-                    result = caseAttachments.get(i).getAttachmentPath();
-                }
-            }
+        try {
+            getBetterDb.openDatabase();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
+
+        result = getBetterDb.getHPI(caseRecordId);
+        getBetterDb.closeDatabase();
+
+//        if(caseAttachments.isEmpty()) {
+//            Log.e("attachments is empty", "true");
+//        } else {
+//            for(int i = 0; i < caseAttachments.size(); i++) {
+//
+//                if(caseAttachments.get(i).getAttachmentType() == 5) {
+//                    result = caseAttachments.get(i).getAttachmentPath();
+//                }
+//            }
+//        }
+
         return result;
     }
 
@@ -238,7 +247,6 @@ public class DetailsFragment extends Fragment implements MediaController.MediaPl
                                 nMediaPlayer.start();
                             }
                         });
-
                     }
                 });
             }
@@ -248,7 +256,7 @@ public class DetailsFragment extends Fragment implements MediaController.MediaPl
     private void prepareMediaPlayer() {
 
         killMediaPlayer();
-        String recordedHPIOutputFile = getHpiOutputFile();
+//        String recordedHPIOutputFile = getHpiOutputFile();
         nMediaPlayer = new MediaPlayer();
         nMediaController = new MediaController(this.getContext()) {
             @Override
@@ -256,7 +264,6 @@ public class DetailsFragment extends Fragment implements MediaController.MediaPl
 
             }
         };
-        //Uri hpiRecordingUri = Uri.parse(recordedHpiOutputFile);
 
         nMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
 
@@ -269,9 +276,13 @@ public class DetailsFragment extends Fragment implements MediaController.MediaPl
     }
 
     private void killMediaPlayer() {
-        nMediaController.hide();
+
+
         if(nMediaPlayer != null) {
             try{
+                if(nMediaController.isShowing()) {
+                    nMediaController.hide();
+                }
                 nMediaPlayer.release();
             } catch (Exception e) {
                 e.printStackTrace();

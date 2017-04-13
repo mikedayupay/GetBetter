@@ -367,7 +367,6 @@ public class SummaryActivity extends AppCompatActivity implements View.OnClickLi
             playRecordedAudio.setEnabled(false);
 
         }
-
     }
 
     private String generateControlNumber(long pId) {

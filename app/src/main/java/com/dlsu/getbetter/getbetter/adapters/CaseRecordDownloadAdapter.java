@@ -44,7 +44,7 @@ public class CaseRecordDownloadAdapter extends RecyclerView.Adapter<CaseRecordDo
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        holder.controlNumber.setText(String.valueOf(caseRecordsList.get(position).getCaseRecordId()));
+        holder.controlNumber.setText(String.valueOf(caseRecordsList.get(position).getCaseRecordControlNumber()));
         holder.patientName.setText(caseRecordsList.get(position).getPatientName());
         holder.complaint.setText(caseRecordsList.get(position).getCaseRecordComplaint());
 //        holder.healthCenter.setText(caseRecordsList.get(position).getHealthCenter());

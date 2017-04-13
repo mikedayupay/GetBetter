@@ -588,7 +588,6 @@ public class DataAdapter {
         result = c.getString(c.getColumnIndexOrThrow("case_file_url"));
 
         c.close();
-
         return result;
     }
 
@@ -621,8 +620,6 @@ public class DataAdapter {
         cv.put("profile_url", patient.getProfileImageBytes());
 
         return getBetterDb.update(USER_TABLE, cv, "_id = " + patientId, null);
-
-
     }
 
     public void updateCaseRecordAdditionalNotes (int caseRecordId, String additionalNotes) {
@@ -744,9 +741,21 @@ public class DataAdapter {
 
         ArrayList<CaseRecord> result = new ArrayList<>();
 
+        String sql = "SELECT c._id AS id, c.user_id AS user, c.complaint AS complaint, h.updated_on AS updated_on" +
+                " FROM tbl_case_records AS c INNER JOIN tbl_case_record_history AS h ON c._id = h._id" +
+                " WHERE h.record_status_id = 10 AND c.health_center_id = ?";
+        Cursor c = getBetterDb.rawQuery(sql, new String[]{String.valueOf(healthCenterId)});
 
+        while(c.moveToNext()) {
+            CaseRecord caseRecord = new CaseRecord(c.getInt(c.getColumnIndexOrThrow("id")),
+                    c.getInt(c.getColumnIndexOrThrow("user")),
+                    c.getString(c.getColumnIndexOrThrow("complaint")),
+                    c.getString(c.getColumnIndexOrThrow("updated_on")));
 
+            result.add(caseRecord);
+        }
 
+        c.close();
         return result;
     }
 
@@ -763,7 +772,7 @@ public class DataAdapter {
         cv.put("user_id", newId);
 
         getBetterDb.update(CASE_RECORD_TABLE, cv, "user_id = ?", new String[]{String.valueOf(oldId)});
-        getBetterDb.update(CASE_RECORD_TABLE_UPLOAD, cv, "user_id = ?", new String[]{String.valueOf(oldId)});
+//        getBetterDb.update(CASE_RECORD_TABLE_UPLOAD, cv, "user_id = ?", new String[]{String.valueOf(oldId)});
     }
 
     public void updateCaseRecordId (int newId, int oldId) {
@@ -778,7 +787,6 @@ public class DataAdapter {
         cv.put("case_record_id", newId);
 
         getBetterDb.update(CASE_RECORD_ATTACHMENTS_TABLE, cv, "case_record_id = " + oldId, null);
-
     }
 
     public void updateCaseRecordUploaded(int caseRecordId) {
