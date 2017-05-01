@@ -43,6 +43,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 
 import cz.msebera.android.httpclient.Header;
+import cz.msebera.android.httpclient.HttpEntity;
 
 public class DownloadContentActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -222,6 +223,8 @@ public class DownloadContentActivity extends AppCompatActivity implements View.O
 
     private void populateAttachmentList() {
 
+        attachments = new ArrayList<>();
+
         try {
             JSONObject jsonObject = new JSONObject(myJSON);
             JSONArray caseAttachments = jsonObject.getJSONArray(TAG_CASE_ATTACHMENTS);
@@ -234,17 +237,21 @@ public class DownloadContentActivity extends AppCompatActivity implements View.O
                 int caseAttachmentTypeId = Integer.parseInt(c.getString(TAG_CASE_ATTACHMENT_TYPE));
                 String uploadedOn = c.getString(TAG_UPLOADED_ON);
 
+//                Log.d(TAG, "populateAttachmentList: " + caseRecordId);
+//                Log.d(TAG, "populateAttachmentList: " + description);
+//                Log.d(TAG, "populateAttachmentList: " + filePath);
+//                Log.d(TAG, "populateAttachmentList: " + uploadedOn);
+//                Log.d(TAG, "populateAttachmentList: " + caseAttachmentTypeId);
                 Attachment attachment = new Attachment(caseRecordId, filePath, description, caseAttachmentTypeId, uploadedOn);
                 attachments.add(attachment);
-                Log.d(TAG, "populateAttachmentList: " + attachments.size());
-                downloadAttachment(attachment);
+//                Log.d(TAG, "populateAttachmentList: " + attachments.size());
             }
+
+            downloadAttachment(attachments);
 
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
-
     }
 
     private void updateCaseRecord(CaseRecord caseRecord) {
@@ -306,159 +313,34 @@ public class DownloadContentActivity extends AppCompatActivity implements View.O
         });
     }
 
-    private void downloadAttachment(Attachment attachment) {
+    private void downloadAttachment(ArrayList<Attachment> attachment) {
 
-        AsyncHttpClient fileClient = new AsyncHttpClient();
-
-        String uploadedOn = attachment.getUploadedDate();
-        int attachmentType = attachment.getAttachmentType();
-        String attachmentDescription = attachment.getAttachmentDescription();
-
-        final File destinationFile = createAttachmentFile(attachmentDescription, uploadedOn, attachmentType);
-
-        fileClient.get(attachment.getAttachmentPath(), new FileAsyncHttpResponseHandler(this) {
-
-            @Override
-            public void onFailure(int statusCode, Header[] headers, Throwable throwable, File file) {
-                Log.d(TAG, "onFailure: " + statusCode + file.getName());
-            }
-
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, File file) {
-                new WriteToLocalTask().execute(file, destinationFile);
-//                writeFileToLocal(file, destinationFile.getPath());
-
-            }
-        });
-    }
-
-    private class WriteToLocalTask extends AsyncTask<File, Integer, Void> {
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            showDownloadingDialog();
-
-        }
-
-        @Override
-        protected Void doInBackground(File... files) {
-//            writeFileToLocal(files[0], files[1].getPath());
-            FileInputStream inputStream = null;
-            FileOutputStream outputStream = null;
-            dDialog.setMax((int) files[0].length());
-
-            try {
-                inputStream = new FileInputStream(files[0]);
-                outputStream = new FileOutputStream(files[1]);
-
-
-                byte[] buffer = new byte[1024];
-                int bytesRead;
-
-                while ((bytesRead = inputStream.read(buffer)) > 0) {
-                    outputStream.write(buffer, 0, bytesRead);
-                    publishProgress((int)((bytesRead / (float)files.length) * 100));
-                    if (isCancelled()) break;
-                }
-
-            }catch (Exception e) {
-                e.printStackTrace();
-            }finally {
-                try {
-                    if (inputStream != null) {
-                        inputStream.close();
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                try {
-                    if (outputStream != null) {
-                        outputStream.close();
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            return null;
-        }
-
-        @Override
-        protected void onProgressUpdate(Integer... values) {
-            dDialog.setProgress(values[0]);
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-        }
-    }
-
-    private void downloadSelectedData(ArrayList<CaseRecord> caseRecords) {
-
-        final ArrayList<String> fileUrl = new ArrayList<>();
-
-        AsyncHttpClient client = new AsyncHttpClient();
-        RequestParams params = new RequestParams();
-        params.put("caseRecords", caseRecords);
-        final File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS),
-                DirectoryConstants.CASE_RECORD_ATTACHMENT_DIRECTORY_NAME);
-        client.post(DirectoryConstants.DOWNLOAD_CASE_RECORD_NEW_ATTACHMENTS_SERVER_SCRIPT_URL, params, new TextHttpResponseHandler() {
-
-            @Override
-            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-
-            }
-
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, String responseString) {
-                fileUrl.add(responseString);
-            }
-        });
-
-
-        for (int i = 0; i < fileUrl.size(); i++) {
-
+        for (int i = 0; i < attachment.size(); i++) {
             AsyncHttpClient fileClient = new AsyncHttpClient();
-            fileClient.get(fileUrl.get(i), new FileAsyncHttpResponseHandler(this) {
-                @Override
-                public void onFailure(int statusCode, Header[] headers, Throwable throwable, File file) {
+            fileClient.addHeader("Connection", "Keep-Alive");
 
-                }
+            String uploadedOn = attachment.get(i).getUploadedDate();
+            int attachmentType = attachment.get(i).getAttachmentType();
+            String attachmentDescription = attachment.get(i).getAttachmentDescription();
 
-                @Override
-                public void onSuccess(int statusCode, Header[] headers, File file) {
-                    FileInputStream inputStream = null;
-                    FileOutputStream outputStream = null;
+            File destinationFile = createAttachmentFile(attachmentDescription, uploadedOn, attachmentType);
 
-                    try {
-                        inputStream = new FileInputStream(file);
-                        outputStream = new FileOutputStream(mediaStorageDir + "/" + file.getName());
-                        byte[] buffer = new byte[1024];
-                        int bytesRead;
-                        while ((bytesRead = inputStream.read(buffer)) > 0) {
-                            outputStream.write(buffer, 0, bytesRead);
-                        }
 
-                    }catch (Exception e) {
-                        e.printStackTrace();
-                    }finally {
-                        try {
-                            inputStream.close();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        try {
-                            outputStream.close();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+            if (destinationFile != null) {
+                fileClient.get(attachment.get(i).getAttachmentPath(), new FileAsyncHttpResponseHandler(destinationFile, false, true) {
+
+                    @Override
+                    public void onFailure(int statusCode, Header[] headers, Throwable throwable, File file) {
+                        Log.d(TAG, "onFailure: " + statusCode + file.getName());
                     }
-                }
-            });
-        }
 
+                    @Override
+                    public void onSuccess(int statusCode, Header[] headers, File file) {
+
+                    }
+                });
+            }
+        }
     }
 
     private String getCaseRecordStatusString(int caseRecordStatusId) {

@@ -36,8 +36,8 @@ if(($_SERVER['REQUEST_METHOD'] == 'POST') && isset($_POST['case_record_id'])) {
 
       $stmt->close();
 
-      var_dump($result);
-      // echo json_encode(array('case_attachments'=>$result));
+      // var_dump($result);
+      echo json_encode(array('case_attachments'=>$result));
 
     } else {
       echo 'SQL Query Fail';

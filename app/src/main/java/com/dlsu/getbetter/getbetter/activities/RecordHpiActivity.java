@@ -249,7 +249,6 @@ public class RecordHpiActivity extends AppCompatActivity implements View.OnClick
                     minutesView.setText("0" + minutes);
                 }
                 handler.postDelayed(this, 1000);
-
             }
         }
     };

@@ -15,6 +15,7 @@ import android.os.AsyncTask;
 import android.os.Environment;
 import android.os.Handler;
 import android.provider.MediaStore;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -27,16 +28,17 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.MediaController;
 import android.widget.TextView;
 
 import com.dlsu.getbetter.getbetter.DirectoryConstants;
 import com.dlsu.getbetter.getbetter.R;
+import com.dlsu.getbetter.getbetter.RecordAudioFragment;
 import com.dlsu.getbetter.getbetter.adapters.FileAttachmentsAdapter;
 import com.dlsu.getbetter.getbetter.database.DataAdapter;
 import com.dlsu.getbetter.getbetter.objects.Attachment;
 import com.dlsu.getbetter.getbetter.objects.DividerItemDecoration;
-import com.dlsu.getbetter.getbetter.objects.Patient;
 import com.dlsu.getbetter.getbetter.sessionmanagers.NewPatientSessionManager;
 import com.dlsu.getbetter.getbetter.sessionmanagers.SystemSessionManager;
 
@@ -63,6 +65,7 @@ public class SummaryActivity extends AppCompatActivity implements View.OnClickLi
     private TextView chiefComplaintText;
     private CircleImageView profilePicture;
     private RecyclerView attachmentLists;
+    private FrameLayout recordContainer;
     private Button submitButton;
     private Button backButton;
     private Button takePicture;
@@ -175,12 +178,15 @@ public class SummaryActivity extends AppCompatActivity implements View.OnClickLi
         activity.takeVideo = (Button)activity.findViewById(R.id.summary_page_rec_video_btn);
         activity.openRecordAudio = (Button)activity.findViewById(R.id.summary_page_rec_sound_btn);
         activity.takePictureDocument = (Button)activity.findViewById(R.id.summary_page_take_pic_doc_btn);
-        activity.recordAudio = (Button)activity.findViewById(R.id.summary_page_audio_record_btn);
-        activity.stopRecord = (Button)activity.findViewById(R.id.summary_page_audio_stop_record_btn);
-        activity.playRecordedAudio = (Button)activity.findViewById(R.id.summary_page_audio_play_recorded_btn);
-        activity.recordAudioContainer = (CardView)activity.findViewById(R.id.summary_page_record_sound_container);
-        activity.cancelRecording = (Button)activity.findViewById(R.id.summary_page_record_audio_cancel_btn);
-        activity.saveRecording = (Button)activity.findViewById(R.id.summary_page_record_audio_done_btn);
+//        activity.recordAudio = (Button)activity.findViewById(R.id.summary_page_audio_record_btn);
+//        activity.stopRecord = (Button)activity.findViewById(R.id.summary_page_audio_stop_record_btn);
+//        activity.playRecordedAudio = (Button)activity.findViewById(R.id.summary_page_audio_play_recorded_btn);
+//        activity.recordAudioContainer = (CardView)activity.findViewById(R.id.summary_page_record_sound_container);
+//        activity.cancelRecording = (Button)activity.findViewById(R.id.summary_page_record_audio_cancel_btn);
+//        activity.saveRecording = (Button)activity.findViewById(R.id.summary_page_record_audio_done_btn);
+
+        activity.recordContainer = (FrameLayout)activity.findViewById(R.id.record_audio_container);
+
 
         activity.healthCenter.setText(healthCenterName);
         setPic(profilePicture, patientProfileImage);
@@ -188,9 +194,9 @@ public class SummaryActivity extends AppCompatActivity implements View.OnClickLi
         String patientAgeGender = patientAge + ", " + patientGender;
         activity.ageGender.setText(patientAgeGender);
         activity.chiefComplaintText.setText(chiefComplaint);
-        activity.stopRecord.setEnabled(false);
-        activity.playRecordedAudio.setEnabled(false);
-        activity.saveRecording.setEnabled(false);
+//        activity.stopRecord.setEnabled(false);
+//        activity.playRecordedAudio.setEnabled(false);
+//        activity.saveRecording.setEnabled(false);
 
     }
 
@@ -202,11 +208,11 @@ public class SummaryActivity extends AppCompatActivity implements View.OnClickLi
         takeVideo.setOnClickListener(activity);
         openRecordAudio.setOnClickListener(activity);
         takePictureDocument.setOnClickListener(activity);
-        recordAudio.setOnClickListener(activity);
-        stopRecord.setOnClickListener(activity);
-        playRecordedAudio.setOnClickListener(activity);
-        cancelRecording.setOnClickListener(activity);
-        saveRecording.setOnClickListener(activity);
+//        recordAudio.setOnClickListener(activity);
+//        stopRecord.setOnClickListener(activity);
+//        playRecordedAudio.setOnClickListener(activity);
+//        cancelRecording.setOnClickListener(activity);
+//        saveRecording.setOnClickListener(activity);
 
     }
 
@@ -333,40 +339,43 @@ public class SummaryActivity extends AppCompatActivity implements View.OnClickLi
         } else if(id == R.id.summary_page_rec_sound_btn) {
 
 //            initializeMediaRecorder();
-            featureAlertMessage();
-
-        } else if(id == R.id.summary_page_audio_record_btn) {
-
-            recordAudio();
-
-        } else if(id == R.id.summary_page_audio_stop_record_btn) {
-
-            stopRecording();
-
-        } else if(id == R.id.summary_page_audio_play_recorded_btn) {
-
-            playRecording();
-
-        } else if(id == R.id.summary_page_record_audio_cancel_btn) {
-
-            if(!audioOutputFile.isEmpty()){
-                File file = new File(audioOutputFile);
-                boolean deleted = file.delete();
-                Log.d("file deleted?", deleted + "");
-                playRecordedAudio.setEnabled(false);
-            }
-
-            recordAudioContainer.setVisibility(View.INVISIBLE);
-            recordAudio.setEnabled(false);
-
-        } else if(id == R.id.summary_page_record_audio_done_btn) {
-
-            editAttachmentName(MEDIA_TYPE_AUDIO);
-            recordAudioContainer.setVisibility(View.INVISIBLE);
-            recordAudio.setEnabled(false);
-            playRecordedAudio.setEnabled(false);
+            FragmentManager fm = getSupportFragmentManager();
+            RecordAudioFragment recordAudioFragment = RecordAudioFragment.newInstance();
+            recordAudioFragment.show(fm, "fragment_record");
 
         }
+//        } else if(id == R.id.summary_page_audio_record_btn) {
+//
+//            recordAudio();
+//
+//        } else if(id == R.id.summary_page_audio_stop_record_btn) {
+//
+//            stopRecording();
+//
+//        } else if(id == R.id.summary_page_audio_play_recorded_btn) {
+//
+//            playRecording();
+//
+//        } else if(id == R.id.summary_page_record_audio_cancel_btn) {
+//
+//            if(!audioOutputFile.isEmpty()){
+//                File file = new File(audioOutputFile);
+//                boolean deleted = file.delete();
+//                Log.d("file deleted?", deleted + "");
+//                playRecordedAudio.setEnabled(false);
+//            }
+//
+//            recordAudioContainer.setVisibility(View.INVISIBLE);
+//            recordAudio.setEnabled(false);
+//
+//        } else if(id == R.id.summary_page_record_audio_done_btn) {
+//
+//            editAttachmentName(MEDIA_TYPE_AUDIO);
+//            recordAudioContainer.setVisibility(View.INVISIBLE);
+//            recordAudio.setEnabled(false);
+//            playRecordedAudio.setEnabled(false);
+//
+//        }
     }
 
     private String generateControlNumber(long pId) {
