@@ -14,8 +14,8 @@ gen/
 out/
 
 # Gradle files
-#.gradle/
-#build/
+.gradle/
+build/
 
 # Local configuration file (sdk path, etc)
 local.properties
@@ -45,3 +45,10 @@ captures/
 build.gradle
 projectFilesBackup/.idea/workspace.xml
 
+app/src/main/res/values-ch/
+app/src/main/res/values-fr-rFR/
+build/android-profile/profile-2017-05-02-00-54-42-034.rawproto
+build/android-profile/profile-2017-05-02-01-03-38-110.rawproto
+build/android-profile/profile-2017-05-02-01-05-16-433.rawproto
+build/android-profile/profile-2017-05-02-01-12-59-556.rawproto
+projectFilesBackup/
