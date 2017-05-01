@@ -393,4 +393,10 @@ public class CaptureDocumentsActivity extends AppCompatActivity implements View.
     public static CaptureDocumentsActivity getInstance() {
         return captureDocumentsActivity;
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        newPatientSessionManager.endSession();
+    }
 }
