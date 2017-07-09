@@ -22,6 +22,7 @@ import android.widget.TextView;
 import com.dlsu.getbetter.getbetter.R;
 import com.dlsu.getbetter.getbetter.adapters.ExistingPatientAdapter;
 import com.dlsu.getbetter.getbetter.database.DataAdapter;
+import com.dlsu.getbetter.getbetter.objects.Connectivity;
 import com.dlsu.getbetter.getbetter.objects.DividerItemDecoration;
 import com.dlsu.getbetter.getbetter.objects.Patient;
 import com.dlsu.getbetter.getbetter.sessionmanagers.SystemSessionManager;
@@ -158,10 +159,11 @@ public class ExistingPatientActivity extends AppCompatActivity implements View.O
 
             Intent intent = new Intent(this, NewPatientInfoActivity.class);
             startActivity(intent);
+            finish();
 
         } else if (id == R.id.upload_patient_record) {
 
-            if(isConnected) {
+            if(Connectivity.isConnectedFast(this)) {
                 Intent intent = new Intent(this, UploadPatientToServerActivity.class);
                 startActivity(intent);
                 finish();
@@ -172,7 +174,7 @@ public class ExistingPatientActivity extends AppCompatActivity implements View.O
 
         } else if (id == R.id.upload_case_record) {
 
-            if(isConnected) {
+            if(Connectivity.isConnectedFast(this)) {
                 Intent intent = new Intent(this, UploadCaseRecordToServerActivity.class);
                 startActivity(intent);
                 finish();
@@ -182,6 +184,8 @@ public class ExistingPatientActivity extends AppCompatActivity implements View.O
 
 
         } else if (id == R.id.existing_patient_back_btn) {
+
+
             finish();
         }
     }
