@@ -14,6 +14,7 @@ import com.dlsu.getbetter.getbetter.R;
 import com.dlsu.getbetter.getbetter.objects.Patient;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -85,12 +86,19 @@ public class ExistingPatientAdapter extends RecyclerView.Adapter<ExistingPatient
         holder.patientDateLastConsult.setText(existingPatients.get(position).getBirthdate());
         holder.patientGender.setText(existingPatients.get(position).getGender());
 
-        holder.itemView.post(new Runnable() {
-            @Override
-            public void run() {
-                setPic(holder.patientImage, existingPatients.get(position).getProfileImageBytes());
-            }
-        });
+        if(Objects.equals(existingPatients.get(position).getProfileImageBytes(), "")) {
+            holder.patientImage.setImageResource(R.drawable.ic_account_circle);
+        } else {
+
+            holder.itemView.post(new Runnable() {
+                @Override
+                public void run() {
+                    setPic(holder.patientImage, existingPatients.get(position).getProfileImageBytes());
+                }
+            });
+        }
+
+
 
         holder.itemView.setSelected(selectedItem == position);
 

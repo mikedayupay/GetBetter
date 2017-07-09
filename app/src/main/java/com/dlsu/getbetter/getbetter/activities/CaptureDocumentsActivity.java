@@ -213,13 +213,12 @@ public class CaptureDocumentsActivity extends AppCompatActivity implements View.
 
         } else if(id == R.id.capture_document_back_btn) {
 
-            Intent intent = new Intent(this, ExistingPatientActivity.class);
-//            Intent intent = new Intent(this, ViewPatientActivity.class);
+//            Intent intent = new Intent(this, ExistingPatientActivity.class);
+            Intent intent = new Intent(this, ViewPatientActivity.class);
 //            Log.d(TAG, "" + newPatientSessionManager.getPatientInfo().get(NewPatientSessionManager.PATIENT_ID));
-//            intent.putExtra("patientId", newPatientSessionManager.getPatientInfo().get(NewPatientSessionManager.PATIENT_ID));
+            intent.putExtra("patientId", newPatientSessionManager.getPatientInfo().get(NewPatientSessionManager.PATIENT_ID));
             newPatientSessionManager.endSession();
             startActivity(intent);
-
             finish();
 
         } else if(id == R.id.capture_document_next_btn) {

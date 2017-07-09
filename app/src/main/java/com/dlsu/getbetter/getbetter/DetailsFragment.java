@@ -280,7 +280,7 @@ public class DetailsFragment extends Fragment implements MediaController.MediaPl
 
         if(nMediaPlayer != null) {
             try{
-                if(nMediaController.isShowing()) {
+                if(nMediaController.isShowing() || nMediaController != null) {
                     nMediaController.hide();
                 }
                 nMediaPlayer.release();
@@ -363,4 +363,5 @@ public class DetailsFragment extends Fragment implements MediaController.MediaPl
     public int getAudioSessionId() {
         return 0;
     }
+
 }

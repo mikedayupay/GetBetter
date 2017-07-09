@@ -124,6 +124,8 @@ public class NewPatientInfoActivity extends AppCompatActivity implements DatePic
 
         } else if (id == R.id.new_patient_back_btn) {
 
+            Intent intent = new Intent(NewPatientInfoActivity.this, ExistingPatientActivity.class);
+            startActivity(intent);
             finish();
 
 
@@ -160,6 +162,11 @@ public class NewPatientInfoActivity extends AppCompatActivity implements DatePic
         String firstName = firstNameInput.getText().toString();
         String middleName = middleNameInput.getText().toString();
         String lastName = lastNameInput.getText().toString();
+        String filePath = "";
+
+        if (fileUri != null) {
+            filePath = fileUri.getPath();
+        }
 
         try {
             getBetterDb.openDatabase();
@@ -167,11 +174,8 @@ public class NewPatientInfoActivity extends AppCompatActivity implements DatePic
             e.printStackTrace();
         }
 
-        Log.d(TAG, "savePatientInfo: " + genderSelected);
-        Log.d(TAG, "savePatientInfo: " + civilStatusSelected);
-
         long patientId = getBetterDb.insertPatientInfo(firstName, middleName, lastName, birthDate,
-                genderSelected, civilStatusSelected, bloodTypeSelected, fileUri.getPath(), healthCenterId);
+                genderSelected, civilStatusSelected, bloodTypeSelected, filePath, healthCenterId);
 
         getBetterDb.closeDatabase();
 
@@ -213,8 +217,6 @@ public class NewPatientInfoActivity extends AppCompatActivity implements DatePic
             startActivity(intent);
             finish();
 
-//            Toast.makeText(NewPatientInfoActivity.this, "Patient ID: " + result + " inserted.",
-//                    Toast.LENGTH_LONG).show();
         }
     }
 
@@ -234,7 +236,7 @@ public class NewPatientInfoActivity extends AppCompatActivity implements DatePic
         }
 
         return firstNameInput.getText().toString().trim().length() <= 0 || lastNameInput.getText().toString().trim().length() <= 0
-                || birthDate.trim().length() <= 0 || fileUri.getPath().trim().length() <= 0;
+                || birthDate.trim().length() <= 0;
     }
 
 

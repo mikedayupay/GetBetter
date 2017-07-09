@@ -75,7 +75,12 @@ public class ViewPatientActivity extends AppCompatActivity implements View.OnCli
         getCaseRecords();
         createPatientSession(this);
 
-        setPic(profileImage, patient.getProfileImageBytes());
+        if (patient.getProfileImageBytes().equals("")) {
+            profileImage.setImageResource(R.drawable.ic_account_circle);
+        } else {
+            setPic(profileImage, patient.getProfileImageBytes());
+        }
+
         patientName.setText(patientFullName(patient.getLastName() + ", ", patient.getFirstName(), patient.getMiddleName()));
         age.append(": " + patient.getAge() + " Years Old");
         gender.append(": " + patient.getGender());
@@ -131,11 +136,11 @@ public class ViewPatientActivity extends AppCompatActivity implements View.OnCli
 
     }
 
+
+
     private void getCaseRecords() {
 
         class GetCaseRecordsTask extends AsyncTask<Void, Void, Void> {
-
-//        private ProgressDialog progressDialog = new ProgressDialog(CreateUpdateCaseRecordActivity.this);
 
             @Override
             protected void onPreExecute () {
@@ -154,8 +159,20 @@ public class ViewPatientActivity extends AppCompatActivity implements View.OnCli
                     e.printStackTrace();
                 }
 
-
                 caseRecords.addAll(getBetterDb.getCaseRecords(patientId));
+                Log.d(TAG, "size: " + caseRecords.size());
+
+                if (!caseRecords.isEmpty() || caseRecords.size() <= 0) {
+
+                    for (int i = 0 ; i < caseRecords.size(); i++) {
+
+                        String status = getBetterDb.getRecordStatus(caseRecords.get(i).getCaseRecordStatusId());
+                        caseRecords.get(i).setCaseRecordStatus(status);
+                    }
+                }
+
+
+
                 getBetterDb.closeDatabase();
 //            getCaseRecordStatus();
 

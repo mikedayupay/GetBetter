@@ -327,8 +327,8 @@ public class UploadPatientToServerActivity extends AppCompatActivity implements 
     private void showUploadProgressDialog() {
         if(pDialog == null) {
             pDialog = new ProgressDialog(UploadPatientToServerActivity.this);
-            pDialog.setTitle("Uploading Patient Records");
-            pDialog.setMessage("Please wait a moment...");
+            pDialog.setTitle("GetBetter Server");
+            pDialog.setMessage("Uploading Patient Records...");
 //            pDialog.setProgress(0);
 //            pDialog.setMax(100);
             pDialog.setIndeterminate(true);
@@ -341,6 +341,7 @@ public class UploadPatientToServerActivity extends AppCompatActivity implements 
 
         if(pDialog != null && pDialog.isShowing()) {
             pDialog.dismiss();
+            pDialog = null;
         }
     }
 

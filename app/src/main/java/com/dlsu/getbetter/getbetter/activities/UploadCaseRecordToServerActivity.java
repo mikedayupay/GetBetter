@@ -188,18 +188,6 @@ public class UploadCaseRecordToServerActivity extends AppCompatActivity implemen
         return caseAttachments;
     }
 
-    private void removeCaseRecordsUpload (int caseRecordId) {
-
-        try {
-            getBetterDb.openDatabase();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        getBetterDb.removeCaseRecordUpload(caseRecordId);
-        getBetterDb.closeDatabase();
-    }
-
     private void updateCaseRecordId(int newCaseRecordId, int oldCaseRecordId) {
 
         try {
@@ -298,6 +286,7 @@ public class UploadCaseRecordToServerActivity extends AppCompatActivity implemen
 
                         super.onStart();
                         showProgressDialog();
+                        uDialog.setMessage("Uploading Case Record...");
                     }
 
                     @Override
@@ -360,7 +349,7 @@ public class UploadCaseRecordToServerActivity extends AppCompatActivity implemen
 
             @Override
             public void onStart() {
-                uDialog.setMessage("Uploading " + caseRecordAttachments.get(index).getAttachmentDescription());
+                uDialog.setMessage("Uploading " + caseRecordAttachments.get(index).getAttachmentDescription() + "...");
                 showProgressDialog();
             }
 
@@ -371,7 +360,9 @@ public class UploadCaseRecordToServerActivity extends AppCompatActivity implemen
 
             @Override
             public void onSuccess(int statusCode, Header[] headers, String responseString) {
-                dismissProgressDialog();
+
+
+                featureAlertMessage("UPLOAD SUCCESS");
                 Log.d(TAG, "onSuccess");
                 Log.d(TAG, "onSuccess: " + responseString);
 
@@ -383,7 +374,7 @@ public class UploadCaseRecordToServerActivity extends AppCompatActivity implemen
 
             @Override
             public void onFinish() {
-
+                dismissProgressDialog();
             }
         });
     }
@@ -428,7 +419,7 @@ public class UploadCaseRecordToServerActivity extends AppCompatActivity implemen
 
         if(uDialog == null) {
             uDialog = new ProgressDialog(UploadCaseRecordToServerActivity.this);
-            uDialog.setTitle("Uploading case record");
+            uDialog.setTitle("GetBetter Server");
 //            uDialog.setProgress(0);
 //            uDialog.incrementProgressBy(1);
             uDialog.setIndeterminate(true);
