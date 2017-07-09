@@ -1,5 +1,7 @@
 package com.dlsu.getbetter.getbetter.objects;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.io.File;
 
 /**
@@ -8,13 +10,25 @@ import java.io.File;
  */
 public class Attachment {
 
+    @SerializedName("case_record_id")
     private int caseRecordId;
+
+    @SerializedName("file_path")
     private String attachmentPath;
+
+    @SerializedName("description")
     private String attachmentDescription;
+
+    @SerializedName("case_attachment_type")
     private int attachmentType;
+
+    @SerializedName("uploaded_on")
     private String uploadedDate;
+
+    private int attachmentId;
     private int uploadedBy;
     private File fileName;
+    private int isNew;
 
     public Attachment(String attachmentPath, String attachmentDescription, int attachmentType, String uploadedDate) {
         this.attachmentPath = attachmentPath;
@@ -36,6 +50,18 @@ public class Attachment {
         this.attachmentType = attachmentType;
         this.uploadedDate = uploadedDate;
         this.uploadedBy = uploadedBy;
+    }
+
+    public Attachment(int caseRecordId, String attachmentPath, String attachmentDescription,
+                      int attachmentType, String uploadedDate, int uploadedBy, int isNew, int attachmentId) {
+        this.caseRecordId = caseRecordId;
+        this.attachmentPath = attachmentPath;
+        this.attachmentDescription = attachmentDescription;
+        this.attachmentType = attachmentType;
+        this.uploadedDate = uploadedDate;
+        this.uploadedBy = uploadedBy;
+        this.isNew = isNew;
+        this.attachmentId = attachmentId;
     }
 
     public Attachment(int caseRecordId, String attachmentPath, String attachmentDescription,
@@ -106,5 +132,21 @@ public class Attachment {
 
     public void setUploadedBy(int uploadedBy) {
         this.uploadedBy = uploadedBy;
+    }
+
+    public int getIsNew() {
+        return isNew;
+    }
+
+    public void setIsNew(int isNew) {
+        this.isNew = isNew;
+    }
+
+    public int getAttachmentId() {
+        return attachmentId;
+    }
+
+    public void setAttachmentId(int attachmentId) {
+        this.attachmentId = attachmentId;
     }
 }

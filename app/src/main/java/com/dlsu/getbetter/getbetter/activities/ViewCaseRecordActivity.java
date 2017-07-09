@@ -1,11 +1,18 @@
 package com.dlsu.getbetter.getbetter.activities;
 
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.net.Uri;
+import android.os.AsyncTask;
+import android.os.Environment;
 import android.os.Handler;
+import android.support.v4.app.FragmentManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -16,22 +23,37 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.MediaController;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.dlsu.getbetter.getbetter.DirectoryConstants;
+import com.dlsu.getbetter.getbetter.ListenAudioFragment;
 import com.dlsu.getbetter.getbetter.R;
+import com.dlsu.getbetter.getbetter.ViewVideoFragment;
 import com.dlsu.getbetter.getbetter.adapters.FileAttachmentsAdapter;
 import com.dlsu.getbetter.getbetter.database.DataAdapter;
+import com.dlsu.getbetter.getbetter.interfaces.GetBetterClient;
 import com.dlsu.getbetter.getbetter.objects.Attachment;
 import com.dlsu.getbetter.getbetter.objects.CaseRecord;
+import com.dlsu.getbetter.getbetter.objects.Connectivity;
 import com.dlsu.getbetter.getbetter.objects.DividerItemDecoration;
 import com.dlsu.getbetter.getbetter.objects.Patient;
+import com.dlsu.getbetter.getbetter.services.ServiceGenerator;
 import com.dlsu.getbetter.getbetter.sessionmanagers.SystemSessionManager;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class ViewCaseRecordActivity extends AppCompatActivity implements MediaController.MediaPlayerControl, View.OnClickListener {
 
@@ -52,6 +74,8 @@ public class ViewCaseRecordActivity extends AppCompatActivity implements MediaCo
     private CaseRecord caseRecord;
     private Patient patientInfo;
     private ArrayList<Attachment> caseAttachments;
+    private int attachmentType;
+    private Uri fileUri;
 
     private DataAdapter getBetterDb;
     private MediaPlayer nMediaPlayer;
@@ -139,13 +163,21 @@ public class ViewCaseRecordActivity extends AppCompatActivity implements MediaCo
         String fullName = patientInfo.getFirstName() + " " + patientInfo.getMiddleName() + " " + patientInfo.getLastName();
         String gender = patientInfo.getGender();
         String patientAgeGender = patientInfo.getAge() + " yrs. old, " + gender;
-        setPic(profilePic, patientInfo.getProfileImageBytes());
+
+        if(!patientInfo.getProfileImageBytes().equals("")) {
+            setPic(profilePic, patientInfo.getProfileImageBytes());
+        }
+
 
         ageGender.setText(patientAgeGender);
         chiefComplaint.setText(caseRecord.getCaseRecordComplaint());
-        controlNumber.setText(caseRecord.getCaseRecordControlNumber());
-        if (!caseRecord.getCaseRecordAdditionalNotes().isEmpty())
-            additionalNotes.setText(caseRecord.getCaseRecordAdditionalNotes());
+
+        if (caseRecord.getCaseRecordControlNumber() != null ) {
+            controlNumber.setText(caseRecord.getCaseRecordControlNumber());
+        }
+
+        additionalNotes.setText(caseRecord.getCaseRecordAdditionalNotes());
+
         patientName.setText(fullName);
         healthCenterName.setText(getHealthCenterString(healthCenterId));
         activity.updateCaseBtn.setVisibility(View.INVISIBLE);
@@ -172,13 +204,59 @@ public class ViewCaseRecordActivity extends AppCompatActivity implements MediaCo
             @Override
             public void onItemClick(View view, int position) {
 
-                if(caseAttachments.get(position).getAttachmentType() == 1) {
-                    Intent intent = new Intent(ViewCaseRecordActivity.this, ViewImageActivity.class);
-                    intent.putExtra("imageUrl", caseAttachments.get(position).getAttachmentPath());
-                    intent.putExtra("imageTitle", caseAttachments.get(position).getAttachmentDescription());
-                    startActivity(intent);
+                if (caseAttachments.get(position).getIsNew() == 1) {
+
+                    if (Connectivity.isConnectedFast(ViewCaseRecordActivity.this)) {
+
+                        downloadAttachment(caseAttachments.get(position));
+//                        fileAdapter.notifyItemChanged(position);
+
+                    } else {
+
+                        AlertDialog.Builder builder = new AlertDialog.Builder(ViewCaseRecordActivity.this);
+                        builder.setTitle("Internet Connectivity");
+                        builder.setMessage("Could not download file due to no internet connection or slow internet.");
+
+                        builder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+
+                        builder.show();
+
+                    }
+
                 } else {
-                    //do nothing
+
+                    String path = caseAttachments.get(position).getAttachmentPath();
+                    String title = caseAttachments.get(position).getAttachmentDescription();
+
+                    Log.d(TAG, "path: " + path);
+                    Log.d(TAG, "title: " + title);
+
+                    if(caseAttachments.get(position).getAttachmentType() == 1) {
+
+                        Intent intent = new Intent(ViewCaseRecordActivity.this, ViewImageActivity.class);
+                        intent.putExtra("imageUrl", path);
+                        intent.putExtra("imageTitle", title);
+                        startActivity(intent);
+
+                    } else if (caseAttachments.get(position).getAttachmentType() == 2) {
+
+                        FragmentManager fm = getSupportFragmentManager();
+                        ViewVideoFragment viewVideoFragment = ViewVideoFragment.newInstance(path, title);
+                        viewVideoFragment.show(fm , "fragment_video");
+
+
+                    } else if (caseAttachments.get(position).getAttachmentType() == 3 || caseAttachments.get(position).getAttachmentType() == 5) {
+
+
+                        FragmentManager fm = getSupportFragmentManager();
+                        ListenAudioFragment listenAudioFragment = ListenAudioFragment.newInstance(path, title);
+                        listenAudioFragment.show(fm, "fragment_listen");
+                    }
                 }
             }
         });
@@ -308,16 +386,239 @@ public class ViewCaseRecordActivity extends AppCompatActivity implements MediaCo
         return result;
     }
 
+    private void downloadAttachment (final Attachment attachment) {
+
+        GetBetterClient getBetterClient = ServiceGenerator.createService(GetBetterClient.class);
+
+//        String filePath = DirectoryConstants.SERVER_UPLOAD_URL + attachment.getAttachmentPath();
+//        Log.d(TAG, "downloadAttachment: " + filePath);
+
+        Call<ResponseBody> call = getBetterClient.downloadAttachmentFile(attachment.getAttachmentPath());
+
+        final ProgressDialog progressDoalog;
+        progressDoalog = new ProgressDialog(ViewCaseRecordActivity.this);
+//        progressDoalog.setMax(100);
+        progressDoalog.setMessage("Downloading attachment file...");
+        progressDoalog.setTitle("GetBetter Server");
+        progressDoalog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        // show it
+        progressDoalog.show();
+
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, final Response<ResponseBody> response) {
+
+                if (response.isSuccessful()) {
+
+                    Log.d(TAG, "server contacted and has file");
+
+                    new AsyncTask<Void, Void, Void>() {
+
+
+                        @Override
+                        protected Void doInBackground(Void... voids) {
+
+                            boolean writtenToDisk = writeResponseBodyToDisk(response.body(), attachment.getAttachmentDescription(), attachment.getAttachmentPath());
+
+                            Log.d(TAG, "file download was a success? " + writtenToDisk);
+                            return null;
+                        }
+
+                        @Override
+                        protected void onPostExecute(Void aVoid) {
+                            super.onPostExecute(aVoid);
+
+                            updateAttachmentStatus(attachment.getAttachmentId());
+                            Toast.makeText(ViewCaseRecordActivity.this, "Download Complete!", Toast.LENGTH_LONG).show();
+
+                        }
+                    }.execute();
+
+                    progressDoalog.dismiss();
+
+                } else {
+
+                    Log.d(TAG, "server contact failed");
+                    progressDoalog.dismiss();
+                }
+
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+
+                Log.d(TAG, "server contact failed: " + t.toString());
+                progressDoalog.dismiss();
+            }
+        });
+
+    }
+
+    private boolean writeResponseBodyToDisk (ResponseBody body, String description, String url) {
+
+        try {
+            File attachmentFile = createAttachmentFile(description, url);
+
+            InputStream inputStream = null;
+            OutputStream outputStream = null;
+
+            try {
+                byte[] fileReader = new byte[4096];
+
+                long fileSize = body.contentLength();
+                long fileSizeDownloaded = 0;
+
+                inputStream = body.byteStream();
+                outputStream = new FileOutputStream(attachmentFile);
+
+                while (true) {
+                    int read = inputStream.read(fileReader);
+
+                    if(read == -1) {
+                        break;
+                    }
+
+                    outputStream.write(fileReader, 0, read);
+
+                    fileSizeDownloaded += read;
+
+                    Log.d(TAG, "file downloaded: " + fileSizeDownloaded + " of" + fileSize);
+
+                }
+
+                outputStream.flush();
+
+                return true;
+
+            } catch (IOException e) {
+
+                return false;
+
+            } finally {
+                if(inputStream != null) {
+                    inputStream.close();
+                }
+
+                if(outputStream != null) {
+                    outputStream.close();
+                }
+            }
+        } catch (IOException e) {
+            return false;
+        }
+    }
+
+    private void updateAttachmentStatus (int attachmentId) {
+
+        try {
+            getBetterDb.openDatabase();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        getBetterDb.updateAttachmentStatus(attachmentId, attachmentType, fileUri.getPath());
+
+        getBetterDb.closeDatabase();
+
+    }
+
+    private File createAttachmentFile(String description, String url) {
+
+        File attachmentFile = null;
+
+//        Log.d(TAG, "createAttachmentFile: " + description + attachmentType);
+        String extension = url.substring(url.length() - 3);
+        Log.d(TAG, "createAttachmentFile: " + extension);
+        File mediaStorageDir = new File (Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+                DirectoryConstants.CASE_RECORD_ATTACHMENT_DIRECTORY_NAME);
+
+        if (!mediaStorageDir.exists()) {
+            if (!mediaStorageDir.mkdirs()) {
+                Log.d("Debug", "Oops! Failed create "
+                        + DirectoryConstants.CASE_RECORD_ATTACHMENT_DIRECTORY_NAME + " directory");
+                return null;
+            }
+        }
+
+        if(extension.contains("jpg")) {
+
+            attachmentFile = new File(mediaStorageDir.getPath() + File.pathSeparator +
+                    description + ".jpg");
+
+            attachmentType = 1;
+
+        } else if (extension.contains("3gp")) {
+
+            attachmentFile = new File(mediaStorageDir.getPath() + File.pathSeparator +
+                    description + ".3gp");
+
+            attachmentType = 3;
+
+        } else if (extension.contains("mp4")) {
+
+            attachmentFile = new File(mediaStorageDir.getPath() + File.pathSeparator +
+                    description + ".mp4");
+
+            attachmentType = 2;
+
+        } else if (extension.contains("png")) {
+
+            attachmentFile = new File(mediaStorageDir.getPath() + File.pathSeparator +
+                    description + ".png");
+
+            attachmentType = 1;
+
+        } else if (extension.contains("avi")) {
+
+            attachmentFile = new File(mediaStorageDir.getPath() + File.pathSeparator +
+                    description + ".avi");
+
+            attachmentType = 2;
+
+        } else if (extension.contains("gif")) {
+
+            attachmentFile = new File(mediaStorageDir.getPath() + File.pathSeparator +
+                    description + ".gif");
+
+            attachmentType = 1;
+
+        } else if (extension.contains("wmv")) {
+
+            attachmentFile = new File(mediaStorageDir.getPath() + File.pathSeparator +
+                    description + ".wmv");
+
+            attachmentType = 2;
+        }
+
+        fileUri = Uri.fromFile(attachmentFile);
+
+        return attachmentFile;
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        killMediaPlayer();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        killMediaPlayer();
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        nMediaController.hide();
         killMediaPlayer();
     }
 
     private void killMediaPlayer() {
         if(nMediaPlayer != null) {
             try{
+                if(nMediaController.isShowing() || nMediaController != null) {
+                    nMediaController.hide();
+                }
                 nMediaPlayer.release();
             } catch (Exception e) {
                 e.printStackTrace();

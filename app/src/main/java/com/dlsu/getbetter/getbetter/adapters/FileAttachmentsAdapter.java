@@ -4,6 +4,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -31,6 +32,7 @@ public class FileAttachmentsAdapter extends RecyclerView.Adapter<FileAttachments
 
         TextView fileTitle;
         ImageView typeIcon;
+        Button downloadButton;
 
 
         public ViewHolder(View v) {
@@ -38,6 +40,9 @@ public class FileAttachmentsAdapter extends RecyclerView.Adapter<FileAttachments
             itemView.setOnClickListener(this);
             fileTitle = (TextView)v.findViewById(R.id.summary_page_file_list_item);
             typeIcon = (ImageView)v.findViewById(R.id.file_type_icon);
+            downloadButton = (Button)v.findViewById(R.id.attachment_download_btn);
+
+//            downloadButton.setOnClickListener(this);
 
         }
 
@@ -84,6 +89,12 @@ public class FileAttachmentsAdapter extends RecyclerView.Adapter<FileAttachments
             holder.typeIcon.setImageResource(R.drawable.ic_action_video);
         } else if (filesDataset.get(position).getAttachmentType() == 3 || filesDataset.get(position).getAttachmentType() == 5) {
             holder.typeIcon.setImageResource(R.drawable.ic_audiotrack);
+        }
+
+        if (filesDataset.get(position).getIsNew() == 1) {
+            holder.downloadButton.setVisibility(View.VISIBLE);
+        } else {
+            holder.downloadButton.setVisibility(View.GONE);
         }
 
     }
