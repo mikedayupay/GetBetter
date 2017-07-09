@@ -1,9 +1,9 @@
 <?php
 
-if(($_SERVER['REQUEST_METHOD'] == 'POST') && isset($_POST['case_record_id'])) {
+if(($_SERVER['REQUEST_METHOD'] == 'GET') && isset($_GET['case_record_id'])) {
   require_once('db_connect.php');
 
-  $caseRecordId = $_POST['case_record_id'];
+  $caseRecordId = $_GET['case_record_id'];
   $urlDir = "http://128.199.205.226/getbetter/uploads";
 
   if($stmt = $mysqli->prepare("SELECT c.case_record_attachment_id,
