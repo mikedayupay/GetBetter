@@ -1,5 +1,7 @@
 package com.dlsu.getbetter.getbetter.objects;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.util.ArrayList;
 
 /**
@@ -8,19 +10,38 @@ import java.util.ArrayList;
  */
 public class CaseRecord {
 
-    private int caseRecordId;
+    @SerializedName("record_status_id")
     private int caseRecordStatusId;
-    private int caseId;
+
+    @SerializedName("user_id")
     private int userId;
+
+    @SerializedName("health_center_id")
+    private int healthCenterId;
+
+    @SerializedName("complaint")
+    private String caseRecordComplaint;
+
+    @SerializedName("additional_notes")
+    private String caseRecordAdditionalNotes;
+
+    @SerializedName("control_number")
+    private String caseRecordControlNumber;
+
+    @SerializedName("updated_on")
+    private String caseRecordUpdatedOn;
+
+    @SerializedName("updated_by")
+    private int caseRecordUpdatedBy;
+
+    @SerializedName("case_record_id")
+    private int caseRecordId;
+
+    private int caseId;
+    private String caseRecordStatus;
+    private String healthCenter;
     private String patientName;
     private String profilePic;
-    private String healthCenter;
-    private String caseRecordComplaint;
-    private String caseRecordAdditionalNotes;
-    private String caseRecordControlNumber;
-    private String caseRecordStatus;
-    private String caseRecordUpdatedOn;
-    private int caseRecordUpdatedBy;
     private ArrayList<Attachment> attachments;
     private boolean checked = false;
 
@@ -36,10 +57,11 @@ public class CaseRecord {
         this.caseRecordUpdatedOn = caseRecordUpdatedOn;
     }
 
-    public CaseRecord(int caseRecordId, String caseRecordComplaint, String caseRecordControlNumber) {
+    public CaseRecord(int caseRecordId, String caseRecordComplaint, String caseRecordUpdatedOn, int caseRecordStatusId) {
         this.caseRecordId = caseRecordId;
         this.caseRecordComplaint = caseRecordComplaint;
-        this.caseRecordControlNumber = caseRecordControlNumber;
+        this.caseRecordUpdatedOn = caseRecordUpdatedOn;
+        this.caseRecordStatusId = caseRecordStatusId;
     }
 
     public CaseRecord(int caseRecordId, String patientName, String caseRecordControlNumber,
@@ -83,6 +105,13 @@ public class CaseRecord {
         this.caseRecordUpdatedOn = caseRecordUpdatedOn;
     }
 
+    public int getHealthCenterId() {
+        return healthCenterId;
+    }
+
+    public void setHealthCenterId(int healthCenterId) {
+        this.healthCenterId = healthCenterId;
+    }
 
     public int getUserId() {
         return userId;
