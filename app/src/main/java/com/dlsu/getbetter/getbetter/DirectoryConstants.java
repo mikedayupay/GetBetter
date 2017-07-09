@@ -28,4 +28,6 @@ public class DirectoryConstants {
 
     public static final String ATTACHMENT_POST_URL = "http://128.199.205.226/getbetter/android_upload_attachments";
 
+    public static final String SERVER_UPLOAD_URL = "http://128.199.205.226/getbetter/uploads";
+
 }
