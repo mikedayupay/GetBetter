@@ -1,6 +1,7 @@
 package com.dlsu.getbetter.getbetter;
 
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -27,6 +28,7 @@ import java.util.HashMap;
 public class AddInstructionsCaseFragment extends Fragment {
 
     private DataAdapter getBetterDb;
+    private OnCaseRecordSelected mCallback;
 
     private ArrayList<CaseRecord> addInstructionCases;
     private UpdatedCaseRecordAdapter updatedCaseRecordAdapter;
@@ -35,6 +37,11 @@ public class AddInstructionsCaseFragment extends Fragment {
 
     public AddInstructionsCaseFragment() {
         // Required empty public constructor
+    }
+
+    public interface OnCaseRecordSelected {
+
+        void onCaseRecordSelected(int caseRecordId);
     }
 
     @Override
@@ -70,6 +77,7 @@ public class AddInstructionsCaseFragment extends Fragment {
             @Override
             public void onItemClick(View view, int position) {
                 selectedCaseRecordId = addInstructionCases.get(position).getCaseRecordId();
+                mCallback.onCaseRecordSelected(selectedCaseRecordId);
             }
         });
 
@@ -110,4 +118,14 @@ public class AddInstructionsCaseFragment extends Fragment {
         getBetterDb.closeDatabase();
     }
 
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
+        try {
+            mCallback = (OnCaseRecordSelected) context;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(context.toString() + " must implement OnHeadlineSelectedListener");
+        }
+    }
 }
