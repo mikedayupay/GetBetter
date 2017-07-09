@@ -42,8 +42,12 @@ public class RecordAudioFragment extends DialogFragment implements View.OnClickL
 
     int seconds, minutes, recordTime, playTime;
     boolean isRecording;
+    String outputFile;
     Handler handler;
 
+    public interface RecordAudioDialogListener {
+        void onFinishedRecordingDialog(String outputFile, String audioTitle);
+    }
 
     public RecordAudioFragment() {
         // Required empty public constructor
@@ -84,9 +88,13 @@ public class RecordAudioFragment extends DialogFragment implements View.OnClickL
         recordButton.setOnClickListener(this);
         stopRecordButton.setOnClickListener(this);
         playButton.setOnClickListener(this);
+        cancelButton.setOnClickListener(this);
+        doneButton.setOnClickListener(this);
 
         stopRecordButton.setEnabled(false);
         playButton.setEnabled(false);
+
+        handler = new Handler();
     }
 
     @Override
@@ -96,11 +104,13 @@ public class RecordAudioFragment extends DialogFragment implements View.OnClickL
 
         if(id == R.id.audio_record_btn) {
 
-            if(audioTitle.getText().toString().matches("")) {
-                Log.d("audiorecord", "onClick: edit text empty" );
+            if(audioTitle.getText().toString().matches("") || audioTitle.getText().toString().isEmpty()) {
+                audioTitle.setError("You need to enter an audio title");
             } else {
-                mediaRecorder.setOutputFile(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC).getAbsolutePath() + "/" +
-                        audioTitle.getText().toString() + getTimeStamp() + ".3gp");
+
+                outputFile = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC).getAbsolutePath() + "/" +
+                        audioTitle.getText().toString() + getTimeStamp() + ".3gp";
+                mediaRecorder.setOutputFile(outputFile);
 
                 try {
                     mediaRecorder.prepare();
@@ -117,11 +127,61 @@ public class RecordAudioFragment extends DialogFragment implements View.OnClickL
             }
         } else if (id == R.id.audio_stop_record_btn) {
 
+            mediaRecorder.stop();
+            mediaRecorder.release();
+            mediaRecorder = null;
+
+            isRecording = false;
+            recordStatus.setVisibility(View.INVISIBLE);
+            stopRecordButton.setEnabled(false);
+            playButton.setEnabled(true);
+
         } else if (id == R.id.audio_play_recorded_btn) {
+
+            mp = new MediaPlayer();
+
+            seconds = 0;
+            minutes = 0;
+
+            secondsView.setText(R.string.recording_progress_zero);
+            minutesView.setText(R.string.recording_progress_zero);
+
+            try {
+
+                mp.setDataSource(outputFile);
+            } catch (IOException e ) {
+
+                e.printStackTrace();
+
+            }
+
+            try {
+                mp.prepare();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            mp.start();
+            handler.post(UpdatePlayTime);
 
         } else if (id == R.id.record_audio_done_btn) {
 
+            if(!outputFile.equals("") || outputFile != null || !outputFile.isEmpty()) {
+                Log.d("record audio fragment", "onClick: " + outputFile);
+                RecordAudioDialogListener listener = (RecordAudioDialogListener) getActivity();
+                listener.onFinishedRecordingDialog(outputFile, audioTitle.getText().toString());
+                dismiss();
+            }
+
+            Log.d("record audio fragment", "onClick: ");
+
+//            getDialog().dismiss();
+
+
         } else if (id == R.id.record_audio_cancel_btn) {
+
+            dismiss();
+//            getDialog().dismiss();
 
         }
     }
