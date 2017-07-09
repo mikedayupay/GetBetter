@@ -33,8 +33,10 @@ import android.widget.MediaController;
 import android.widget.TextView;
 
 import com.dlsu.getbetter.getbetter.DirectoryConstants;
+import com.dlsu.getbetter.getbetter.ListenAudioFragment;
 import com.dlsu.getbetter.getbetter.R;
 import com.dlsu.getbetter.getbetter.RecordAudioFragment;
+import com.dlsu.getbetter.getbetter.ViewVideoFragment;
 import com.dlsu.getbetter.getbetter.adapters.FileAttachmentsAdapter;
 import com.dlsu.getbetter.getbetter.database.DataAdapter;
 import com.dlsu.getbetter.getbetter.objects.Attachment;
@@ -55,7 +57,8 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 // TODO: 06/12/2016 record audio function
 
-public class SummaryActivity extends AppCompatActivity implements View.OnClickListener, MediaController.MediaPlayerControl {
+public class SummaryActivity extends AppCompatActivity implements View.OnClickListener,
+        MediaController.MediaPlayerControl, RecordAudioFragment.RecordAudioDialogListener {
 
     private static final String TAG = "SummaryActivity";
 
@@ -159,10 +162,6 @@ public class SummaryActivity extends AppCompatActivity implements View.OnClickLi
         addHPIAttachment(recordedHpiOutputFile, chiefComplaint, getDateStamp());
         initializeAttachmentList(this);
         initializeMediaPlayer(this);
-
-        caseRecordId = generateCaseRecordId();
-        controlNumber = generateControlNumber(patientId);
-
     }
 
     private void bindViews(SummaryActivity activity) {
@@ -229,11 +228,25 @@ public class SummaryActivity extends AppCompatActivity implements View.OnClickLi
             @Override
             public void onItemClick(View view, int position) {
 
+                String path = attachments.get(position).getAttachmentPath();
+                String title = attachments.get(position).getAttachmentDescription();
+
                 if(attachments.get(position).getAttachmentType() == 1) {
                     Intent intent = new Intent(SummaryActivity.this, ViewImageActivity.class);
-                    intent.putExtra("imageUrl", attachments.get(position).getAttachmentPath());
-                    intent.putExtra("imageTitle", attachments.get(position).getAttachmentDescription());
+                    intent.putExtra("imageUrl", path);
+                    intent.putExtra("imageTitle", title);
                     startActivity(intent);
+                } else if (attachments.get(position).getAttachmentType() == 2) {
+
+                    FragmentManager fm = getSupportFragmentManager();
+                    ViewVideoFragment viewVideoFragment = ViewVideoFragment.newInstance(path, title);
+                    viewVideoFragment.show(fm, "fragment_video");
+
+                } else if (attachments.get(position).getAttachmentType() == 3 || attachments.get(position).getAttachmentType() == 5) {
+
+                    FragmentManager fm = getSupportFragmentManager();
+                    ListenAudioFragment listenAudioFragment = ListenAudioFragment.newInstance(path, title);
+                    listenAudioFragment.show(fm, "fragment_listen");
                 }
 
             }
@@ -305,19 +318,12 @@ public class SummaryActivity extends AppCompatActivity implements View.OnClickLi
         if(id == R.id.summary_page_submit_btn) {
 
             new InsertCaseRecordTask().execute();
-            if(nMediaPlayer.isPlaying()) {
-                nMediaPlayer.stop();
-                nMediaPlayer.release();
-            }
-
-            if(nMediaController.isShowing()) {
-                nMediaController.hide();
-            }
-
-            newPatientDetails.endSession();
 
             CaptureDocumentsActivity.getInstance().finish();
             RecordHpiActivity.getInstance().finish();
+            Intent intent = new Intent(this, ViewPatientActivity.class);
+            intent.putExtra("patientId", patientId);
+            startActivity(intent);
             finish();
 
         } else if(id == R.id.summary_page_back_btn) {
@@ -343,92 +349,6 @@ public class SummaryActivity extends AppCompatActivity implements View.OnClickLi
             RecordAudioFragment recordAudioFragment = RecordAudioFragment.newInstance();
             recordAudioFragment.show(fm, "fragment_record");
 
-        }
-//        } else if(id == R.id.summary_page_audio_record_btn) {
-//
-//            recordAudio();
-//
-//        } else if(id == R.id.summary_page_audio_stop_record_btn) {
-//
-//            stopRecording();
-//
-//        } else if(id == R.id.summary_page_audio_play_recorded_btn) {
-//
-//            playRecording();
-//
-//        } else if(id == R.id.summary_page_record_audio_cancel_btn) {
-//
-//            if(!audioOutputFile.isEmpty()){
-//                File file = new File(audioOutputFile);
-//                boolean deleted = file.delete();
-//                Log.d("file deleted?", deleted + "");
-//                playRecordedAudio.setEnabled(false);
-//            }
-//
-//            recordAudioContainer.setVisibility(View.INVISIBLE);
-//            recordAudio.setEnabled(false);
-//
-//        } else if(id == R.id.summary_page_record_audio_done_btn) {
-//
-//            editAttachmentName(MEDIA_TYPE_AUDIO);
-//            recordAudioContainer.setVisibility(View.INVISIBLE);
-//            recordAudio.setEnabled(false);
-//            playRecordedAudio.setEnabled(false);
-//
-//        }
-    }
-
-    private String generateControlNumber(long pId) {
-
-        String result;
-        int a = 251;
-        int c = 134;
-        int m = 312;
-        int generatedRandomId = m / 2;
-
-        generatedRandomId = (a * generatedRandomId + c) % m;
-
-        String firstChar = patientFirstName.substring(0, 1).toUpperCase();
-        String secondChar = patientLastName.substring(0, 1).toUpperCase();
-        String lastChar = patientLastName.substring(patientLastName.length() - 1, patientLastName.length()).toUpperCase();
-        String patientIdChar = String.valueOf(pId);
-
-        result = firstChar + secondChar + patientIdChar + "-" + generatedRandomId + lastChar;
-        Log.e("control number", result);
-
-        return result;
-    }
-
-    private int generateCaseRecordId() {
-
-        ArrayList<Integer> storedIds;
-        int caseRecordId = 1;
-//        int a = 251;
-//        int c = 134;
-//        int m = 312;
-//        int generatedRandomId = m / 2;
-//
-//        generatedRandomId = (a * generatedRandomId + c) % m;
-//        caseRecordId = Integer.parseInt(patientId + Integer.toString(generatedRandomId));
-
-        try {
-            getBetterDb.openDatabase();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        storedIds = getBetterDb.getCaseRecordIds();
-        getBetterDb.closeDatabase();
-
-
-        if(storedIds.isEmpty()) {
-            return caseRecordId;
-        } else {
-            while (storedIds.contains(caseRecordId)){
-                caseRecordId += 1;
-            }
-
-            return caseRecordId;
         }
     }
 
@@ -634,6 +554,7 @@ public class SummaryActivity extends AppCompatActivity implements View.OnClickLi
 
         Attachment attachment = new Attachment(path, title, 3, uploadedOn);
         attachments.add(attachment);
+        fileAdapter.notifyItemInserted(fileAdapter.getItemCount() - 1);
     }
 
     private void addHPIAttachment(String path, String title, String uploadedOn) {
@@ -747,33 +668,31 @@ public class SummaryActivity extends AppCompatActivity implements View.OnClickLi
         }
 
 
-        getBetterDb.insertCaseRecord(caseRecordId, patientId, healthCenterId, chiefComplaint,
-                controlNumber);
+        caseRecordId = (int)getBetterDb.insertCaseRecord(patientId, healthCenterId, chiefComplaint);
 
-
-        getBetterDb.closeDatabase();
+//        getBetterDb.closeDatabase();
     }
 
     private void insertCaseRecordHistory() {
 
-        try {
-            getBetterDb.openDatabase();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            getBetterDb.openDatabase();
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
 
         getBetterDb.insertCaseRecordHistory(caseRecordId, userId, getDateStamp());
 
-        getBetterDb.closeDatabase();
+//        getBetterDb.closeDatabase();
     }
 
     private void insertCaseRecordAttachments() {
 
-        try {
-            getBetterDb.openDatabase();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            getBetterDb.openDatabase();
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
 
         for(int i = 0; i < attachments.size(); i++) {
 
@@ -783,9 +702,14 @@ public class SummaryActivity extends AppCompatActivity implements View.OnClickLi
             getBetterDb.insertCaseRecordAttachments(attachments.get(i));
         }
 
-        getBetterDb.closeDatabase();
+//        getBetterDb.closeDatabase();
     }
 
+    @Override
+    public void onFinishedRecordingDialog(String outputFile, String audioTitle) {
+        addAudioAttachment(outputFile, audioTitle, getDateStamp());
+        Log.d(TAG, "onFinishedRecordingDialog: " + attachments.size());
+    }
 
     private class InsertCaseRecordTask extends AsyncTask<Void, Void, Void> {
 
@@ -793,7 +717,8 @@ public class SummaryActivity extends AppCompatActivity implements View.OnClickLi
 
         @Override
         protected void onPreExecute() {
-            progressDialog.setMessage("Inserting case record...");
+            progressDialog.setTitle("Saving Case Record");
+            progressDialog.setMessage("Please wait for a moment...");
             progressDialog.show();
         }
 
@@ -801,8 +726,6 @@ public class SummaryActivity extends AppCompatActivity implements View.OnClickLi
         protected Void doInBackground(Void... params) {
 
             insertCaseRecord();
-            insertCaseRecordAttachments();
-            insertCaseRecordHistory();
 
             return null;
         }
@@ -812,6 +735,41 @@ public class SummaryActivity extends AppCompatActivity implements View.OnClickLi
             if(progressDialog.isShowing()) {
                 progressDialog.hide();
                 progressDialog.dismiss();
+                progressDialog = null;
+            }
+
+            new InsertCaseRecordHistoryandAttachments().execute();
+        }
+    }
+
+    private class InsertCaseRecordHistoryandAttachments extends AsyncTask<Void, Void, Void> {
+
+        private ProgressDialog progressDialog = new ProgressDialog(SummaryActivity.this);
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            progressDialog.setTitle("Saving Case Record History and Attachments");
+            progressDialog.setMessage("Please wait for a moment...");
+            progressDialog.show();
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+
+            insertCaseRecordAttachments();
+            insertCaseRecordHistory();
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            if(progressDialog.isShowing()) {
+                progressDialog.hide();
+                progressDialog.dismiss();
+                progressDialog = null;
+                getBetterDb.closeDatabase();
             }
         }
     }
@@ -876,68 +834,38 @@ public class SummaryActivity extends AppCompatActivity implements View.OnClickLi
         nMediaPlayer.start();
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
+    private void killMediaPlayer() {
 
-        if(nMediaPlayer.isPlaying()) {
-            nMediaPlayer.stop();
-            nMediaPlayer.release();
-        }
 
-        if(nMediaController.isShowing()) {
-            nMediaController.hide();
+        if(nMediaPlayer != null) {
+            try{
+                if(nMediaController.isShowing() || nMediaController != null) {
+                    nMediaController.hide();
+                }
+                nMediaPlayer.stop();
+                nMediaPlayer.release();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
-    Runnable UpdateRecordTime = new Runnable() {
-        @Override
-        public void run() {
-            if(isRecording) {
-                if(seconds < 10) {
-                    secondsView.setText("0" + seconds);
-                }
-                else {
-                    secondsView.setText(String.valueOf(seconds));
-                }
+    @Override
+    public void onPause() {
+        super.onPause();
+        killMediaPlayer();
+    }
 
-                recordTime += 1;
-                seconds += 1;
+    @Override
+    public void onStop() {
+        super.onStop();
+        killMediaPlayer();
+    }
 
-                if(seconds > 60) {
-                    seconds = 0;
-                    minutes += 1;
-                    minutesView.setText("0" + minutes);
-                }
-                handler.postDelayed(this, 1000);
-            }
-        }
-    };
-
-    Runnable UpdatePlayTime = new Runnable() {
-        @Override
-        public void run() {
-            if(mp.isPlaying()) {
-
-                if(seconds < 10) {
-                    secondsView.setText("0" + seconds);
-                }
-                else {
-                    secondsView.setText(String.valueOf(seconds));
-                }
-
-                seconds += 1;
-
-                if(seconds > 60) {
-                    seconds = 0;
-                    minutes += 1;
-                    minutesView.setText("0" + minutes);
-                }
-                handler.postDelayed(this, 1000);
-
-            }
-        }
-    };
-
-
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        killMediaPlayer();
+        newPatientDetails.endSession();
+    }
 }

@@ -314,7 +314,7 @@
 
                         <View
                             android:id="@+id/hpi_media_player"
-                            android:layout_width="520dp"
+                            android:layout_width="530dp"
                             android:layout_height="80dp"
                             android:background="@color/cardBackground"
                             android:layout_marginBottom="16dp"/>
