@@ -19,9 +19,13 @@ import com.dlsu.getbetter.getbetter.DirectoryConstants;
 import com.dlsu.getbetter.getbetter.R;
 import com.dlsu.getbetter.getbetter.adapters.CaseRecordDownloadAdapter;
 import com.dlsu.getbetter.getbetter.database.DataAdapter;
+import com.dlsu.getbetter.getbetter.interfaces.GetBetterClient;
 import com.dlsu.getbetter.getbetter.objects.Attachment;
+import com.dlsu.getbetter.getbetter.objects.AttachmentList;
 import com.dlsu.getbetter.getbetter.objects.CaseRecord;
+import com.dlsu.getbetter.getbetter.objects.CaseRecordList;
 import com.dlsu.getbetter.getbetter.objects.DividerItemDecoration;
+import com.dlsu.getbetter.getbetter.services.ServiceGenerator;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.FileAsyncHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
@@ -33,6 +37,7 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,6 +49,10 @@ import java.util.ArrayList;
 
 import cz.msebera.android.httpclient.Header;
 import cz.msebera.android.httpclient.HttpEntity;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class DownloadContentActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -76,6 +85,8 @@ public class DownloadContentActivity extends AppCompatActivity implements View.O
     private ProgressDialog dDialog = null;
     private RecyclerView recyclerView;
 
+    private GetBetterClient getBetterClient;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -97,22 +108,13 @@ public class DownloadContentActivity extends AppCompatActivity implements View.O
         caseRecordsData = new ArrayList<>();
 
         ArrayList<Attachment> caseRecordAttachments = new ArrayList<>();
+        getBetterClient = ServiceGenerator.createService(GetBetterClient.class);
 
         initializeDatabase();
         getPatientIds();
-        getDownloadList();
+        getUpdatedCaseRecordList();
+//        getDownloadList();
 //        getDownloadableData();
-    }
-
-    private void initializeDatabase () {
-
-        getBetterDb = new DataAdapter(this);
-
-        try {
-            getBetterDb.createDatabase();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
     }
 
     @Override
@@ -130,33 +132,130 @@ public class DownloadContentActivity extends AppCompatActivity implements View.O
         }
     }
 
-    private void getPatientIds() {
+    private void getUpdatedCaseRecordList () {
 
-        try {
-            getBetterDb.openDatabase();
-        }catch (SQLException e) {
-            e.printStackTrace();
-        }
+        Call<CaseRecordList> call = getBetterClient.getCaseRecords();
 
-        patientIds = getBetterDb.getPatientIds();
-        getBetterDb.closeDatabase();
+        call.enqueue(new Callback<CaseRecordList>() {
+
+            @Override
+            public void onResponse(Call<CaseRecordList> call, Response<CaseRecordList> response) {
+                Log.d(TAG, "contact to server successful");
+
+                caseRecordsData = response.body().getCaseRecords();
+                CaseRecordDownloadAdapter caseRecordDownloadAdapter = new CaseRecordDownloadAdapter(caseRecordsData);
+                recyclerView.setAdapter(caseRecordDownloadAdapter);
+                caseRecordDownloadAdapter.SetOnItemClickListener(new CaseRecordDownloadAdapter.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(View view, int position) {
+                        selectedCaseRecord = caseRecordsData.get(position);
+                        Log.d(TAG, "onItemClick: " + selectedCaseRecord.getCaseRecordStatus());
+
+                    }
+                });
+            }
+            @Override
+            public void onFailure(Call<CaseRecordList> call, Throwable t) {
+                Log.i(TAG, "onFailure: " + t.toString());
+            }
+        });
+    }
+
+    private void getAttachmentData (long caseRecordId) {
+
+        Call<AttachmentList> call = getBetterClient.getAttachmentList(caseRecordId);
+
+        call.enqueue(new Callback<AttachmentList>() {
+
+            @Override
+            public void onResponse(Call<AttachmentList> call, Response<AttachmentList> response) {
+                Log.d(TAG, "contact to server successful");
+                attachments = response.body().getAttachments();
+
+            }
+
+            @Override
+            public void onFailure(Call<AttachmentList> call, Throwable t) {
+                Log.d(TAG, "failed to connect to server");
+
+            }
+        });
 
     }
 
-    private String getHealthCenterName(int healthCenterId) {
+    private void downloadAttachmentFile (String url, final String description, final String uploadedOn, final int attachmentType) {
+
+        Call<ResponseBody> call = getBetterClient.downloadAttachmentFile(url);
+
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+
+                Log.d(TAG, "contact to server successful");
+
+                boolean writtenToDisk = writeResponseBodyToDisk(response.body(), description, uploadedOn, attachmentType);
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Log.d(TAG, "failed to connect to server");
+            }
+        });
+
+    }
+
+    private boolean writeResponseBodyToDisk (ResponseBody body, String description, String uploadedOn, int attachmentType) {
 
         try {
-            getBetterDb.openDatabase();
-        } catch (SQLException e) {
-            e.printStackTrace();
+            File attachmentFile = createAttachmentFile(description, uploadedOn, attachmentType);
+
+            InputStream inputStream = null;
+            OutputStream outputStream = null;
+
+            try {
+                byte[] fileReader = new byte[4096];
+
+                long fileSize = body.contentLength();
+                long fileSizeDownloaded = 0;
+
+                inputStream = body.byteStream();
+                outputStream = new FileOutputStream(attachmentFile);
+
+                while (true) {
+                    int read = inputStream.read(fileReader);
+
+                    if(read == -1) {
+                        break;
+                    }
+
+                    outputStream.write(fileReader, 0, read);
+
+                    fileSizeDownloaded += read;
+
+                    Log.d(TAG, "file downloaded: " + fileSizeDownloaded + " of" + fileSize);
+
+                }
+
+                outputStream.flush();
+
+                return true;
+
+            } catch (IOException e) {
+
+                return false;
+
+            } finally {
+                if(inputStream != null) {
+                    inputStream.close();
+                }
+
+                if(outputStream != null) {
+                    outputStream.close();
+                }
+            }
+        } catch (IOException e) {
+            return false;
         }
-
-        String result;
-        result = getBetterDb.getHealthCenterString(healthCenterId);
-
-        getBetterDb.closeDatabase();
-
-        return result;
     }
 
     private void getDownloadList() {
@@ -343,6 +442,51 @@ public class DownloadContentActivity extends AppCompatActivity implements View.O
         }
     }
 
+    /**
+    * ALL METHODS BELOW ARE
+    * DATABASE MANIPULATION
+    */
+
+    private void initializeDatabase () {
+
+        getBetterDb = new DataAdapter(this);
+
+        try {
+            getBetterDb.createDatabase();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void getPatientIds() {
+
+        try {
+            getBetterDb.openDatabase();
+        }catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        patientIds = getBetterDb.getPatientIds();
+        getBetterDb.closeDatabase();
+
+    }
+
+    private String getHealthCenterName(int healthCenterId) {
+
+        try {
+            getBetterDb.openDatabase();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        String result;
+        result = getBetterDb.getHealthCenterString(healthCenterId);
+
+        getBetterDb.closeDatabase();
+
+        return result;
+    }
+
     private String getCaseRecordStatusString(int caseRecordStatusId) {
 
         String result = null;
@@ -439,7 +583,6 @@ public class DownloadContentActivity extends AppCompatActivity implements View.O
         getBetterDb.closeDatabase();
     }
 
-
     private File createAttachmentFile(String description, String uploaded_on, int attachmentType) {
 
         File attachmentFile = null;
@@ -474,125 +617,10 @@ public class DownloadContentActivity extends AppCompatActivity implements View.O
         return attachmentFile;
     }
 
-    private void writeFileToDirectory (ArrayList<Attachment> attachmentFile, ArrayList<Attachment> attachmentData) {
-
-
-        class TransferFiletoLocal extends AsyncTask<String, Integer, Integer> {
-
-            int count, bytesAvailable;
-            int maxBufferSize = 1024 * 1024;
-
-            public TransferFiletoLocal(int count) {
-                this.count = count;
-            }
-
-            @Override
-            protected void onPreExecute() {
-                super.onPreExecute();
-                showProgressDialog("Downloading Attachments...");
-
-            }
-
-            @Override
-            protected void onPostExecute(Integer s) {
-                super.onPostExecute(s);
-
-                dismissProgressDialog();
-
-                if(s == -1) {
-                    featureAlertMessage("Download Failed");
-                } else if (s == 0) {
-//                    insertCaseAttachment(attachmentData.get(count));
-                    featureAlertMessage("Successfully Downloaded Attachments!");
-                }
-            }
-
-            @Override
-            protected void onProgressUpdate(Integer... values) {
-                super.onProgressUpdate(values);
-                dDialog.setProgress(values[0]);
-            }
-
-            @Override
-            protected Integer doInBackground(String... params) {
-
-                InputStream in = null;
-                OutputStream out = null;
-                HttpURLConnection conn = null;
-
-                try {
-
-                    URL url = new URL(params[0]);
-                    conn = (HttpURLConnection) url.openConnection();
-                    conn.connect();
-
-                    if(conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
-                        Log.d("Connection Status", "Server returned HTTP " + conn.getResponseCode()
-                                + " " + conn.getResponseMessage());
-                        return -1;
-                    }
-
-                    in = conn.getInputStream();
-
-                    out = new FileOutputStream(new File(params[1]));
-
-//                    bytesAvailable = in.available();
-
-                    bytesAvailable = conn.getContentLength();
-
-                    int bufferSize = Math.min(bytesAvailable, maxBufferSize);
-
-                    byte data[] = new byte[bufferSize];
-//                    byte data[] = new byte[2048 * 2 * 2];
-                    long total = 0;
-                    int count;
-
-                    while ((count = in.read(data)) != -1) {
-
-                        total += count;
-
-                        if(bytesAvailable > 0) {
-                            publishProgress((int) total * 100 / bytesAvailable);
-                        }
-
-                        out.write(data, 0, count);
-                    }
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return -1;
-                } finally {
-
-                    try {
-                        if(out != null) {
-                            out.close();
-                        }
-
-                        if(in != null) {
-                            in.close();
-                        }
-
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                    if(conn != null) {
-                        conn.disconnect();
-                    }
-                }
-
-                return 0;
-            }
-        }
-
-        for(int i = 0; i < attachmentFile.size(); i++) {
-
-            String filePath = Uri.fromFile(attachmentFile.get(i).getFileName()).getPath();
-            TransferFiletoLocal transferFiletoLocal = new TransferFiletoLocal(i);
-            transferFiletoLocal.execute(attachmentFile.get(i).getAttachmentPath(), filePath);
-            insertCaseAttachment(attachmentData.get(i));
-        }
-    }
+    /**
+     * BELOW ARE THE
+     * DIALOG AND ALERT MESSAGE METHODS
+     */
 
     private void featureAlertMessage(String result) {
 

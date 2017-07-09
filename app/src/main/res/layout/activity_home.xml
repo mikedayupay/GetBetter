@@ -119,16 +119,16 @@
                 android:orientation="horizontal"
                 android:layout_marginTop="14dp">
 
-                <Button
-                    android:id="@+id/download_content_btn"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@color/greenButton"
-                    android:text="@string/download_content_button_text"
-                    android:textColor="@color/cardBackground"
-                    android:textSize="14sp"
-                    android:layout_weight="0.5"
-                    android:layout_marginRight="4dp"/>
+                <!--<Button-->
+                    <!--android:id="@+id/download_content_btn"-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:background="@color/greenButton"-->
+                    <!--android:text="@string/download_content_button_text"-->
+                    <!--android:textColor="@color/cardBackground"-->
+                    <!--android:textSize="14sp"-->
+                    <!--android:layout_weight="0.5"-->
+                    <!--android:layout_marginRight="4dp"/>-->
 
                 <Button
                     android:id="@+id/view_create_patient_records_btn"
@@ -137,8 +137,7 @@
                     android:background="@color/blueButton"
                     android:text="@string/view_create_patient_records_button_text"
                     android:textColor="@color/cardBackground"
-                    android:textSize="14sp"
-                    android:layout_weight="0.5"/>
+                    android:textSize="14sp" />
 
             </LinearLayout>
 
