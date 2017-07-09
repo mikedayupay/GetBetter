@@ -35,7 +35,7 @@ public class CaseRecordAdapter extends RecyclerView.Adapter<CaseRecordAdapter.Ca
         CaseRecordViewHolder (View itemView) {
             super(itemView);
 
-            controlNumber = (TextView)itemView.findViewById(R.id.case_record_control_number);
+//            controlNumber = (TextView)itemView.findViewById(R.id.case_record_control_number);
             chiefComplaint = (TextView)itemView.findViewById(R.id.case_record_chief_complaint);
             caseRecordStatus = (TextView)itemView.findViewById(R.id.case_record_status);
             date = (TextView)itemView.findViewById(R.id.case_record_date);
@@ -80,7 +80,7 @@ public class CaseRecordAdapter extends RecyclerView.Adapter<CaseRecordAdapter.Ca
     @Override
     public void onBindViewHolder(CaseRecordViewHolder holder, int position) {
 
-        holder.controlNumber.setText(caseRecordData.get(position).getCaseRecordControlNumber());
+//        holder.controlNumber.setText(caseRecordData.get(position).getCaseRecordControlNumber());
         holder.chiefComplaint.setText(caseRecordData.get(position).getCaseRecordComplaint());
         holder.caseRecordStatus.setText(caseRecordData.get(position).getCaseRecordStatus());
         holder.date.setText(caseRecordData.get(position).getCaseRecordUpdatedOn());

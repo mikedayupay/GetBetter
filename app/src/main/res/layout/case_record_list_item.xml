@@ -12,13 +12,11 @@
         android:padding="10dp">
 
         <TextView
-            android:id="@+id/case_record_control_number"
+            android:id="@+id/case_record_date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/control_number_placeholder"
-            android:textStyle="bold"
+            android:text="@string/date_placeholder"
             android:textSize="16sp"
-            android:layout_centerVertical="true"
             />
 
         <TextView
@@ -26,11 +24,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/chief_complaint_placeholder"
-            android:textSize="16sp"
+            android:textSize="18sp"
+            android:textStyle="bold"
             android:layout_centerVertical="true"
             android:layout_marginLeft="100dp"
             android:layout_marginStart="100dp"
-            android:layout_toRightOf="@id/case_record_control_number" />
+            android:layout_toRightOf="@id/case_record_date" />
 
         <TextView
             android:id="@+id/case_record_status"
@@ -43,15 +42,7 @@
             android:layout_marginLeft="100dp"
             android:layout_marginStart="100dp"/>
 
-        <TextView
-            android:id="@+id/case_record_date"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/date_placeholder"
-            android:textSize="16sp"
-            android:layout_toRightOf="@id/case_record_status"
-            android:layout_marginLeft="100dp"
-            />
+
 
     </RelativeLayout>
 
